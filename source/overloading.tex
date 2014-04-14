@@ -1468,26 +1468,24 @@ the viability of the function (see~\ref{over.ics.ref}).
 
 \pnum
 \indextext{conversion!overload resolution~and}%
-Define ICS\textit{i}(\tcode{F}) as follows:
+Define \ICS{i}{F} as follows:
 
 \begin{itemize}
 \item
 if
 \tcode{F}
-is a static member function, ICS\textit{1}(\tcode{F}) is defined such that
-ICS\textit{1}(\tcode{F}) is neither better nor worse than ICS\textit{1}(\tcode{G})
+is a static member function, \ICS{1}{F} is defined such that
+\ICS{1}{F} is neither better nor worse than \ICS{1}{G}
 for any function
 \tcode{G},
-and, symmetrically, ICS\textit{1}(\tcode{G}) is neither better nor worse than
-ICS\textit{1}(\tcode{F})\footnote{If a function is a static member function, this
+and, symmetrically, \ICS{1}{G} is neither better nor worse than
+\ICS{1}{F}\footnote{If a function is a static member function, this
 definition means that the first argument, the implied object argument,
 has no effect in the determination of whether the function is better
 or worse than any other function.};
 otherwise,
 \item
-let ICS\textit{i}(\tcode{F}) denote the implicit conversion sequence that converts
-the \textit{i}-th argument in the list to the type of the
-\textit{i}-th
+let \ICS{i}{F} denote the implicit conversion sequence that converts
 the $i$-th argument in the list to the type of the
 $i$-th
 parameter
@@ -1508,16 +1506,16 @@ function than another viable function
 \tcode{F2}
 if
 for all arguments
-ICS\textit{i}(\tcode{F1}) is not a worse conversion
-sequence than ICS\textit{i}(\tcode{F2}), and then
 $i$,
+\ICS{i}{F1} is not a worse conversion
+sequence than \ICS{i}{F2}, and then
 \begin{itemize}
 
 \item
 for some argument
-ICS\textit{j}(\tcode{F1}) is a better conversion
-sequence than ICS\textit{j}(\tcode{F2}), or, if not that,
 $j$,
+\ICS{j}{F1} is a better conversion
+sequence than \ICS{j}{F2}, or, if not that,
 
 \item
 the context is an initialization by user-defined conversion
