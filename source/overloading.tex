@@ -1417,14 +1417,14 @@ list.
 \begin{itemize}
 \item
 If there are
-\textit{m}
+$m$
 arguments in the list, all candidate
 functions having exactly
-\textit{m}
+$m$
 parameters are viable.
 \item
 A candidate function having fewer than
-\textit{m}
+$m$
 parameters is
 viable only if it has an ellipsis in its parameter list~(\ref{dcl.fct}).
 For the purposes of overload resolution,
@@ -1432,19 +1432,19 @@ any argument for which there is no corresponding parameter is
 considered to ``match the ellipsis''~(\ref{over.ics.ellipsis}) .
 \item
 A candidate function having more than
-\textit{m}
+$m$
 parameters is viable
 only if the
-\textit{(m+1)}-st
+$(m+1)$-st
 parameter has a default
 argument~(\ref{dcl.fct.default}).\footnote{According to~\ref{dcl.fct.default},
 parameters following the
-\textit{(m+1)}-st
+$(m+1)$-st
 parameter must also have default arguments.}
 For the purposes of overload
 resolution, the parameter list is truncated on the right, so
 that there are exactly
-\textit{m}
+$m$
 parameters.
 \end{itemize}
 
@@ -1488,6 +1488,8 @@ otherwise,
 let ICS\textit{i}(\tcode{F}) denote the implicit conversion sequence that converts
 the \textit{i}-th argument in the list to the type of the
 \textit{i}-th
+the $i$-th argument in the list to the type of the
+$i$-th
 parameter
 of viable function
 \tcode{F}.
@@ -1506,16 +1508,16 @@ function than another viable function
 \tcode{F2}
 if
 for all arguments
-\textit{i},
 ICS\textit{i}(\tcode{F1}) is not a worse conversion
 sequence than ICS\textit{i}(\tcode{F2}), and then
+$i$,
 \begin{itemize}
 
 \item
 for some argument
-\textit{j},
 ICS\textit{j}(\tcode{F1}) is a better conversion
 sequence than ICS\textit{j}(\tcode{F2}), or, if not that,
+$j$,
 
 \item
 the context is an initialization by user-defined conversion
