@@ -258,10 +258,10 @@ Any
 statement within the \tcode{switch} statement can be labeled with one or
 more case labels as follows:
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 \indextext{label!\idxcode{case}}%
 \terminal{case} constant-expression \terminal{:}
-\end{ncbnf}
+\end{ncsimplebnf}
 
 where the \grammarterm{constant-expression} shall be
 a converted constant expression~(\ref{expr.const}) of the
@@ -458,9 +458,9 @@ place after each execution of the statement.
 \pnum
 The \tcode{for} statement
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 \terminal{for (} for-init-statement condition\opt \terminal{;} expression\opt \terminal{)} statement
-\end{ncbnf}
+\end{ncsimplebnf}
 
 is equivalent to
 
@@ -518,24 +518,24 @@ int j = i;          // \tcode{j = 42}
 \pnum
 For a range-based \tcode{for} statement of the form
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 \terminal{for (} for-range-declaration : expression \terminal{)} statement
-\end{ncbnf}
+\end{ncsimplebnf}
 
 let \term{range-init} be equivalent to the \grammarterm{expression} surrounded
 by parentheses\footnote{this ensures that a top-level comma operator cannot be
 reinterpreted as a delimiter between \grammarterm{init-declarator}{s} in the
 declaration of \tcode{__range}.}
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 \terminal{(} expression \terminal{)}
-\end{ncbnf}
+\end{ncsimplebnf}
 
 and for a range-based \tcode{for} statement of the form
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 \terminal{for} \terminal{(} for-range-declaration \terminal{:} braced-init-list \terminal{)} statement
-\end{ncbnf}
+\end{ncsimplebnf}
 
 let \term{range-init} be equivalent to the \grammarterm{braced-init-list}. In each case, a
 range-based \tcode{for} statement
