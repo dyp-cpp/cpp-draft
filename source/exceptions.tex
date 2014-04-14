@@ -122,10 +122,10 @@ lab:  try {
   T1 t1;
   try {
     T2 t2;
-    if (@\textit{condition}@)
+    if (@\grammarterm{condition}@)
       goto lab;
-    } catch(...) { /* @\textit{handler 2}@ */ }
-  } catch(...) { /* @\textit{handler 1}@ */ }
+    } catch(...) { /* @\placeholder{handler 2}@ */ }
+  } catch(...) { /* @\placeholder{handler 1}@ */ }
 \end{codeblock}
 
 Here, executing
@@ -140,11 +140,11 @@ does not declare a variable.
 Any exception raised while destroying
 \tcode{t2}
 will result in executing
-\textit{handler 2};
+\placeholder{handler 2};
 any exception raised while destroying
 \tcode{t1}
 will result in executing
-\textit{handler 1}.
+\placeholder{handler 1}.
 \exitexample
 
 \pnum

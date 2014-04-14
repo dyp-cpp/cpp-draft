@@ -522,7 +522,7 @@ For a range-based \tcode{for} statement of the form
 \terminal{for (} for-range-declaration : expression \terminal{)} statement
 \end{ncbnf}
 
-let \textit{range-init} be equivalent to the \grammarterm{expression} surrounded
+let \term{range-init} be equivalent to the \grammarterm{expression} surrounded
 by parentheses\footnote{this ensures that a top-level comma operator cannot be
 reinterpreted as a delimiter between \grammarterm{init-declarator}{s} in the
 declaration of \tcode{__range}.}
@@ -537,7 +537,7 @@ and for a range-based \tcode{for} statement of the form
 \terminal{for} \terminal{(} for-range-declaration \terminal{:} braced-init-list \terminal{)} statement
 \end{ncbnf}
 
-let \textit{range-init} be equivalent to the \grammarterm{braced-init-list}. In each case, a
+let \term{range-init} be equivalent to the \grammarterm{braced-init-list}. In each case, a
 range-based \tcode{for} statement
 is equivalent to
 
@@ -548,8 +548,8 @@ is equivalent to
              __end = end-expr;
         __begin != __end;
         ++__begin ) {
-    @\textit{for-range-declaration}@ = *__begin;
-    @\textit{statement}@
+    @\grammarterm{for-range-declaration}@ = *__begin;
+    @\grammarterm{statement}@
   }
 }
 \end{codeblock}
@@ -560,19 +560,19 @@ exposition only, and \tcode{_RangeT} is the type of the
 determined as follows:
 
 \begin{itemize}
-\item if \tcode{_RangeT} is an array type, \textit{begin-expr} and \textit{end-expr} are
+\item if \tcode{_RangeT} is an array type, \term{begin-expr} and \term{end-expr} are
 \tcode{__range} and \tcode{__range + __bound}, respectively, where \tcode{__bound} is
 the array bound. If \tcode{_RangeT} is an array of unknown size or an array of
 incomplete type, the program is ill-formed;
 
 \item if \tcode{_RangeT} is a class type, the \grammarterm{unqualified-id}{s}
-\tcode{begin} and \tcode{end} are looked up in the scope of class \tcode{\mbox{_RangeT}}
+\tcode{begin} and \tcode{end} are looked up in the scope of class \tcode{_RangeT}
 as if by class member access lookup~(\ref{basic.lookup.classref}), and if either
 (or both) finds at least one declaration, \grammarterm{begin-expr} and
 \grammarterm{end-expr} are \tcode{__range.begin()} and \tcode{__range.end()},
 respectively;
 
-\item otherwise, \textit{begin-expr} and \textit{end-expr} are \tcode{begin(__range)}
+\item otherwise, \term{begin-expr} and \term{end-expr} are \tcode{begin(__range)}
 and \tcode{end(__range)}, respectively, where \tcode{begin} and \tcode{end} are looked
 up in the associated namespaces~(\ref{basic.lookup.argdep}).
 \enternote Ordinary unqualified lookup~(\ref{basic.lookup.unqual}) is not
