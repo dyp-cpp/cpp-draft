@@ -627,18 +627,18 @@ The point of declaration of a class first declared in an
 \begin{itemize}
 \item for a declaration of the form
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 class-key attribute-specifier-seq\opt identifier \terminal{;}
-\end{ncbnf}
+\end{ncsimplebnf}
 
 the \grammarterm{identifier} is declared to be a
 \grammarterm{class-name} in the scope that contains the declaration,
 otherwise
 \item for an \grammarterm{elaborated-type-specifier} of the form
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 class-key identifier
-\end{ncbnf}
+\end{ncsimplebnf}
 
 if the
 \grammarterm{elaborated-type-specifier} is used in the
@@ -1619,9 +1619,9 @@ up as types in the scope designated by the
 \grammarterm{nested-name-specifier}. Similarly, in a
 \grammarterm{qualified-id} of the form:
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 nested-name-specifier\opt class-name \terminal{::} \terminal{\tilde} class-name
-\end{ncbnf}
+\end{ncsimplebnf}
 
 the second \grammarterm{class-name} is looked up in the same scope as the
 first. \enterexample
@@ -1922,9 +1922,9 @@ In a declaration for a namespace member in which the
 \grammarterm{declarator-id} is a \grammarterm{qualified-id}, given that the
 \grammarterm{qualified-id} for the namespace member has the form
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 nested-name-specifier unqualified-id
-\end{ncbnf}
+\end{ncsimplebnf}
 
 the
 \grammarterm{unqualified-id} shall name a member of the namespace
@@ -1983,9 +1983,9 @@ If the \grammarterm{elaborated-type-specifier} has no
 \grammarterm{elaborated-type-specifier} appears in a declaration with the
 following form:
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 class-key attribute-specifier-seq\opt identifier \terminal{;}
-\end{ncbnf}
+\end{ncsimplebnf}
 
 the \grammarterm{identifier} is looked up according
 to~\ref{basic.lookup.unqual} but ignoring any non-type names that have
@@ -1998,9 +1998,9 @@ declared \grammarterm{type-name}, or if the
 \grammarterm{elaborated-type-specifier} appears in a declaration with the
 form:
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 class-key attribute-specifier-seq\opt identifier \terminal{;}
-\end{ncbnf}
+\end{ncsimplebnf}
 
 the \grammarterm{elaborated-type-specifier} is a declaration that
 introduces the \grammarterm{class-name} as described

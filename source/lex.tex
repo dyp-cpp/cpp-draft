@@ -345,9 +345,9 @@ shall apply before any \grammarterm{d-char}, \grammarterm{r-char}, or delimiting
 parenthesis is identified. The raw string literal is defined as the shortest sequence
 of characters that matches the raw-string pattern
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 encoding-prefix\opt \terminal{R} raw-string
-\end{ncbnf}
+\end{ncsimplebnf}
 
 \item Otherwise, if the next three characters are \tcode{<::} and the subsequent character
 is neither \tcode{:} nor \tcode{>}, the \tcode{<} is treated as a preprocessor token by

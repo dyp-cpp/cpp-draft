@@ -195,15 +195,15 @@ all identifiers either are or are not macro names ---
 there simply are no keywords, enumeration constants, etc.}
 and it may contain unary operator expressions of the form
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 \terminal{defined} identifier
-\end{ncbnf}
+\end{ncsimplebnf}
 
 or
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 \terminal{defined (} identifier \terminal{)}
-\end{ncbnf}
+\end{ncsimplebnf}
 
 which evaluate to
 \tcode{1}
@@ -1307,9 +1307,9 @@ underscore.
 
 A unary operator expression of the form:
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 \terminal{_Pragma} \terminal{(} string-literal \terminal{)}
-\end{ncbnf}
+\end{ncsimplebnf}
 
 is processed as follows: The string literal is \term{destringized}
 by deleting the \tcode{L} prefix, if present, deleting the leading and trailing
