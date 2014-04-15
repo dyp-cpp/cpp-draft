@@ -464,15 +464,15 @@ The \tcode{for} statement
 
 is equivalent to
 
-\begin{ncbnftab}
-\terminal{\{}\br
-\>for-init-statement\br
-\>\terminal{while (} condition \terminal{) \{}\br
-\>\>statement\br
-\>\>expression \terminal{;}\br
-\>\terminal{\}}\br
-\terminal{\}}
-\end{ncbnftab}
+\begin{codeblock}
+{
+  @\grammarterm{for-init-statement}@
+  while( @\grammarterm{condition}@ ) {
+    @\grammarterm{statement}@
+    @\grammarterm{expression}@ ;
+  }
+}
+\end{codeblock}
 
 except that names declared in the \grammarterm{for-init-statement} are in
 the same declarative-region as those declared in the
