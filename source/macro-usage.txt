@@ -1,0 +1,159 @@
+\ICS{parameter number}{function name}
+In [overloading], more specifically [over.match.best], there is a comparison between the Implicit Conversion Sequences for arguments expressions in overload resolution. As there are multiple parameters and two functions, the ICS is identified by two indices/parameters, for example ICSi(F).
+It is currently formatted as ICS\textit{i}(\tcode{F}) and so on.
+To remove the meaningless \textit, improve readability and formatting, I suggest introducing a macro \ICS which takes two parameters, e.g. \ICS{i}{F}
+A similar issue occurs in [conversions] for e.g. $\mathit{cv}_{1,0}P_0$
+
+
+\tcode{text}
+Used for inline code, mostly code fragments or single keywords.
+
+
+\techterm{text}
+Not used (in core language).
+
+
+\defnx{text}{index text}
+Indexed definition. Used for inline definitions of terms. The first argument is printed in the text, the second is what appears in the index.
+
+
+\defn{text}
+Simplification of \defnx, defined as \defnx{text}{text}.
+
+
+\term{text}
+Ambiguous use, over 500 occurences.
+* emphasizing, e.g. in [access]:
+
+	It should be noted that it is
+	\term{access}
+	to members and base classes that is controlled, not their
+	\term{visibility}.
+
+The words "access" and "visibility" are not defined via \defn nor \defnx, and are used without any formatting at other places in [access].
+
+* marking a phrase as a technical term (that is defined somewhere), e.g. in [access]
+
+	A base class
+	\tcode{B}
+	of
+	\tcode{N}
+	is
+	\term{accessible}
+	at
+	\term{R},
+	if
+	\begin{itemize}
+
+though arguably that should be a \defn or an unindexed definition
+
+* for placeholders (should probably replaced with \placeholder), see the example above
+
+* marking a phrase as a grammar term (despite \grammarterm), e.g. in [access]
+
+	\enternote A \tcode{friend} declaration may be the
+	\term{declaration} in a \grammarterm{template-declaration}
+
+[basic] arguably contains a misuse as \term{storage} \term{duration}; [intro] contains \term{storage duration}; [basic.stc] has a \indextext{storage~duration} but does not format the phrase.
+There are several occurences of \term{something}~(\ref{section}).
+
+* formatting of "cv", e.g. in [basic]
+
+	is to pointer to \term{cv} \tcode{void}, or to pointer to \term{cv}
+
+This should probably be replaced by \cvqual
+
+
+\grammarterm{text}
+Marks a phrase as a term defined in the grammar, e.g. postfix-expression. Over 2000 occurences. I did not check them, but I think the name is clear.
+
+
+\placeholder{text}
+Occurs only 10 times (in core language).
+Marks some "name" as a placeholder, e.g. in [basic]
+
+	For each value \placeholder{i} of type \tcode{unsigned char} in the range
+	0 to 255 inclusive, there exists a value \placeholder{j} of type
+
+and in [intro]
+
+	For each signal handler invocation, evaluations
+	perfomed by the thread invoking a signal handler can be divided into two
+	groups \placeholder{A} and \placeholder{B}, such that no evaluations in
+	\placeholder{B} happen before evaluations in \placeholder{A}, and the
+
+
+\Rplus
+Not used (in core language).
+
+
+\state
+Not used (in core language).
+
+
+NTBS etc.
+Commands used to write "NTBS", "NTMBS" etc. in small caps (null-terminated byte string)
+
+
+\uniquens
+Used to write "unique" as the name for unique namespaces in [declarations].
+
+
+\doccite{text}
+Marks some text as a citation of a document. Mostly used in [intro] for normative references.
+
+
+\cvqual
+Marks some text as a cv-qualification (or no cv-qualification), e.g. \cvqual{cv1}. Occurs about 100 times.
+
+
+\cv
+Defined as \cvqual{cv}, i.e. prints "cv" formatted as a cv-qualification.
+
+
+\emph{text}
+Emphasises. Only used 3 times.
+
+
+\numconst{text}
+Marks some text as a number (literal). Occurs only in [lex] in the escape sequences table and subsequent references to esacpes with a number. E.g.
+
+	The escape
+	\indextext{number!octal}%
+	\tcode{\textbackslash\numconst{ooo}} consists of the backslasgh followed by one,
+	two, or three octal digits that are taken to specify the value of the
+	desired character.
+
+
+\logop{text}
+Used probably to format the name of logical operators in what looks like small caps (but using \footnotesize). E.g.
+
+	The usual arithmetic conversions are performed; the result is the
+	bitwise \logop{AND} functions of the operands.
+
+
+environment indented
+Not used (in core language).
+
+
+\nonterminal{text}
+Marks some text as a nonterminal (inside BNFs).
+
+
+environment bnfkeywordtab
+Used twice (in [lex.operators]/1 and [over.oper]/1). Defines a nonterminal, where the rules are simple terminals and there are so many of them that you cannot (practically) put them on individual lines. In LaTeX code, the rules are separated by \> and the line breaks defined via \br
+
+
+environment bnftab
+Defines a nonterminal; the rules are manually indented. Allows additional indentation within the rule [cpp] and line-breaks within a rule, the following line is then continued with one more level of indentation [lex.ccon].
+The non-copied version ncbnftab is used sometimes (always?) without any manual indentation, and sometimes (always?) without defining a nonterminal inside the environment.
+
+
+environment simplebnf
+Only occurs as ncsimplebnf. Does not contain manual indenting and does not define a nonterminal inside the environment.
+
+
+environment bnf
+Always contains a \nontermdef. Defines the nonterminal using one or more rules (automatic indenting).
+One exception is [dcl.fct.def.general]/1, where "function-body:" has been used as the nonterminal which is to be defined, instead of \nontermdef{function-body} or \nonterminal{function-body:}
+The non-copied version usually doesn't contain a nonterminal definition; the single exception being [over.match.call]/3
