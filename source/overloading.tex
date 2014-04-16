@@ -683,12 +683,11 @@ Such a
 perhaps nested arbitrarily deep in
 parentheses, has one of the following forms:
 
-\begin{ncbnf}
-postfix-expression:\br
-    postfix-expression \terminal{.} id-expression\br
-    postfix-expression \terminal{->} id-expression\br
-    primary-expression
-\end{ncbnf}
+\begin{ncsimplebnf}
+postfix-expression \terminal{.} id-expression\br
+postfix-expression \terminal{->} id-expression\br
+primary-expression
+\end{ncsimplebnf}
 
 These represent two syntactic subcategories of function calls:
 qualified function calls and unqualified function calls.
