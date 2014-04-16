@@ -289,17 +289,16 @@ or
 \tcode{\#elif}
 directive)
 is \impldef{numeric values of character literals in \tcode{\#if}
-directives}.\footnote{Thus, the constant expression in the following
+directives}.\cprotect\footnote{Thus, the constant expression in the following
 \tcode{\#if}
 directive and
 \tcode{if}
 statement is not guaranteed to evaluate to the same value in these two
 contexts.
-\begin{tabbing}
-\hspace{.6in}\=\kill%
-\>\tcode{\#if 'z' - 'a' == 25}\\
-\>\tcode{if ('z' - 'a' == 25)}
-\end{tabbing}
+\begin{codeblock}
+#if 'z' - 'a' == 25
+if ('z' - 'a' == 25)
+\end{codeblock}
 }
 Also, whether a single-character character literal may have a negative
 value is \impldef{negative value of character literal in preprocessor}.
