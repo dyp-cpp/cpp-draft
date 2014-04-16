@@ -2795,7 +2795,7 @@ the operator named in its
 \begin{bnfkeywordtab}
 \nontermdef{operator} \textnormal{one of}\br
 \>new\>delete\>new[]\>delete[]\br
-\>+\>-\>*\>/\>\%\>\^{}\>\&\>|\>$\sim$\br
+\>+\>-\>*\>/\>\%\>\^{}\>\&\>|\>\tilde\br
 \>!\>=\><\>>\>+=\>-=\>*=\>/=\>\%=\br
 \>\^{}=\>\&=\>|=\>\shl\>\shr\>\shr=\>\shl=\>={=}\>!=\br
 \><=\>>=\>\&\&\>|{|}\>++\>-{-}\>,\>->*\>->\br
@@ -3445,7 +3445,7 @@ For every promoted integral type
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\textit{T}@ operator@$\sim$@(@\textit{T}@);
+@\textit{T}@ operator@\tilde@(@\textit{T}@);
 \end{codeblock}
 
 \pnum
