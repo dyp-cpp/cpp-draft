@@ -1934,20 +1934,20 @@ Match rank.
 
 \begin{floattable}{Conversions}{tab:over.conversions}{l|c|c|c}
 \topline
-\hdstyle{Conversion}            &   \hdstyle{Category}          &   \hdstyle{Rank}  &   \hdstyle{Subclause} \\ \capsep
-No conversions required         &   Identity                    &                   &                       \\ \cline{1-2}\cline{4-4}
-Lvalue-to-rvalue conversion     &                               &                   &   \ref{conv.lval}     \\ \cline{1-1}\cline{4-4}
-Array-to-pointer conversion     &   Lvalue Transformation       &   Exact Match     &   \ref{conv.array}    \\ \cline{1-1}\cline{4-4}
-Function-to-pointer conversion  &                               &                   &   \ref{conv.func}     \\ \cline{1-2}\cline{4-4}
-Qualification conversions       &   Qualification Adjustment    &                   &   \ref{conv.qual}     \\ \hline
-Integral promotions             &                               &                   &   \ref{conv.prom}     \\ \cline{1-1}\cline{4-4}
-Floating point promotion        &   \rb{Promotion}              &   \rb{Promotion}  &   \ref{conv.fpprom}   \\ \hline
-Integral conversions            &                               &                   &   \ref{conv.integral} \\ \cline{1-1}\cline{4-4}
-Floating point conversions      &                               &                   &   \ref{conv.double}   \\ \cline{1-1}\cline{4-4}
-Floating-integral conversions   &                               &                   &   \ref{conv.fpint}    \\ \cline{1-1}\cline{4-4}
-Pointer conversions             &   \rb{Conversion}             &   \rb{Conversion} &   \ref{conv.ptr}      \\ \cline{1-1}\cline{4-4}
-Pointer to member conversions   &                               &                   &   \ref{conv.mem}      \\ \cline{1-1}\cline{4-4}
-Boolean conversions             &                               &                   &   \ref{conv.bool}     \\
+\hdstyle{Conversion}            &   \hdstyle{Category}                         &   \hdstyle{Rank}                 &   \hdstyle{Subclause} \\ \capsep
+No conversions required         &   Identity                                   &   \multirow{5}{*}{Exact Match}   &                       \\ \cline{1-2}\cline{4-4}
+Lvalue-to-rvalue conversion     &   \multirow{3}{*}{Lvalue Transformation}     &                                  &   \ref{conv.lval}     \\ \cline{1-1}\cline{4-4}
+Array-to-pointer conversion     &                                              &                                  &   \ref{conv.array}    \\ \cline{1-1}\cline{4-4}
+Function-to-pointer conversion  &                                              &                                  &   \ref{conv.func}     \\ \cline{1-2}\cline{4-4}
+Qualification conversions       &   Qualification Adjustment                   &                                  &   \ref{conv.qual}     \\ \hline
+Integral promotions             &   \multirow{2}{*}{Promotion}                 &   \multirow{2}{*}{Promotion}     &   \ref{conv.prom}     \\ \cline{1-1}\cline{4-4}
+Floating point promotion        &                                              &                                  &   \ref{conv.fpprom}   \\ \hline
+Integral conversions            &   \multirow{6}{*}{Conversion}                &   \multirow{6}{*}{Conversion}    &   \ref{conv.integral} \\ \cline{1-1}\cline{4-4}
+Floating point conversions      &                                              &                                  &   \ref{conv.double}   \\ \cline{1-1}\cline{4-4}
+Floating-integral conversions   &                                              &                                  &   \ref{conv.fpint}    \\ \cline{1-1}\cline{4-4}
+Pointer conversions             &                                              &                                  &   \ref{conv.ptr}      \\ \cline{1-1}\cline{4-4}
+Pointer to member conversions   &                                              &                                  &   \ref{conv.mem}      \\ \cline{1-1}\cline{4-4}
+Boolean conversions             &                                              &                                  &   \ref{conv.bool}     \\
 \end{floattable}
 
 \rSec4[over.ics.user]{User-defined conversion sequences}
