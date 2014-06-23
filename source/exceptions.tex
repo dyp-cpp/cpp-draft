@@ -122,10 +122,10 @@ lab:  try {
   T1 t1;
   try {
     T2 t2;
-    if (@\textit{condition}@)
+    if (@\grammarterm{condition}@)
       goto lab;
-    } catch(...) { /* @\textit{handler 2}@ */ }
-  } catch(...) { /* @\textit{handler 1}@ */ }
+    } catch(...) { /* @\placeholder{handler 2}@ */ }
+  } catch(...) { /* @\placeholder{handler 1}@ */ }
 \end{codeblock}
 
 Here, executing
@@ -140,11 +140,11 @@ does not declare a variable.
 Any exception raised while destroying
 \tcode{t2}
 will result in executing
-\textit{handler 2};
+\placeholder{handler 2};
 any exception raised while destroying
 \tcode{t1}
 will result in executing
-\textit{handler 1}.
+\placeholder{handler 1}.
 \exitexample
 
 \pnum
@@ -495,10 +495,10 @@ if
 The
 \term{handler}
 is of type
-\textit{cv}
+\cv
 \tcode{T}
 or
-\textit{cv}
+\cv
 \tcode{T\&}
 and
 \tcode{E}
@@ -511,10 +511,10 @@ or
 the
 \term{handler}
 is of type
-\textit{cv}
+\cv
 \tcode{T}
 or
-\textit{cv}
+\cv
 \tcode{T\&}
 and
 \tcode{T}
@@ -525,7 +525,7 @@ or
 the
 \term{handler}
 is of type
-\textit{cv}
+\cv
 \tcode{T} or \tcode{const T\&} where \tcode{T} is a pointer type
 and
 \tcode{E}
@@ -543,7 +543,7 @@ a qualification conversion
 \end{itemize}
 
 \item
-the \term{handler} is of type \textit{cv} \tcode{T} or \tcode{const T\&} where \tcode{T} is a pointer or pointer to member type and \tcode{E} is \tcode{std::nullptr_t}.
+the \term{handler} is of type \cv \tcode{T} or \tcode{const T\&} where \tcode{T} is a pointer or pointer to member type and \tcode{E} is \tcode{std::nullptr_t}.
 
 \end{itemize}
 
@@ -1073,7 +1073,7 @@ struct D : public A, public B {
     // Implicit declaration of \tcode{D::D();}
     // Implicit declaration of \tcode{D::D(const D\&) noexcept(true);}
     // Implicit declaration of \tcode{D::D(D\&\&) throw(Y);}
-    // Implicit declaration of \tcode{D::$\sim$D() throw(X, Y);}
+    // Implicit declaration of \tcode{D::\tilde D() throw(X, Y);}
 };
 \end{codeblock}
 

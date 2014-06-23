@@ -3503,9 +3503,9 @@ Expressions may be
 (on the value of a non-type template parameter).
 In an expression of the form:
 
-\begin{ncbnftab}
+\begin{ncsimplebnf}
 postfix-expression \terminal{(} expression-list\opt \terminal{)}
-\end{ncbnftab}
+\end{ncsimplebnf}
 
 where the
 \grammarterm{postfix-expression}
@@ -3654,8 +3654,8 @@ or a member of a partial specialization, the name of
 the class template followed by the template argument list of
 the partial specialization enclosed in
 \tcode{<>} (or an equivalent template alias specialization).
-If the \textit{n}th template parameter is
-a parameter pack, the \textit{n}th template argument is a pack
+If the $n$th template parameter is
+a parameter pack, the $n$th template argument is a pack
 expansion~(\ref{temp.variadic}) whose pattern is the name of
 the parameter pack.
 \end{itemize}
@@ -3663,12 +3663,12 @@ the parameter pack.
 \pnum
 The template argument list of a primary template is a
 template argument list in which the
-\textit{n}th
+$n$th
 template argument has the value of the
-\textit{n}th
+$n$th
 template parameter of the class template.
-If the \textit{n}th template parameter is a template
-parameter pack~(\ref{temp.variadic}), the \textit{n}th template argument is a pack
+If the $n$th template parameter is a template
+parameter pack~(\ref{temp.variadic}), the $n$th template argument is a pack
 expansion~(\ref{temp.variadic}) whose pattern is the name of
 the template parameter pack.
 
@@ -3935,7 +3935,7 @@ or
 \grammarterm{new-type-id}
 is dependent, even if any subexpression is type-dependent:
 
-\begin{ncbnftab}
+\begin{ncsimplebnf}
 simple-type-specifier \terminal{(} expression-list\opt \terminal{)}\br
 \terminal{::\opt new} new-placement\opt new-type-id new-initializer\opt\br
 \terminal{::\opt new} new-placement\opt \terminal{(} type-id \terminal{)} new-initializer\opt\br
@@ -3944,13 +3944,13 @@ simple-type-specifier \terminal{(} expression-list\opt \terminal{)}\br
 \terminal{const_cast <} type-id \terminal{> (} expression \terminal{)}\br
 \terminal{reinterpret_cast <} type-id \terminal{> (} expression \terminal{)}\br
 \terminal{(} type-id \terminal{)} cast-expression
-\end{ncbnftab}
+\end{ncsimplebnf}
 
 \pnum
 Expressions of the following forms are never type-dependent (because the type
 of the expression cannot be dependent):
 
-\begin{ncbnftab}
+\begin{ncsimplebnf}
 literal\br
 postfix-expression \terminal{.} pseudo-destructor-name\br
 postfix-expression \terminal{->} pseudo-destructor-name\br
@@ -3964,7 +3964,7 @@ postfix-expression \terminal{->} pseudo-destructor-name\br
 \terminal{::\opt delete [ ]} cast-expression\br
 \terminal{throw} assignment-expression\opt\br
 \terminal{noexcept} \terminal{(} expression \terminal{)}
-\end{ncbnftab}
+\end{ncsimplebnf}
 
 \enternote For the standard library macro \tcode{offsetof},
 see~\ref{support.types}.\exitnote
@@ -4060,20 +4060,20 @@ or
 \grammarterm{cast-expression}
 is value-dependent:
 
-\begin{ncbnftab}
+\begin{ncsimplebnf}
 simple-type-specifier \terminal{(} expression-list\opt \terminal{)}\br
 \terminal{static_cast <} type-id \terminal{> (} expression \terminal{)}\br
 \terminal{const_cast <} type-id \terminal{> (} expression \terminal{)}\br
 \terminal{reinterpret_cast <} type-id \terminal{> (} expression \terminal{)}\br
 \terminal{(} type-id \terminal{)} cast-expression
-\end{ncbnftab}
+\end{ncsimplebnf}
 
 \pnum
 Expressions of the following form are value-dependent:
 
-\begin{ncbnftab}
+\begin{ncsimplebnf}
 \terminal{sizeof} \terminal{...} \terminal{(} identifier \terminal{)}
-\end{ncbnftab}
+\end{ncsimplebnf}
 
 \pnum
 An expression of the form \tcode{\&}\grammarterm{qualified-id} where the
@@ -6163,6 +6163,7 @@ argument deduction is attempted using each of the members of the set. If
 deduction succeeds for only one of the overload set members, that member is
 used as the argument value for the deduction. If deduction succeeds for more than
 one member of the overload set the parameter is treated as a non-deduced context.
+\end{itemize}
 
 \pnum
 \enterexample
@@ -6199,7 +6200,6 @@ template <class T> T g(T);
 int i = f(1, g);    // calls \tcode{f(int, int (*)(int))}
 \end{codeblock}
 \exitexample
-\end{itemize}
 
 \rSec3[temp.deduct.funcaddr]{Deducing template arguments taking the address of a function template}
 

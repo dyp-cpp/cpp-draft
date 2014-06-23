@@ -175,7 +175,7 @@ are not subject to macro expansion unless otherwise stated.
 EMPTY   #   include <file.h>
 \end{codeblock}
 
-the sequence of preprocessing tokens on the second line is \textit{not}
+the sequence of preprocessing tokens on the second line is \emph{not}
 a preprocessing directive, because it does not begin with a \# at the start of
 translation phase 4, even though it will do so after the macro \tcode{EMPTY}
 has been replaced.\exitexample
@@ -195,15 +195,15 @@ all identifiers either are or are not macro names ---
 there simply are no keywords, enumeration constants, etc.}
 and it may contain unary operator expressions of the form
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 \terminal{defined} identifier
-\end{ncbnf}
+\end{ncsimplebnf}
 
 or
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 \terminal{defined (} identifier \terminal{)}
-\end{ncbnf}
+\end{ncsimplebnf}
 
 which evaluate to
 \tcode{1}
@@ -289,17 +289,16 @@ or
 \tcode{\#elif}
 directive)
 is \impldef{numeric values of character literals in \tcode{\#if}
-directives}.\footnote{Thus, the constant expression in the following
+directives}.\cprotect\footnote{Thus, the constant expression in the following
 \tcode{\#if}
 directive and
 \tcode{if}
 statement is not guaranteed to evaluate to the same value in these two
 contexts.
-\begin{tabbing}
-\hspace{.6in}\=\kill%
-\>\tcode{\#if 'z' - 'a' == 25}\\
-\>\tcode{if ('z' - 'a' == 25)}
-\end{tabbing}
+\begin{codeblock}
+#if 'z' - 'a' == 25
+if ('z' - 'a' == 25)
+\end{codeblock}
 }
 Also, whether a single-character character literal may have a negative
 value is \impldef{negative value of character literal in preprocessor}.
@@ -620,7 +619,7 @@ A preprocessing directive of the form
 \begin{ncsimplebnf}
 \terminal{\# define} identifier lparen identifier-list\opt \terminal{)} replacement-list new-line\br
 \terminal{\# define} identifier lparen \terminal{...} \terminal{)} replacement-list new-line\br
-\terminal{\# define} identifier lparen identifier-list \terminal{, ...} \terminal{)} replacement-list new-line\br
+\terminal{\# define} identifier lparen identifier-list \terminal{, ...} \terminal{)} replacement-list new-line
 \end{ncsimplebnf}
 
 \indextext{macro!function-like}%
@@ -912,7 +911,7 @@ the sequence
 #define x       2
 #define g       f
 #define z       z[0]
-#define h       g(@$\sim$@
+#define h       g(@\tilde@
 #define m(a)    a(w)
 #define w       0,1
 #define t(a)    a
@@ -932,7 +931,7 @@ results in
 
 \begin{codeblock}
 f(2 * (y+1)) + f(2 * (f(2 * (z[0])))) % f(2 * (0)) + t(1);
-f(2 * (2+(3,4)-0,1)) | f(2 * (@$\sim$@ 5)) & f(2 * (0,1))^m(0,1);
+f(2 * (2+(3,4)-0,1)) | f(2 * (@\tilde@ 5)) & f(2 * (0,1))^m(0,1);
 int i[] = { 1, 23, 4, 5, };
 char c[2][6] = { "hello", "" };
 \end{codeblock}
@@ -1171,10 +1170,10 @@ has no effect.
 \pnum
 The following macro names shall be defined by the implementation:
 
-\begin{description}
+\begin{description}[style=nextline]
 
 \indextext{\idxcode{\unun cplusplus}}%
-\item \tcode{\xname{cplusplus}}\\
+\item[\tcode{\xname{cplusplus}}]
 The name \tcode{\,\xname{cplusplus}} is defined
 to the value
 \tcode{\cppver}
@@ -1186,7 +1185,7 @@ Non-conforming compilers should use a value with at most
 five decimal digits.}
 
 \indextext{\xname{DATE}@\mname{DATE}}%
-\item \mname{DATE}\\
+\item[\mname{DATE}]
 The date of translation of the source file:
 a character string literal of the form
 \tcode{"Mmm~dd~yyyy"},
@@ -1202,25 +1201,25 @@ an \impldef{text of \mname{DATE} when date of translation is not available} vali
 shall be supplied.
 
 \indextext{\xname{FILE}@\mname{FILE}}%
-\item \mname{FILE}\\
+\item[\mname{FILE}]
 The presumed name of the current source file (a character string
 literal).\footnote{The presumed source file name and line number can be changed
 by the \tcode{\#line} directive.}
 
 \indextext{\xname{LINE}@\mname{LINE}}%
-\item \mname{LINE}\\
+\item[\mname{LINE}]
 The presumed line number (within the current source file) of the current source line
 (an integer literal).%
 \addtocounter{footnote}{-1}\footnotemark\
 
 \indextext{\xname{STDC_HOSTED}@\mname{STDC_HOSTED}}%
 \indextext{\xname{STDC_HOSTED}@\mname{STDC_HOSTED}!implementation-defined}%
-\item \mname{STDC_HOSTED}\\
+\item[\mname{STDC_HOSTED}]
 The integer literal \tcode{1} if the implementation is a hosted
 implementation or the integer literal \tcode{0} if it is not.
 
 \indextext{\xname{TIME}@\mname{TIME}}%
-\item \mname{TIME}\\
+\item[\mname{TIME}]
 The time of translation of the source file:
 a character string literal of the form
 \tcode{"hh:mm:ss"}
@@ -1234,29 +1233,29 @@ an \impldef{text of \mname{TIME} when time of translation is not available} vali
 \pnum
 The following macro names are conditionally defined by the implementation:
 
-\begin{description}
+\begin{description}[style=nextline]
   \indextext{\xname{STDC}@\mname{STDC}}%
   \indextext{\xname{STDC}@\mname{STDC}!implementation-defined}%
-\item \mname{STDC}\\
+\item[\mname{STDC}]
 Whether \mname{STDC} is predefined and if so, what its value is,
 are \impldef{definition and meaning of \mname{STDC}}.
 
 \indextext{\xname{STDC_MB_MIGHT_NEQ_WC}@\mname{STDC_MB_MIGHT_NEQ_WC}}%
 \indextext{\xname{STDC_MB_MIGHT_NEQ_WC}@\mname{STDC_MB_MIGHT_NEQ_WC}!implementation-defined}%
-\item \mname{STDC_MB_MIGHT_NEQ_WC}\\
+\item[\mname{STDC_MB_MIGHT_NEQ_WC}]
 The integer literal \tcode{1}, intended to indicate that, in the encoding for
 \tcode{wchar_t}, a member of the basic character set need not have a code value equal to
 its value when used as the lone character in an ordinary character literal.
 
 \indextext{\xname{STDC_VERSION}@\mname{STDC_VERSION}}%
 \indextext{\xname{STDC_VERSION}@\mname{STDC_VERSION}!implementation-defined}%
-\item \mname{STDC_VERSION}\\
+\item[\mname{STDC_VERSION}]
 Whether \mname{STDC_VERSION} is predefined and if so, what its value is,
 are \impldef{definition and meaning of \mname{STDC_VERSION}}.
 
 \indextext{\xname{STDC_ISO_10646}@\mname{STDC_ISO_10646}}%
 \indextext{\xname{STDC_ISO_10646}@\mname{STDC_ISO_10646}!implementation-defined}%
-\item \mname{STDC_ISO_10646}\\
+\item[\mname{STDC_ISO_10646}]
 An integer literal of the form \tcode{yyyymmL} (for example,
 \tcode{199712L}).
 If this symbol is defined, then every character in the Unicode required set, when
@@ -1267,13 +1266,13 @@ all amendments and technical corrigenda as of the specified year and month.
 
 \indextext{\xname{STDCPP_STRICT_POINTER_SAFETY}@\mname{STDCPP_STRICT_POINTER_SAFETY}}%
 \indextext{\xname{STDCPP_STRICT_POINTER_SAFETY}@\mname{STDCPP_STRICT_POINTER_SAFETY}!implementation-defined}%
-\item \mname{STDCPP_STRICT_POINTER_SAFETY}\\
+\item[\mname{STDCPP_STRICT_POINTER_SAFETY}]
 Defined, and has the value integer literal 1, if and only if the implementation
 has strict pointer safety~(\ref{basic.stc.dynamic.safety}).
 
 \indextext{\xname{STDCPP_THREADS}@\mname{STDCPP_THREADS}}%
 \indextext{\xname{STDCPP_THREADS}@\mname{STDCPP_THREADS}!implementation-defined}%
-\item \mname{STDCPP_THREADS}\\
+\item[\mname{STDCPP_THREADS}]
 Defined, and has the value integer literal 1, if and only if a program
 can have more than one thread of execution~(\ref{intro.multithread}).
 
@@ -1307,9 +1306,9 @@ underscore.
 
 A unary operator expression of the form:
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 \terminal{_Pragma} \terminal{(} string-literal \terminal{)}
-\end{ncbnf}
+\end{ncsimplebnf}
 
 is processed as follows: The string literal is \term{destringized}
 by deleting the \tcode{L} prefix, if present, deleting the leading and trailing

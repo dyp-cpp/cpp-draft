@@ -310,7 +310,7 @@ void prog () {
 Two function declarations of the same name refer to the same function if they
 are in the same scope and have equivalent parameter declarations~(\ref{over.load}).
 A function member of a derived class is
-\textit{not}
+\emph{not}
 in the same scope as a function member of the same name in a base class.
 \enterexample
 
@@ -522,17 +522,17 @@ For non-static member functions, the type of the implicit object
 parameter is
 
 \begin{itemize}
-\item ``lvalue reference to \textit{cv} \tcode{X}'' for functions declared
+\item ``lvalue reference to \cv \tcode{X}'' for functions declared
 without a \grammarterm{ref-qualifier} or with the
 \tcode{\&} \grammarterm{ref-qualifier}
-\item ``rvalue reference to \textit{cv} \tcode{X}'' for functions declared with the
+\item ``rvalue reference to \cv \tcode{X}'' for functions declared with the
 \tcode{\&\&} \grammarterm{ref-qualifier}
 \end{itemize}
 
 where
 \tcode{X}
 is the class of which the function is a member and
-\textit{cv}
+\cv
 is the cv-qualification on the
 member function declaration.
 \enterexample
@@ -683,12 +683,11 @@ Such a
 perhaps nested arbitrarily deep in
 parentheses, has one of the following forms:
 
-\begin{ncbnf}
-postfix-expression:\br
-    postfix-expression \terminal{.} id-expression\br
-    postfix-expression \terminal{->} id-expression\br
-    primary-expression
-\end{ncbnf}
+\begin{ncsimplebnf}
+postfix-expression \terminal{.} id-expression\br
+postfix-expression \terminal{->} id-expression\br
+primary-expression
+\end{ncsimplebnf}
 
 These represent two syntactic subcategories of function calls:
 qualified function calls and unqualified function calls.
@@ -718,7 +717,7 @@ the
 that is the left operand of the
 \tcode{.}
 operator
-has type ``\textit{cv}
+has type ``\cv
 \tcode{T}''
 where
 \tcode{T}
@@ -807,7 +806,7 @@ If the
 \grammarterm{primary-expression}
 \tcode{E}
 in the function call syntax evaluates
-to a class object of type ``\textit{cv}
+to a class object of type ``\cv
 \tcode{T}'',
 then the set of candidate
 functions includes at least the function call operators of
@@ -832,7 +831,7 @@ form
 where
 \grammarterm{cv-qualifier}
 is the same cv-qualification as, or a greater cv-qualification than,
-\textit{cv},
+\cv,
 and where
 \grammarterm{conversion-type-id}
 denotes the type ``pointer to function
@@ -845,9 +844,9 @@ returning \tcode{R}'', a \term{surrogate call function} with the unique name
 \grammarterm{call-function}
 and having the form
 
-\begin{ncbnf}
+\begin{ncsimplebnf}
 \terminal{R} call-function \terminal{(} conversion-type-id \terminal{F, P1 a1, ... ,Pn an)} \terminal{\{ return F (a1,... ,an); \}}
-\end{ncbnf}
+\end{ncsimplebnf}
 
 is also considered as a candidate function.
 Similarly, surrogate
@@ -1208,7 +1207,7 @@ to select the user-defined conversion to be invoked.
 cv-qualified class type is determined in terms of a corresponding non-reference
 copy-initialization. \exitnote
 Assuming that
-``\textit{cv1} \tcode{T}'' is the type of the object being initialized, with
+``\cvqual{cv1} \tcode{T}'' is the type of the object being initialized, with
 \tcode{T}
 a class type,
 the candidate functions are selected as follows:
@@ -1220,7 +1219,7 @@ The converting constructors~(\ref{class.conv.ctor}) of
 are candidate functions.
 \item
 When the type of the initializer expression is a class type
-``\textit{cv} \tcode{S}'',
+``\cv \tcode{S}'',
 the non-explicit conversion functions of
 \tcode{S}
 and its base classes are considered.
@@ -1228,7 +1227,7 @@ When initializing a temporary to be bound to the first parameter of a
 constructor
 that takes a reference to possibly \cv-qualified \tcode{T} as its first argument,
 called with a single argument in the context of
-direct-initialization of an object of type ``\textit{cv2} \tcode{T}'', explicit
+direct-initialization of an object of type ``\cvqual{cv2} \tcode{T}'', explicit
 conversion functions are also considered.
 Those that are not hidden within
 \tcode{S}
@@ -1267,8 +1266,8 @@ expression of class type to the type of the object
 being initialized.
 Overload resolution is used to select the
 conversion function to be invoked.
-Assuming that ``\textit{cv1} \tcode{T}'' is the
-type of the object being initialized, and ``\textit{cv} \tcode{S}'' is the type
+Assuming that ``\cvqual{cv1} \tcode{T}'' is the
+type of the object being initialized, and ``\cv \tcode{S}'' is the type
 of the initializer expression, with
 \tcode{S}
 a class type,
@@ -1296,11 +1295,11 @@ Conversion functions that return a cv-qualified type
 are considered to yield the cv-unqualified version of that type
 for this process of selecting candidate functions.
 Conversion functions that return ``reference to
-\textit{cv2}
+\cvqual{cv2}
 \tcode{X}''
 return
 lvalues or xvalues, depending on the type of reference, of type
-``\textit{cv2}
+``\cvqual{cv2}
 \tcode{X}''
 and are therefore considered to yield
 \tcode{X}
@@ -1324,9 +1323,9 @@ to a glvalue or class prvalue that is the result of applying a conversion
 function to an initializer expression.
 Overload resolution is used to select the
 conversion function to be invoked.
-Assuming that ``\textit{cv1} \tcode{T}'' is the
+Assuming that ``\cvqual{cv1} \tcode{T}'' is the
 underlying type of the reference being initialized, and
-``\textit{cv} \tcode{S}'' is the type
+``\cv \tcode{S}'' is the type
 of the initializer expression, with
 \tcode{S}
 a class type,
@@ -1338,13 +1337,13 @@ The conversion functions of
 and its base classes are considered.
 Those non-explicit conversion functions that are not hidden within
 \tcode{S}
-and yield type ``lvalue reference to \textit{cv2} \tcode{T2}''
+and yield type ``lvalue reference to \cvqual{cv2} \tcode{T2}''
 (when initializing an lvalue reference or an rvalue reference to function) or
 ``\nonterminal{cv2} \tcode{T2}''
 or ``rvalue reference to \nonterminal{cv2} \tcode{T2}'' (when initializing an
 rvalue reference or an lvalue reference to function),
-where ``\textit{cv1} \tcode{T}'' is reference-compatible~(\ref{dcl.init.ref})
-with ``\textit{cv2} \tcode{T2}'',
+where ``\cvqual{cv1} \tcode{T}'' is reference-compatible~(\ref{dcl.init.ref})
+with ``\cvqual{cv2} \tcode{T2}'',
 are candidate functions. For direct-initialization, those explicit
 conversion functions that are not hidden within \tcode{S} and yield
 type ``lvalue reference to \cvqual{cv2} \tcode{T2}'' or ``\cvqual{cv2}
@@ -1417,14 +1416,14 @@ list.
 \begin{itemize}
 \item
 If there are
-\textit{m}
+$m$
 arguments in the list, all candidate
 functions having exactly
-\textit{m}
+$m$
 parameters are viable.
 \item
 A candidate function having fewer than
-\textit{m}
+$m$
 parameters is
 viable only if it has an ellipsis in its parameter list~(\ref{dcl.fct}).
 For the purposes of overload resolution,
@@ -1432,19 +1431,19 @@ any argument for which there is no corresponding parameter is
 considered to ``match the ellipsis''~(\ref{over.ics.ellipsis}) .
 \item
 A candidate function having more than
-\textit{m}
+$m$
 parameters is viable
 only if the
-\textit{(m+1)}-st
+$(m+1)$-st
 parameter has a default
 argument~(\ref{dcl.fct.default}).\footnote{According to~\ref{dcl.fct.default},
 parameters following the
-\textit{(m+1)}-st
+$(m+1)$-st
 parameter must also have default arguments.}
 For the purposes of overload
 resolution, the parameter list is truncated on the right, so
 that there are exactly
-\textit{m}
+$m$
 parameters.
 \end{itemize}
 
@@ -1468,26 +1467,26 @@ the viability of the function (see~\ref{over.ics.ref}).
 
 \pnum
 \indextext{conversion!overload resolution~and}%
-Define ICS\textit{i}(\tcode{F}) as follows:
+Define \ICS{i}{F} as follows:
 
 \begin{itemize}
 \item
 if
 \tcode{F}
-is a static member function, ICS\textit{1}(\tcode{F}) is defined such that
-ICS\textit{1}(\tcode{F}) is neither better nor worse than ICS\textit{1}(\tcode{G})
+is a static member function, \ICS{1}{F} is defined such that
+\ICS{1}{F} is neither better nor worse than \ICS{1}{G}
 for any function
 \tcode{G},
-and, symmetrically, ICS\textit{1}(\tcode{G}) is neither better nor worse than
-ICS\textit{1}(\tcode{F})\footnote{If a function is a static member function, this
+and, symmetrically, \ICS{1}{G} is neither better nor worse than
+\ICS{1}{F}\footnote{If a function is a static member function, this
 definition means that the first argument, the implied object argument,
 has no effect in the determination of whether the function is better
 or worse than any other function.};
 otherwise,
 \item
-let ICS\textit{i}(\tcode{F}) denote the implicit conversion sequence that converts
-the \textit{i}-th argument in the list to the type of the
-\textit{i}-th
+let \ICS{i}{F} denote the implicit conversion sequence that converts
+the $i$-th argument in the list to the type of the
+$i$-th
 parameter
 of viable function
 \tcode{F}.
@@ -1506,16 +1505,16 @@ function than another viable function
 \tcode{F2}
 if
 for all arguments
-\textit{i},
-ICS\textit{i}(\tcode{F1}) is not a worse conversion
-sequence than ICS\textit{i}(\tcode{F2}), and then
+$i$,
+\ICS{i}{F1} is not a worse conversion
+sequence than \ICS{i}{F2}, and then
 \begin{itemize}
 
 \item
 for some argument
-\textit{j},
-ICS\textit{j}(\tcode{F1}) is a better conversion
-sequence than ICS\textit{j}(\tcode{F2}), or, if not that,
+$j$,
+\ICS{j}{F1} is a better conversion
+sequence than \ICS{j}{F2}, or, if not that,
 
 \item
 the context is an initialization by user-defined conversion
@@ -1827,7 +1826,7 @@ the unique conversion sequence designated the
 For the purpose of ranking implicit conversion sequences as described
 in~\ref{over.ics.rank}, the ambiguous conversion sequence is treated
 as a user-defined sequence that is indistinguishable from any
-other user-defined conversion sequence\footnote{The ambiguous conversion
+other user-defined conversion sequence\cprotect\footnote{The ambiguous conversion
 sequence is ranked with user-defined
 conversion sequences because multiple conversion sequences
 for an argument can exist only if they involve different
@@ -1842,20 +1841,17 @@ This rule prevents a function from becoming non-viable because of an ambiguous
 conversion sequence for one of its parameters.
 Consider this example,
 
-\begin{ttfamily}
-\begin{tabbing}
-\hspace{2in}\=\kill%
-\indent class B;\\
-\indent class A \{ A (B\&);\};\\
-\indent class B \{ operator A (); \};\\
-\indent class C \{ C (B\&); \};\\
-\indent void f(A) \{ \}\\
-\indent void f(C) \{ \}\\
-\indent B b;\\
-\indent f(b);\>\textrm{// ambiguous because \tcode{b} $\to$ \tcode{C} via constructor and}\\
-\indent \>\textrm{// \tcode{b} $\to$ \tcode{A} via constructor or conversion function.}
-\end{tabbing}
-\end{ttfamily}
+\begin{codeblock}
+class B;
+class A { A (B&); };
+class B { operator A (); };
+class C { C (B&); };
+void f(A) { }
+void f(C) { }
+B b;
+f(b);  // ambiguous because \tcode{b} $\to$ \tcode{C} via constructor and
+       // \tcode{b} $\to$ \tcode{A} via constructor or conversion function.
+\end{codeblock}
 
 If it were not for this rule,
 \tcode{f(A)}
@@ -1913,11 +1909,11 @@ At most one conversion from each
 category is allowed in a single standard conversion sequence.
 If there are two or more conversions in the sequence, the
 conversions are applied in the canonical order:
-\textbf{Lvalue Transformation},
-\textbf{Promotion}
+\emph{Lvalue Transformation},
+\emph{Promotion}
 or
-\textbf{Conversion},
-\textbf{Qualification Adjustment}.
+\emph{Conversion},
+\emph{Qualification Adjustment}.
 \exitnote
 
 \pnum
@@ -1937,20 +1933,20 @@ Match rank.
 
 \begin{floattable}{Conversions}{tab:over.conversions}{l|c|c|c}
 \topline
-\hdstyle{Conversion}            &   \hdstyle{Category}          &   \hdstyle{Rank}  &   \hdstyle{Subclause} \\ \capsep
-No conversions required         &   Identity                    &                   &                       \\ \cline{1-2}\cline{4-4}
-Lvalue-to-rvalue conversion     &                               &                   &   \ref{conv.lval}     \\ \cline{1-1}\cline{4-4}
-Array-to-pointer conversion     &   Lvalue Transformation       &   Exact Match     &   \ref{conv.array}    \\ \cline{1-1}\cline{4-4}
-Function-to-pointer conversion  &                               &                   &   \ref{conv.func}     \\ \cline{1-2}\cline{4-4}
-Qualification conversions       &   Qualification Adjustment    &                   &   \ref{conv.qual}     \\ \hline
-Integral promotions             &                               &                   &   \ref{conv.prom}     \\ \cline{1-1}\cline{4-4}
-Floating point promotion        &   \rb{Promotion}              &   \rb{Promotion}  &   \ref{conv.fpprom}   \\ \hline
-Integral conversions            &                               &                   &   \ref{conv.integral} \\ \cline{1-1}\cline{4-4}
-Floating point conversions      &                               &                   &   \ref{conv.double}   \\ \cline{1-1}\cline{4-4}
-Floating-integral conversions   &                               &                   &   \ref{conv.fpint}    \\ \cline{1-1}\cline{4-4}
-Pointer conversions             &   \rb{Conversion}             &   \rb{Conversion} &   \ref{conv.ptr}      \\ \cline{1-1}\cline{4-4}
-Pointer to member conversions   &                               &                   &   \ref{conv.mem}      \\ \cline{1-1}\cline{4-4}
-Boolean conversions             &                               &                   &   \ref{conv.bool}     \\
+\hdstyle{Conversion}            &   \hdstyle{Category}                         &   \hdstyle{Rank}                 &   \hdstyle{Subclause} \\ \capsep
+No conversions required         &   Identity                                   &   \multirow{5}{*}{Exact Match}   &                       \\ \cline{1-2}\cline{4-4}
+Lvalue-to-rvalue conversion     &   \multirow{3}{*}{Lvalue Transformation}     &                                  &   \ref{conv.lval}     \\ \cline{1-1}\cline{4-4}
+Array-to-pointer conversion     &                                              &                                  &   \ref{conv.array}    \\ \cline{1-1}\cline{4-4}
+Function-to-pointer conversion  &                                              &                                  &   \ref{conv.func}     \\ \cline{1-2}\cline{4-4}
+Qualification conversions       &   Qualification Adjustment                   &                                  &   \ref{conv.qual}     \\ \hline
+Integral promotions             &   \multirow{2}{*}{Promotion}                 &   \multirow{2}{*}{Promotion}     &   \ref{conv.prom}     \\ \cline{1-1}\cline{4-4}
+Floating point promotion        &                                              &                                  &   \ref{conv.fpprom}   \\ \hline
+Integral conversions            &   \multirow{6}{*}{Conversion}                &   \multirow{6}{*}{Conversion}    &   \ref{conv.integral} \\ \cline{1-1}\cline{4-4}
+Floating point conversions      &                                              &                                  &   \ref{conv.double}   \\ \cline{1-1}\cline{4-4}
+Floating-integral conversions   &                                              &                                  &   \ref{conv.fpint}    \\ \cline{1-1}\cline{4-4}
+Pointer conversions             &                                              &                                  &   \ref{conv.ptr}      \\ \cline{1-1}\cline{4-4}
+Pointer to member conversions   &                                              &                                  &   \ref{conv.mem}      \\ \cline{1-1}\cline{4-4}
+Boolean conversions             &                                              &                                  &   \ref{conv.bool}     \\
 \end{floattable}
 
 \rSec4[over.ics.user]{User-defined conversion sequences}
@@ -2798,7 +2794,7 @@ the operator named in its
 \begin{bnfkeywordtab}
 \nontermdef{operator} \textnormal{one of}\br
 \>new\>delete\>new[]\>delete[]\br
-\>+\>-\>*\>/\>\%\>\^{}\>\&\>|\>$\sim$\br
+\>+\>-\>*\>/\>\%\>\^{}\>\&\>|\>\tilde\br
 \>!\>=\><\>>\>+=\>-=\>*=\>/=\>\%=\br
 \>\^{}=\>\&=\>|=\>\shl\>\shr\>\shr=\>\shl=\>={=}\>!=\br
 \><=\>>=\>\&\&\>|{|}\>++\>-{-}\>,\>->*\>->\br
@@ -3351,153 +3347,153 @@ integral promotions.
 
 \pnum
 For every pair
-(\textit{T},
-\textit{VQ}),
+(\placeholder{T},
+\cvqual{vq}),
 where
-\textit{T}
+\placeholder{T}
 is an arithmetic type, and
-\textit{VQ}
+\cvqual{vq}
 is either
 \tcode{volatile}
 or empty,
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\textit{VQ T}@& operator++(@\textit{VQ T}@&);
-@\textit{T}@ operator++(@\textit{VQ T}@&, int);
+@\cvqual{vq}\space\placeholder{T}@& operator++(@\cvqual{vq}\space\placeholder{T}@&);
+@\placeholder{T}@ operator++(@\cvqual{vq}\space\placeholder{T}@&, int);
 \end{codeblock}
 
 \pnum
 For every pair
-(\textit{T},
-\textit{VQ}),
+(\placeholder{T},
+\cvqual{vq}),
 where
-\textit{T}
+\placeholder{T}
 is an arithmetic type other than
-\textit{bool},
+\tcode{bool},
 and
-\textit{VQ}
+\cvqual{vq}
 is either
 \tcode{volatile}
 or empty,
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\textit{VQ T}@& operator--(@\textit{VQ T}@&);
-@\textit{T}@ operator--(@\textit{VQ T}@&, int);
+@\cvqual{vq} \placeholder{T}@& operator--(@\cvqual{vq}\space\placeholder{T}@&);
+@\placeholder{T}@ operator--(@\cvqual{vq}\space\placeholder{T}@&, int);
 \end{codeblock}
 
 \pnum
 For every pair
-(\textit{T},
-\textit{VQ}),
+(\placeholder{T},
+\cvqual{vq}),
 where
-\textit{T}
+\placeholder{T}
 is a cv-qualified or cv-unqualified object type, and
-\textit{VQ}
+\cvqual{vq}
 is either
 \tcode{volatile}
 or empty,
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\textit{T}@*@\textit{VQ}@& operator++(@\textit{T}@*@\textit{VQ}@&);
-@\textit{T}@*@\textit{VQ}@& operator--(@\textit{T}@*@\textit{VQ}@&);
-@\textit{T}@*    operator++(@\textit{T}@*@\textit{VQ}@&, int);
-@\textit{T}@*    operator--(@\textit{T}@*@\textit{VQ}@&, int);
+@\placeholder{T}@*@\cvqual{vq}@& operator++(@\placeholder{T}@*@\cvqual{vq}@&);
+@\placeholder{T}@*@\cvqual{vq}@& operator--(@\placeholder{T}@*@\cvqual{vq}@&);
+@\placeholder{T}@*    operator++(@\placeholder{T}@*@\cvqual{vq}@&, int);
+@\placeholder{T}@*    operator--(@\placeholder{T}@*@\cvqual{vq}@&, int);
 \end{codeblock}
 
 \pnum
 For every cv-qualified or cv-unqualified object type
-\textit{T},
+\placeholder{T},
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\textit{T}@&    operator*(@\textit{T}@*);
+@\placeholder{T}@&    operator*(@\placeholder{T}@*);
 \end{codeblock}
 
 \pnum
 For every function type
-\textit{T} that does not have cv-qualifiers or a \grammarterm{ref-qualifier},
+\placeholder{T} that does not have cv-qualifiers or a \grammarterm{ref-qualifier},
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\textit{T}@&    operator*(@\textit{T}@*);
+@\placeholder{T}@&    operator*(@\placeholder{T}@*);
 \end{codeblock}
 
 \pnum
-For every type \textit{T} there exist candidate operator functions of the form
+For every type \placeholder{T} there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\textit{T}@*    operator+(@\textit{T}@*);
+@\placeholder{T}@*    operator+(@\placeholder{T}@*);
 \end{codeblock}
 
 \pnum
 For every promoted arithmetic type
-\textit{T},
+\placeholder{T},
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\textit{T}@ operator+(@\textit{T}@);
-@\textit{T}@ operator-(@\textit{T}@);
+@\placeholder{T}@ operator+(@\placeholder{T}@);
+@\placeholder{T}@ operator-(@\placeholder{T}@);
 \end{codeblock}
 
 \pnum
 For every promoted integral type
-\textit{T},
+\placeholder{T},
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\textit{T}@ operator@$\sim$@(@\textit{T}@);
+@\placeholder{T}@ operator@\tilde@(@\placeholder{T}@);
 \end{codeblock}
 
 \pnum
 For every quintuple
-(\textit{C1},
-\textit{C2},
-\textit{T},
-\textit{CV1},
-\textit{CV2}),
+(\placeholder{C1},
+\placeholder{C2},
+\placeholder{T},
+\cvqual{cv1},
+\cvqual{cv2}),
 where
-\textit{C2}
+\placeholder{C2}
 is a class type,
-\textit{C1}
+\placeholder{C1}
 is the same type as C2 or is a derived class of C2,
-\textit{T}
+\placeholder{T}
 is an object type or a function type,
 and
-\textit{CV1}
+\cvqual{cv1}
 and
-\textit{CV2}
+\cvqual{cv2}
 are
 \grammarterm{cv-qualifier-seq}{s},
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\textit{CV12 T}@& operator->*(@\textit{CV1 C1}@*, @\textit{CV2 T C2}@::*);
+@\cvqual{cv12}\space\placeholder{T}@& operator->*(@\cvqual{cv1}\space\placeholder{C1}@*, @\cvqual{cv2}\space\placeholder{T}\space\placeholder{C2}@::*);
 \end{codeblock}
 
 where
-\textit{CV12}
+\cvqual{cv12}
 is the union of
-\textit{CV1}
+\cvqual{cv1}
 and
-\textit{CV2}.
+\cvqual{cv2}.
 The return type is shown for exposition only; see~\ref{expr.mptr.oper} for the
 determination of the operator's result type.
 
 \pnum
 For every pair of promoted arithmetic types
-\textit{L}
+\placeholder{L}
 and
-\textit{R},
+\placeholder{R},
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\textit{LR}@      operator*(@\textit{L}@, @\textit{R}@);
-@\textit{LR}@      operator/(@\textit{L}@, @\textit{R}@);
-@\textit{LR}@      operator+(@\textit{L}@, @\textit{R}@);
-@\textit{LR}@      operator-(@\textit{L}@, @\textit{R}@);
+@\placeholder{LR}@      operator*(@\textit{L}@, @\textit{R}@);
+@\placeholder{LR}@      operator/(@\textit{L}@, @\textit{R}@);
+@\placeholder{LR}@      operator+(@\textit{L}@, @\textit{R}@);
+@\placeholder{LR}@      operator-(@\textit{L}@, @\textit{R}@);
 bool    operator<(@\textit{L}@, @\textit{R}@);
 bool    operator>(@\textit{L}@, @\textit{R}@);
 bool    operator<=(@\textit{L}@, @\textit{R}@);
@@ -3507,174 +3503,174 @@ bool    operator!=(@\textit{L}@, @\textit{R}@);
 \end{codeblock}
 
 where
-\textit{LR}
+\placeholder{LR}
 is the result of the usual arithmetic conversions between types
-\textit{L}
+\placeholder{L}
 and
-\textit{R}.
+\placeholder{R}.
 
 \pnum
 For every cv-qualified or cv-unqualified object type
-\textit{T}
+\placeholder{T}
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\textit{T}@*      operator+(@\textit{T}@*, std::ptrdiff_t);
-@\textit{T}@&      operator[](@\textit{T}@*, std::ptrdiff_t);
-@\textit{T}@*      operator-(@\textit{T}@*, std::ptrdiff_t);
-@\textit{T}@*      operator+(std::ptrdiff_t, @\textit{T}@*);
-@\textit{T}@&      operator[](std::ptrdiff_t, @\textit{T}@*);
+@\placeholder{T}@*      operator+(@\placeholder{T}@*, std::ptrdiff_t);
+@\placeholder{T}@&      operator[](@\placeholder{T}@*, std::ptrdiff_t);
+@\placeholder{T}@*      operator-(@\placeholder{T}@*, std::ptrdiff_t);
+@\placeholder{T}@*      operator+(std::ptrdiff_t, @\placeholder{T}@*);
+@\placeholder{T}@&      operator[](std::ptrdiff_t, @\placeholder{T}@*);
 \end{codeblock}
 
 \pnum
 For every
-\textit{T},
+\placeholder{T},
 where
-\textit{T}
+\placeholder{T}
 is a pointer to object type,
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-std::ptrdiff_t   operator-(@\term{T}@, @\term{T}@);
+std::ptrdiff_t   operator-(@\placeholder{T}@, @\placeholder{T}@);
 \end{codeblock}
 
 \pnum
-For every \term{T}, where \term{T} is an enumeration type or a pointer type,
+For every \placeholder{T}, where \placeholder{T} is an enumeration type or a pointer type,
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-bool    operator<(@\term{T}@, @\term{T}@);
-bool    operator>(@\term{T}@, @\term{T}@);
-bool    operator<=(@\term{T}@, @\term{T}@);
-bool    operator>=(@\term{T}@, @\term{T}@);
-bool    operator==(@\term{T}@, @\term{T}@);
-bool    operator!=(@\term{T}@, @\term{T}@);
+bool    operator<(@\placeholder{T}@, @\placeholder{T}@);
+bool    operator>(@\placeholder{T}@, @\placeholder{T}@);
+bool    operator<=(@\placeholder{T}@, @\placeholder{T}@);
+bool    operator>=(@\placeholder{T}@, @\placeholder{T}@);
+bool    operator==(@\placeholder{T}@, @\placeholder{T}@);
+bool    operator!=(@\placeholder{T}@, @\placeholder{T}@);
 \end{codeblock}
 
 \pnum
-For every pointer to member type \term{T} or type \tcode{std::nullptr_t} there
+For every pointer to member type \placeholder{T} or type \tcode{std::nullptr_t} there
 exist candidate operator functions of the form
 
 \begin{codeblock}
-bool    operator==(@\term{T}@, @\term{T}@);
-bool    operator!=(@\term{T}@, @\term{T}@);
+bool    operator==(@\placeholder{T}@, @\placeholder{T}@);
+bool    operator!=(@\placeholder{T}@, @\placeholder{T}@);
 \end{codeblock}
 
 \pnum
 For every pair of promoted integral types
-\term{L}
+\placeholder{L}
 and
-\term{R},
+\placeholder{R},
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\term{LR}@      operator%(@\term{L}@, @\term{R}@);
-@\term{LR}@      operator&(@\term{L}@, @\term{R}@);
-@\term{LR}@      operator^(@\term{L}@, @\term{R}@);
-@\term{LR}@      operator|(@\term{L}@, @\term{R}@);
-@\term{L}@       operator<<(@\term{L}@, @\term{R}@);
-@\term{L}@       operator>>(@\term{L}@, @\term{R}@);
+@\placeholder{LR}@      operator%(@\placeholder{L}@, @\placeholder{R}@);
+@\placeholder{LR}@      operator&(@\placeholder{L}@, @\placeholder{R}@);
+@\placeholder{LR}@      operator^(@\placeholder{L}@, @\placeholder{R}@);
+@\placeholder{LR}@      operator|(@\placeholder{L}@, @\placeholder{R}@);
+@\placeholder{L}@       operator<<(@\placeholder{L}@, @\placeholder{R}@);
+@\placeholder{L}@       operator>>(@\placeholder{L}@, @\placeholder{R}@);
 \end{codeblock}
 
 where
-\term{LR}
+\placeholder{LR}
 is the result of the usual arithmetic conversions between types
-\term{L}
+\placeholder{L}
 and
-\term{R}.
+\placeholder{R}.
 
 \pnum
 For every triple
-(\term{L},
-\term{VQ},
-\term{R}),
+(\placeholder{L},
+\cvqual{vq},
+\placeholder{R}),
 where
-\term{L}
+\placeholder{L}
 is an arithmetic type,
-\term{VQ}
+\cvqual{vq}
 is either
 \tcode{volatile}
 or empty,
 and
-\term{R}
+\placeholder{R}
 is a promoted arithmetic type,
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\term{VQ L}@&   operator=(@\term{VQ L}@&, @\term{R}@);
-@\term{VQ L}@&   operator*=(@\term{VQ L}@&, @\term{R}@);
-@\term{VQ L}@&   operator/=(@\term{VQ L}@&, @\term{R}@);
-@\term{VQ L}@&   operator+=(@\term{VQ L}@&, @\term{R}@);
-@\term{VQ L}@&   operator-=(@\term{VQ L}@&, @\term{R}@);
+@\cvqual{vq}\space\placeholder{L}@&   operator=(@\cvqual{vq}\space\placeholder{L}@&, @\placeholder{R}@);
+@\cvqual{vq}\space\placeholder{L}@&   operator*=(@\cvqual{vq}\space\placeholder{L}@&, @\placeholder{R}@);
+@\cvqual{vq}\space\placeholder{L}@&   operator/=(@\cvqual{vq}\space\placeholder{L}@&, @\placeholder{R}@);
+@\cvqual{vq}\space\placeholder{L}@&   operator+=(@\cvqual{vq}\space\placeholder{L}@&, @\placeholder{R}@);
+@\cvqual{vq}\space\placeholder{L}@&   operator-=(@\cvqual{vq}\space\placeholder{L}@&, @\placeholder{R}@);
 \end{codeblock}
 
 \pnum
-For every pair (\term{T}, \term{VQ}), where \term{T} is any type and \term{VQ} is either
+For every pair (\placeholder{T}, \cvqual{vq}), where \placeholder{T} is any type and \cvqual{vq} is either
 \tcode{volatile} or empty, there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\term{T}@*@\term{VQ}@&   operator=(@\term{T}@*@\term{VQ}@&, @\term{T}@*);
+@\placeholder{T}@*@\cvqual{vq}@&   operator=(@\placeholder{T}@*@\cvqual{vq}@&, @\placeholder{T}@*);
 \end{codeblock}
 
 \pnum
 For every pair
-(\term{T},
-\term{VQ}),
+(\placeholder{T},
+\cvqual{vq}),
 where
-\term{T}
+\placeholder{T}
 is an enumeration or pointer to member type and
-\term{VQ}
+\cvqual{vq}
 is either
 \tcode{volatile}
 or empty,
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\term{VQ} \term{T}@&   operator=(@\term{VQ} \term{T}@&, @\term{T}@);
+@\cvqual{vq} \placeholder{T}@&   operator=(@\cvqual{vq} \placeholder{T}@&, @\placeholder{T}@);
 \end{codeblock}
 
 \pnum
 For every pair
-(\term{T},
-\term{VQ}),
+(\placeholder{T},
+\cvqual{vq}),
 where
-\term{T}
+\placeholder{T}
 is a cv-qualified or cv-unqualified object type and
-\term{VQ}
+\cvqual{vq}
 is either
 \tcode{volatile}
 or empty,
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\term{T}@*@\term{VQ}@&   operator+=(@\term{T}@*@\term{VQ}@&, std::ptrdiff_t);
-@\term{T}@*@\term{VQ}@&   operator-=(@\term{T}@*@\term{VQ}@&, std::ptrdiff_t);
+@\placeholder{T}@*@\cvqual{vq}@&   operator+=(@\placeholder{T}@*@\cvqual{vq}@&, std::ptrdiff_t);
+@\placeholder{T}@*@\cvqual{vq}@&   operator-=(@\placeholder{T}@*@\cvqual{vq}@&, std::ptrdiff_t);
 \end{codeblock}
 
 \pnum
 For every triple
-(\term{L},
-\term{VQ},
-\term{R}),
+(\placeholder{L},
+\cvqual{vq},
+\placeholder{R}),
 where
-\term{L}
+\placeholder{L}
 is an integral type,
-\term{VQ}
+\cvqual{vq}
 is either
 \tcode{volatile}
 or empty,
 and
-\term{R}
+\placeholder{R}
 is a promoted integral type,
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\term{VQ L}@&   operator%=(@\term{VQ L}@&, @\term{R}@);
-@\term{VQ L}@&   operator<<=(@\term{VQ L}@&, @\term{R}@);
-@\term{VQ L}@&   operator>>=(@\term{VQ L}@&, @\term{R}@);
-@\term{VQ L}@&   operator&=(@\term{VQ L}@&, @\term{R}@);
-@\term{VQ L}@&   operator^=(@\term{VQ L}@&, @\term{R}@);
-@\term{VQ L}@&   operator|=(@\term{VQ L}@&, @\term{R}@);
+@\cvqual{vq}\space\placeholder{L}@&   operator%=(@\cvqual{vq}\space\placeholder{L}@&, @\placeholder{R}@);
+@\cvqual{vq}\space\placeholder{L}@&   operator<<=(@\cvqual{vq}\space\placeholder{L}@&, @\placeholder{R}@);
+@\cvqual{vq}\space\placeholder{L}@&   operator>>=(@\cvqual{vq}\space\placeholder{L}@&, @\placeholder{R}@);
+@\cvqual{vq}\space\placeholder{L}@&   operator&=(@\cvqual{vq}\space\placeholder{L}@&, @\placeholder{R}@);
+@\cvqual{vq}\space\placeholder{L}@&   operator^=(@\cvqual{vq}\space\placeholder{L}@&, @\placeholder{R}@);
+@\cvqual{vq}\space\placeholder{L}@&   operator|=(@\cvqual{vq}\space\placeholder{L}@&, @\placeholder{R}@);
 \end{codeblock}
 
 \pnum
@@ -3688,21 +3684,21 @@ bool    operator||(bool, bool);
 
 \pnum
 For every pair of promoted arithmetic types
-\term{L}
+\placeholder{L}
 and
-\term{R},
+\placeholder{R},
 there exist candidate operator functions of the form
 
 \begin{codeblock}
-@\term{LR}@      operator?:(bool, @\term{L}@, @\term{R}@);
+@\placeholder{LR}@      operator?:(bool, @\placeholder{L}@, @\placeholder{R}@);
 \end{codeblock}
 
 where
-\term{LR}
+\placeholder{LR}
 is the result of the usual arithmetic conversions between types
-\term{L}
+\placeholder{L}
 and
-\term{R}.
+\placeholder{R}.
 \enternote
 As with all these descriptions of candidate functions, this declaration serves
 only to describe the built-in operator for purposes of overload resolution.
@@ -3713,13 +3709,13 @@ cannot be overloaded.
 
 \pnum
 For every type
-\term{T},
+\placeholder{T},
 where
-\term{T}
+\placeholder{T}
 is a pointer, pointer-to-member, or scoped enumeration type, there exist candidate operator
 functions of the form
 
 \begin{codeblock}
-@\term{T}@       operator?:(bool, @\term{T}@, @\term{T}@);
+@\placeholder{T}@       operator?:(bool, @\placeholder{T}@, @\placeholder{T}@);
 \end{codeblock}%
 \indextext{overloading|)}
