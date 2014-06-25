@@ -4,85 +4,87 @@
 %     pages
 %     footnotes
 
+% dyp: fancy formatting not required
+
 %%--------------------------------------------------
 %%  create chapter style
 
-\makechapterstyle{cppstd}{%
-  \renewcommand{\beforechapskip}{\onelineskip}
-  \renewcommand{\afterchapskip}{\onelineskip}
-  \renewcommand{\chapternamenum}{}
-  \renewcommand{\chapnamefont}{\chaptitlefont}
-  \renewcommand{\chapnumfont}{\chaptitlefont}
-  \renewcommand{\printchapternum}{\chapnumfont\thechapter\quad}
-  \renewcommand{\afterchapternum}{}
-}
-
-%%--------------------------------------------------
-%%  create page styles
-
-\makepagestyle{cpppage}
-\makeevenhead{cpppage}{\copyright\,\textsc{ISO/IEC}}{}{\textbf{\docno}}
-\makeoddhead{cpppage}{\copyright\,\textsc{ISO/IEC}}{}{\textbf{\docno}}
-\makeevenfoot{cpppage}{\leftmark}{}{\thepage}
-\makeoddfoot{cpppage}{\leftmark}{}{\thepage}
-
-\makeatletter
-\makepsmarks{cpppage}{%
-  \let\@mkboth\markboth
-  \def\chaptermark##1{\markboth{##1}{##1}}%
-  \def\sectionmark##1{\markboth{%
-    \ifnum \c@secnumdepth>\z@
-      \textsection\space\thesection
-    \fi
-    }{\rightmark}}%
-  \def\subsectionmark##1{\markboth{%
-    \ifnum \c@secnumdepth>\z@
-      \textsection\space\thesubsection
-    \fi
-    }{\rightmark}}%
-  \def\subsubsectionmark##1{\markboth{%
-    \ifnum \c@secnumdepth>\z@
-      \textsection\space\thesubsubsection
-    \fi
-    }{\rightmark}}%
-  \def\paragraphmark##1{\markboth{%
-    \ifnum \c@secnumdepth>\z@
-      \textsection\space\theparagraph
-    \fi
-    }{\rightmark}}}
-\makeatother
-
-\aliaspagestyle{chapter}{cpppage}
-
-%%--------------------------------------------------
-%%  set heading styles for main matter
-\newcommand{\beforeskip}{-.7\onelineskip plus -1ex}
-\newcommand{\afterskip}{.3\onelineskip minus .2ex}
-
-\setbeforesecskip{\beforeskip}
-\setsecindent{0pt}
-\setsecheadstyle{\large\bfseries\raggedright}
-\setaftersecskip{\afterskip}
-
-\setbeforesubsecskip{\beforeskip}
-\setsubsecindent{0pt}
-\setsubsecheadstyle{\large\bfseries\raggedright}
-\setaftersubsecskip{\afterskip}
-
-\setbeforesubsubsecskip{\beforeskip}
-\setsubsubsecindent{0pt}
-\setsubsubsecheadstyle{\normalsize\bfseries\raggedright}
-\setaftersubsubsecskip{\afterskip}
-
-\setbeforeparaskip{\beforeskip}
-\setparaindent{0pt}
-\setparaheadstyle{\normalsize\bfseries\raggedright}
-\setafterparaskip{\afterskip}
-
-\setbeforesubparaskip{\beforeskip}
-\setsubparaindent{0pt}
-\setsubparaheadstyle{\normalsize\bfseries\raggedright}
-\setaftersubparaskip{\afterskip}
+%\makechapterstyle{cppstd}{%
+%  \renewcommand{\beforechapskip}{\onelineskip}
+%  \renewcommand{\afterchapskip}{\onelineskip}
+%  \renewcommand{\chapternamenum}{}
+%  \renewcommand{\chapnamefont}{\chaptitlefont}
+%  \renewcommand{\chapnumfont}{\chaptitlefont}
+%  \renewcommand{\printchapternum}{\chapnumfont\thechapter\quad}
+%  \renewcommand{\afterchapternum}{}
+%}
+%
+%%%--------------------------------------------------
+%%%  create page styles
+%
+%\makepagestyle{cpppage}
+%\makeevenhead{cpppage}{\copyright\,\textsc{ISO/IEC}}{}{\textbf{\docno}}
+%\makeoddhead{cpppage}{\copyright\,\textsc{ISO/IEC}}{}{\textbf{\docno}}
+%\makeevenfoot{cpppage}{\leftmark}{}{\thepage}
+%\makeoddfoot{cpppage}{\leftmark}{}{\thepage}
+%
+%\makeatletter
+%\makepsmarks{cpppage}{%
+%  \let\@mkboth\markboth
+%  \def\chaptermark##1{\markboth{##1}{##1}}%
+%  \def\sectionmark##1{\markboth{%
+%    \ifnum \c@secnumdepth>\z@
+%      \textsection\space\thesection
+%    \fi
+%    }{\rightmark}}%
+%  \def\subsectionmark##1{\markboth{%
+%    \ifnum \c@secnumdepth>\z@
+%      \textsection\space\thesubsection
+%    \fi
+%    }{\rightmark}}%
+%  \def\subsubsectionmark##1{\markboth{%
+%    \ifnum \c@secnumdepth>\z@
+%      \textsection\space\thesubsubsection
+%    \fi
+%    }{\rightmark}}%
+%  \def\paragraphmark##1{\markboth{%
+%    \ifnum \c@secnumdepth>\z@
+%      \textsection\space\theparagraph
+%    \fi
+%    }{\rightmark}}}
+%\makeatother
+%
+%\aliaspagestyle{chapter}{cpppage}
+%
+%%%--------------------------------------------------
+%%%  set heading styles for main matter
+%\newcommand{\beforeskip}{-.7\onelineskip plus -1ex}
+%\newcommand{\afterskip}{.3\onelineskip minus .2ex}
+%
+%\setbeforesecskip{\beforeskip}
+%\setsecindent{0pt}
+%\setsecheadstyle{\large\bfseries\raggedright}
+%\setaftersecskip{\afterskip}
+%
+%\setbeforesubsecskip{\beforeskip}
+%\setsubsecindent{0pt}
+%\setsubsecheadstyle{\large\bfseries\raggedright}
+%\setaftersubsecskip{\afterskip}
+%
+%\setbeforesubsubsecskip{\beforeskip}
+%\setsubsubsecindent{0pt}
+%\setsubsubsecheadstyle{\normalsize\bfseries\raggedright}
+%\setaftersubsubsecskip{\afterskip}
+%
+%\setbeforeparaskip{\beforeskip}
+%\setparaindent{0pt}
+%\setparaheadstyle{\normalsize\bfseries\raggedright}
+%\setafterparaskip{\afterskip}
+%
+%\setbeforesubparaskip{\beforeskip}
+%\setsubparaindent{0pt}
+%\setsubparaheadstyle{\normalsize\bfseries\raggedright}
+%\setaftersubparaskip{\afterskip}
 
 %%--------------------------------------------------
 % set heading style for annexes
@@ -90,18 +92,21 @@
 \newcommand{\infannex}[2]{\Annex{#1}{#2}{informative}}
 \newcommand{\normannex}[2]{\Annex{#1}{#2}{normative}}
 
+% dyp: fancy formatting not required
 %%--------------------------------------------------
 %%  set footnote style
-\footmarkstyle{\smaller#1) }
+%\footmarkstyle{\smaller#1) }
 
 %%--------------------------------------------------
 % set style for main text
-\setlength{\parindent}{0pt}
+%\setlength{\parindent}{0pt}
 
 %%--------------------------------------------------
 %%  set caption style and delimiter
-\captionstyle{\centering}
-\captiondelim{ --- }
+% dyp: more fancy formatting. IIRC, I replaced longtable,
+%      so the makecaption customization shouldn't be required either
+%\captionstyle{\centering}
+%\captiondelim{ --- }
 % override longtable's caption delimiter to match
 \makeatletter
 \def\LT@makecaption#1#2#3{%
@@ -126,14 +131,16 @@
   \renewcommand{\appendixname}{Annex }
 }
 
+% dyp: more formatting
 %%--------------------------------------------------
 %% change list item markers to em-dash
-\renewcommand{\labelitemi}{---}
-\renewcommand{\labelitemii}{---}
-\renewcommand{\labelitemiii}{---}
-\renewcommand{\labelitemiv}{---}
+%\renewcommand{\labelitemi}{---}
+%\renewcommand{\labelitemii}{---}
+%\renewcommand{\labelitemiii}{---}
+%\renewcommand{\labelitemiv}{---}
 
 %%--------------------------------------------------
 %% set section numbering limit, toc limit
-\maxsecnumdepth{subparagraph}
-\setcounter{tocdepth}{1}
+\setcounter{secnumdepth}{5} % dyp: this seems to necessary because of the new document class
+%\maxsecnumdepth{subparagraph}
+%\setcounter{tocdepth}{1}

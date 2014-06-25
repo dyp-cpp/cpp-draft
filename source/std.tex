@@ -1,10 +1,13 @@
 %% main file for the C++ standard.
 %%
 
+\RequirePackage{lxir} % dyp: prerequisite for lxir processing
+
 %%--------------------------------------------------
 %% basics
 % \documentclass[letterpaper,oneside,openany]{memoir}
-\documentclass[ebook,10pt,oneside,openany,final]{memoir}
+%\documentclass[ebook,10pt,oneside,openany,final]{memoir}
+\documentclass[makeidx]{book} % dyp: lxir comes with support for the book class
 % \includeonly{declarations}
 
 \usepackage[american]
@@ -27,27 +30,33 @@
 \usepackage{multicol}
 \usepackage{xspace}
 \usepackage{fixme}
-\usepackage{lmodern}
+%\usepackage{lmodern} % dyp: obviously not required for XML trafo
 \usepackage[T1]{fontenc}
-\usepackage[pdftex, final]{graphicx}
-\usepackage[pdftex,
-            pdftitle={C++ International Standard},
-            pdfsubject={C++ International Standard},
-            pdfcreator={Stefanus Du Toit},
-            bookmarks=true,
-            bookmarksnumbered=true,
-            pdfpagelabels=true,
-            pdfpagemode=UseOutlines,
-            pdfstartview=FitH,
-            linktocpage=true,
-            colorlinks=true,
-            linkcolor=blue,
-            plainpages=false
-           ]{hyperref}
-\usepackage{memhfixc}     % fix interactions between hyperref and memoir
+% dyp: obviously not required for XML trafo
+%\usepackage[pdftex, final]{graphicx}
+%\usepackage[pdftex,
+%            pdftitle={C++ International Standard},
+%            pdfsubject={C++ International Standard},
+%            pdfcreator={Stefanus Du Toit},
+%            bookmarks=true,
+%            bookmarksnumbered=true,
+%            pdfpagelabels=true,
+%            pdfpagemode=UseOutlines,
+%            pdfstartview=FitH,
+%            linktocpage=true,
+%            colorlinks=true,
+%            linkcolor=blue,
+%            plainpages=false
+%           ]{hyperref}
+%\usepackage{memhfixc}     % fix interactions between hyperref and memoir
 \usepackage{multirow}
 \usepackage{cprotect} % support for listings inside footnotes
-\usepackage{enumitem} % definition in a description-list on a new line
+% dyp: enumitem causes troubles with the lxir hacks for lists o.O
+%      need to fix that
+%\usepackage{enumitem} % definition in a description-list on a new line
+\usepackage{chngcntr} % dyp: replaces support included in memoir
+\usepackage{multind} % dyp: for multiple indices w/o memoir
+\usepackage{xparse} % dyp: for NewDocumentCommand
 
 \input{layout}
 \input{styles}
@@ -64,17 +73,21 @@
 \hyphenation{tem-plate ex-am-ple in-put-it-er-a-tor name-space name-spaces}
 
 \begin{document}
-\chapterstyle{cppstd}
-\pagestyle{cpppage}
+% dyp: formatting - not required
+%\chapterstyle{cppstd}
+%\pagestyle{cpppage}
+
 
 %%--------------------------------------------------
 %% configuration
 \input{config}
 
+% dyp: for now, only transform the core language
+
 %%--------------------------------------------------
 %% front matter
-\frontmatter
-\include{front}
+%\frontmatter
+%\include{front}
 
 %%--------------------------------------------------
 %% main body of the document
@@ -97,35 +110,35 @@
 \include{templates}
 \include{exceptions}
 \include{preprocessor}
-\include{lib-intro}
-\include{support}
-\include{diagnostics}
-\include{utilities}
-\include{strings}
-\include{locales}
-\include{containers}
-\include{iterators}
-\include{algorithms}
-\include{numerics}
-\include{iostreams}
-\include{regex}
-\include{atomics}
-\include{threads}
-
-%%--------------------------------------------------
-%% appendices
-\appendix
-\include{grammar}
-\include{limits}
-\include{compatibility}
-\include{future}
-\include{charname}
-\include{xref}
-
-%%--------------------------------------------------
-%% back matter
-\backmatter
-\include{back}
+%\include{lib-intro}
+%\include{support}
+%\include{diagnostics}
+%\include{utilities}
+%\include{strings}
+%\include{locales}
+%\include{containers}
+%\include{iterators}
+%\include{algorithms}
+%\include{numerics}
+%\include{iostreams}
+%\include{regex}
+%\include{atomics}
+%\include{threads}
+%
+%%%--------------------------------------------------
+%%% appendices
+%\appendix
+%\include{grammar}
+%\include{limits}
+%\include{compatibility}
+%\include{future}
+%\include{charname}
+%\include{xref}
+%
+%%%--------------------------------------------------
+%%% back matter
+%\backmatter
+%\include{back}
 
 
 %%--------------------------------------------------

@@ -1,4 +1,37 @@
 %!TEX root = std.tex
+
+% This is the draft-to-xml version of the macro.tex file.
+% Use it (only) when compiling for LXir to convert the draft to XML.
+% Only the core language is supported at the moment;
+% front and back matter, appendices, library parts etc. are not supported.
+% dyp, 2014-04
+
+% dyp:
+% I added the package enumitem in the harmonize branch to replace the manual
+% technique used to add newlines in description lists in [cpp.predefined]
+% ex.
+%
+% \begin{description}
+% \item[\tcode{\xname{cplusplus}}]\\
+% The name \tcode{\,\xname{cplusplus}} is defined
+% ...
+%
+% now:
+%
+% \begin{description}
+% \item[\tcode{\xname{cplusplus}}]
+% The name \tcode{\,\xname{cplusplus}} is defined
+% ...
+%
+% However, enumitem seems not to be supported (natively) by lxir.
+% Here's a hack that provides the minimal support required at this point.
+\let\descriptionorig=\description
+\let\enddescriptionorig=\enddescription
+\renewenvironment{description}[1][]
+{\descriptionorig}
+{\enddescriptionorig}
+
+
 % Definitions and redefinitions of special commands
 
 %%--------------------------------------------------
@@ -7,33 +40,35 @@
 \definecolor{remclr}{rgb}{1,0,0}
 \definecolor{noteclr}{rgb}{0,0,1}
 
-\renewcommand{\added}[1]{\textcolor{addclr}{\uline{#1}}}
-\newcommand{\removed}[1]{\textcolor{remclr}{\sout{#1}}}
-\renewcommand{\changed}[2]{\removed{#1}\added{#2}}
+% dyp: these macros are not used in recent drafts and therefore currently not supported
 
-\newcommand{\nbc}[1]{[#1]\ }
-\newcommand{\addednb}[2]{\added{\nbc{#1}#2}}
-\newcommand{\removednb}[2]{\removed{\nbc{#1}#2}}
-\newcommand{\changednb}[3]{\removednb{#1}{#2}\added{#3}}
-\newcommand{\remitem}[1]{\item\removed{#1}}
-
-\newcommand{\ednote}[1]{\textcolor{noteclr}{[Editor's note: #1] }}
-% \newcommand{\ednote}[1]{}
-
-\newenvironment{addedblock}
-{
-\color{addclr}
-}
-{
-\color{black}
-}
-\newenvironment{removedblock}
-{
-\color{remclr}
-}
-{
-\color{black}
-}
+%\renewcommand{\added}[1]{\textcolor{addclr}{\uline{#1}}}
+%\newcommand{\removed}[1]{\textcolor{remclr}{\sout{#1}}}
+%\renewcommand{\changed}[2]{\removed{#1}\added{#2}}
+%
+%\newcommand{\nbc}[1]{[#1]\ }
+%\newcommand{\addednb}[2]{\added{\nbc{#1}#2}}
+%\newcommand{\removednb}[2]{\removed{\nbc{#1}#2}}
+%\newcommand{\changednb}[3]{\removednb{#1}{#2}\added{#3}}
+%\newcommand{\remitem}[1]{\item\removed{#1}}
+%
+%\newcommand{\ednote}[1]{\textcolor{noteclr}{[Editor's note: #1] }}
+%% \newcommand{\ednote}[1]{}
+%
+%\newenvironment{addedblock}
+%{
+%\color{addclr}
+%}
+%{
+%\color{black}
+%}
+%\newenvironment{removedblock}
+%{
+%\color{remclr}
+%}
+%{
+%\color{black}
+%}
 
 %%--------------------------------------------------
 %% Sectioning macros.  
@@ -41,6 +76,39 @@
 % number, a name, and a short tag.  The depth is an integer in 
 % the range [0,5].  (If it proves necessary, it wouldn't take much
 % programming to raise the limit from 5 to something larger.)
+
+\makeatletter
+
+% dyp: remove the "Chapter" from "Chapter X" headings
+\def\@chapapp{}
+
+% dyp: remove the \quad from \@seccntformat
+\def\@seccntformat#1{\csname the#1\endcsname}
+
+% dyp: \paragraph and \subparagraph don't produce sectionHeaders
+% this seems to be a non-trivial problem. First, the call stack:
+%   \paragraph in latex/base/book.cls
+%   \@startsection in latex kernel
+%   \@sect in lxir/lxir.sty
+% and here's the problem:
+%   - book.cls defines a negative AFTERSKIP size (the 5th argument to \@startsection)
+%   - \@sect directly emits lxir tags if AFTERSKIP > 0,
+%     but only defines \@svsechd otherwise (containing the tags)
+%   - \@sect calls \@xsect (defined in the latex kernel),
+%     which *should* output the lxir tags for the first \par (using \everypar)
+%   - this does not seem to work: \everypar seems not be be invoked
+%   - no tags are emitted :(
+% instead of meddling with LXir here, I chose to redefine the AFTERSKIP to a positive value
+\renewcommand{\paragraph}{\@startsection{paragraph}{4}{\z@}%
+                                        {3.25ex \@plus1ex \@minus.2ex}%
+                                        {1ex}%
+                                        {\normalfont\normalsize\bfseries}}
+\renewcommand{\subparagraph}{\@startsection{paragraph}{5}{\parindent}%
+                                           {3.25ex \@plus1ex \@minus.2ex}%
+                                           {1ex}%
+                                           {\normalfont\normalsize\bfseries}}
+
+\makeatother
 
 
 % The basic sectioning command.  Example:
@@ -55,7 +123,9 @@
       \or\let\s=\paragraph
       \or\let\s=\subparagraph
       \fi%
-\s[#3]{#3\hfill[#2]}\label{#2}}
+% dyp: moved the label for easier restructuring of XML
+%\s[#3]{#3\hfill[#2]}\label{#2}}
+\s[#3]{#3\label{#2}}}
 
 % A convenience feature (mostly for the convenience of the Project
 % Editor, to make it easy to move around large blocks of text):
@@ -78,6 +148,14 @@
 %%--------------------------------------------------
 % Indexing
 
+% dyp: memoir indices and the multind packages use a slightly different syntax for indices
+%      so I need to reconsolidate them (adapt the multind syntax)
+%      (the 'dummy' probably has an actual default value in memoir, but we don't use it)
+\let\makeindexOrig=\makeindex
+\let\indexOrig=\index
+\renewcommand{\makeindex}[1][dummy]{\makeindexOrig{#1}}
+\renewcommand{\index}[2][dummy]{\indexOrig{#1}{#2}}
+
 % locations
 \newcommand{\indextext}[1]{\index[generalindex]{#1}}
 \newcommand{\indexlibrary}[1]{\index[libraryindex]{#1}}
@@ -99,16 +177,42 @@
 \newcommand{\CodeStylex}[1]{\texttt{#1}}
 
 % Code and definitions embedded in text.
-\newcommand{\tcode}[1]{\CodeStylex{#1}}
-\newcommand{\techterm}[1]{\textit{#1}\xspace}
-\newcommand{\defnx}[2]{\indexdefn{#2}\textit{#1}\xspace}
-\newcommand{\defn}[1]{\defnx{#1}{#1}}
-\newcommand{\term}[1]{\textit{#1}\xspace}
-\newcommand{\grammarterm}[1]{\textit{#1}\xspace}
-\newcommand{\placeholder}[1]{\textit{#1}\xspace}
+%\newcommand{\tcode}[1]{\CodeStylex{#1}}
+\newcommand{\tcode}[1]{\xBegin{tcode}#1\xEnd{tcode}}% dyp: used for inline code
+%\newcommand{\techterm}[1]{\textit{#1}\xspace}
+\newcommand{\techterm}[1]{\xBegin{techterm}#1\xEnd{tcode}\xspace}% dyp: not used?
+%\newcommand{\defnx}[2]{\indexdefn{#2}\textit{#1}\xspace}
+\newcommand{\defnx}[2]{\indexdefn{#2}\xBegin{defnx}#1\xEnd{defnx}\xspace}% dyp: indexed definition of a term
+%\newcommand{\defn}[1]{\defnx{#1}{#1}}
+\newcommand{\defn}[1]{\defnx{#1}{#1}}% dyp: ??
+%\newcommand{\term}[1]{\textit{#1}\xspace}
+\newcommand{\term}[1]{\xBegin{term}#1\xEnd{term}\xspace}% dyp: many different uses
+
+
+% dyp: \grammarterm is sometimes used "with two arguments", even though the macro only takes a single one
+%      ex. \grammarterm{}{postfix-expression}
+%      this effectively disables the formatting of the term
+%      I've re-enables the formatting in the harmonize branch, but provide additional support here
+%      for both usages
+%\newcommand{\grammarterm}[1]{\textit{#1}\xspace}
+% dyp: (usage note for \grammarterm) inline occurence of a grammar term
+\def\grammartermTwo#1#2{\xBegin{grammarterm}#1\xEnd{grammarterm}#2\xspace}
+\newcommand{\grammartermOne}[1]{\xBegin{grammarterm}#1\xEnd{grammarterm}\xspace}
+% from http://tex.stackexchange.com/a/10405 ; thanks to Joseph Wright
+\NewDocumentCommand\grammarterm{m+g}{%
+  \IfNoValueTF{#2}
+    {\grammartermOne{#1}}
+    {\grammartermTwo{#1}{#2}}%
+}
+
+%\newcommand{\placeholder}[1]{\textit{#1}\xspace}
+\newcommand{\placeholder}[1]{% dyp: placeholder variables, such as foo and bar
+  \xBegin{placeholder}#1\xEnd{placeholder}\xspace%
+}
 
 % For comparison of multiple ICS in [over.match.best]
-\newcommand{\ICS}[2]{$\text{ICS}#1(\text{\tcode{#2}})$}
+%\newcommand{\ICS}[2]{$\text{ICS}#1(\text{\tcode{#2}})$}
+\newcommand{\ICS}[2]{\xEmptyAA{ICS}{index=#1}{arg=#2}}
 
 %%--------------------------------------------------
 %% allow line break if needed for justification
@@ -118,19 +222,25 @@
 
 %%--------------------------------------------------
 %% Macros for funky text
-\newcommand{\Rplus}{\protect\hspace{-.1em}\protect\raisebox{.35ex}{\smaller{\smaller\textbf{+}}}}
+%\newcommand{\Rplus}{\protect\hspace{-.1em}\protect\raisebox{.35ex}{\smaller{\smaller\textbf{+}}}}% dyp: fancy plus for nice rendering of "C++" (see below)
 % \newcommand{\Rplus}{+}
-\newcommand{\Cpp}{\mbox{C\Rplus\Rplus}\xspace}
-\newcommand{\CppIII}{\Cpp 2003\xspace}
-\newcommand{\CppXI}{\Cpp 2011\xspace}
-\newcommand{\opt}{{\ensuremath{_\mathit{opt}}}\xspace}
+%\newcommand{\Cpp}{\mbox{C\Rplus\Rplus}\xspace}
+\newcommand{\Cpp}{\xEmpty{cpp}\xspace}
+%\newcommand{\CppIII}{\Cpp 2003\xspace}
+\newcommand{\CppIII}{\xEmpty{cpp2003}\xspace}
+%\newcommand{\CppXI}{\Cpp 2011\xspace}
+\newcommand{\CppXI}{\xEmpty{cpp2011}\xspace}
+%\newcommand{\opt}{{\ensuremath{_\mathit{opt}}}\xspace}
+\newcommand{\opt}{\xEmpty{opt}\xspace}
 \newcommand{\shl}{<{<}}
 \newcommand{\shr}{>{>}}
 \newcommand{\dcr}{-{-}}
 \newcommand{\exor}{\^{}}
 \newcommand{\bigoh}[1]{\ensuremath{\mathscr{O}(#1)}}
 % \renewcommand{\tilde}{{\smaller\ensuremath{\sim}}}    % extra level of braces is necessary
-\renewcommand{\tilde}{\protect\raisebox{-.5ex}{\larger\textasciitilde}}
+%\renewcommand{\tilde}{\protect\raisebox{-.5ex}{\larger\textasciitilde}}
+\renewcommand{\tilde}{\textasciitilde}
+\def\~{\tilde}
 
 %%--------------------------------------------------
 %% States and operators
@@ -142,52 +252,64 @@
 \newcommand{\leftshift}[1]{\ensuremath{\, \mathsf{lshift}_#1 \,}}
 
 %% Notes and examples
-\newcommand{\EnterBlock}[1]{[\,\textit{#1:}\xspace}
-\newcommand{\ExitBlock}[1]{\textit{\,---\,end #1}\,]\xspace}
-\newcommand{\enternote}{\EnterBlock{Note}}
-\newcommand{\exitnote}{\ExitBlock{note}}
-\newcommand{\enterexample}{\EnterBlock{Example}}
-\newcommand{\exitexample}{\ExitBlock{example}}
+%\newcommand{\EnterBlock}[1]{[\,\textit{#1:}\xspace}
+%\newcommand{\ExitBlock}[1]{\textit{\,---\,end #1}\,]\xspace}
+%\newcommand{\enternote}{\EnterBlock{Note}}
+\newcommand{\enternote}{\xBegin{note}}
+%\newcommand{\exitnote}{\ExitBlock{note}}
+\newcommand{\exitnote}{\xEnd{note}}
+%\newcommand{\enterexample}{\EnterBlock{Example}}
+\newcommand{\enterexample}{\xBegin{example}}
+%\newcommand{\exitexample}{\ExitBlock{example}}
+\newcommand{\exitexample}{\xEnd{example}}
+
+% dyp: library currently not supported
 
 %% Library function descriptions
-\newcommand{\Fundescx}[1]{\textit{#1}\xspace}
-\newcommand{\Fundesc}[1]{\Fundescx{#1:}}
-\newcommand{\required}{\Fundesc{Required behavior}}
-\newcommand{\requires}{\Fundesc{Requires}}
-\newcommand{\effects}{\Fundesc{Effects}}
-\newcommand{\postconditions}{\Fundesc{Postconditions}}
-\newcommand{\postcondition}{\Fundesc{Postcondition}}
-\newcommand{\preconditions}{\requires}
-\newcommand{\precondition}{\requires}
-\newcommand{\returns}{\Fundesc{Returns}}
-\newcommand{\throws}{\Fundesc{Throws}}
-\newcommand{\default}{\Fundesc{Default behavior}}
-\newcommand{\complexity}{\Fundesc{Complexity}}
-\newcommand{\remark}{\Fundesc{Remark}}
-\newcommand{\remarks}{\Fundesc{Remarks}}
-\newcommand{\note}{\remark}
-\newcommand{\notes}{\remarks}
-\newcommand{\realnote}{\Fundesc{Note}}
-\newcommand{\realnotes}{\Fundesc{Notes}}
-\newcommand{\errors}{\Fundesc{Error conditions}}
-\newcommand{\sync}{\Fundesc{Synchronization}}
-\newcommand{\implimits}{\Fundesc{Implementation limits}}
-\newcommand{\replaceable}{\Fundesc{Replaceable}}
-\newcommand{\exceptionsafety}{\Fundesc{Exception safety}}
-\newcommand{\returntype}{\Fundesc{Return type}}
-\newcommand{\cvalue}{\Fundesc{Value}}
-\newcommand{\ctype}{\Fundesc{Type}}
-\newcommand{\ctypes}{\Fundesc{Types}}
-\newcommand{\dtype}{\Fundesc{Default type}}
-\newcommand{\ctemplate}{\Fundesc{Class template}}
-\newcommand{\templalias}{\Fundesc{Alias template}}
-
-%% Cross reference
-\newcommand{\xref}{\textsc{See also:}\xspace}
-\newcommand{\xsee}{\textsc{See:}\xspace}
+%\newcommand{\Fundescx}[1]{\textit{#1}\xspace}
+%\newcommand{\Fundesc}[1]{\Fundescx{#1:}}
+%\newcommand{\required}{\Fundesc{Required behavior}}
+%\newcommand{\requires}{\Fundesc{Requires}}
+%\newcommand{\effects}{\Fundesc{Effects}}
+%\newcommand{\postconditions}{\Fundesc{Postconditions}}
+%\newcommand{\postcondition}{\Fundesc{Postcondition}}
+%\newcommand{\preconditions}{\requires}
+%\newcommand{\precondition}{\requires}
+%\newcommand{\returns}{\Fundesc{Returns}}
+%\newcommand{\throws}{\Fundesc{Throws}}
+%\newcommand{\default}{\Fundesc{Default behavior}}
+%\newcommand{\complexity}{\Fundesc{Complexity}}
+%\newcommand{\remark}{\Fundesc{Remark}}
+%\newcommand{\remarks}{\Fundesc{Remarks}}
+%\newcommand{\note}{\remark}
+%\newcommand{\notes}{\remarks}
+%\newcommand{\realnote}{\Fundesc{Note}}
+%\newcommand{\realnotes}{\Fundesc{Notes}}
+%\newcommand{\errors}{\Fundesc{Error conditions}}
+%\newcommand{\sync}{\Fundesc{Synchronization}}
+%\newcommand{\implimits}{\Fundesc{Implementation limits}}
+%\newcommand{\replaceable}{\Fundesc{Replaceable}}
+%\newcommand{\exceptionsafety}{\Fundesc{Exception safety}}
+%\newcommand{\returntype}{\Fundesc{Return type}}
+%\newcommand{\cvalue}{\Fundesc{Value}}
+%\newcommand{\ctype}{\Fundesc{Type}}
+%\newcommand{\ctypes}{\Fundesc{Types}}
+%\newcommand{\dtype}{\Fundesc{Default type}}
+%\newcommand{\ctemplate}{\Fundesc{Class template}}
+%\newcommand{\templalias}{\Fundesc{Alias template}}
+%
+%%% Cross reference
+%\newcommand{\xref}{\textsc{See also:}\xspace}
+%\newcommand{\xsee}{\textsc{See:}\xspace}
 
 %% NTBS, etc.
-\newcommand{\NTS}[1]{\textsc{#1}\xspace}
+% dyp: these are macros to print the abbreviations of
+%      * null-terminated byte string
+%      * null-terminated multi-byte string
+%      and so on
+%      in small capitals
+%\newcommand{\NTS}[1]{\textsc{#1}\xspace}
+\newcommand{\NTS}[1]{\xBegin{NTS}#1\xEnd{NTS}\xspace}%{\textsc{#1}\xspace}
 \newcommand{\ntbs}{\NTS{ntbs}}
 \newcommand{\ntmbs}{\NTS{ntmbs}}
 \newcommand{\ntwcs}{\NTS{ntwcs}}
@@ -196,22 +318,36 @@
 
 %% Code annotations
 \newcommand{\EXPO}[1]{\textit{#1}}
-\newcommand{\expos}{\EXPO{exposition only}}
-\newcommand{\impdef}{\EXPO{implementation-defined}}
-\newcommand{\impdefx}[1]{\indeximpldef{#1}\EXPO{implementation-defined}}
-\newcommand{\notdef}{\EXPO{not defined}}
+%\newcommand{\expos}{\EXPO{exposition only}}
+\newcommand{\expos}{\xEmptyA{exposition-only}{category=code}}
+%\newcommand{\impdef}{\EXPO{implementation-defined}}
+\newcommand{\impdef}{\xEmptyA{implementation-defined}{category=code}}% dyp: e.g. the return type of std::bind
+%\newcommand{\impdefx}[1]{\indeximpldef{#1}\EXPO{implementation-defined}}
+\newcommand{\impdefx}[1]{\indeximpldef{#1}\impdef}
+%\newcommand{\notdef}{\EXPO{not defined}}
+\newcommand{\notdef}{\xEmptyA{notdef}{category=code}}% dyp: currently unused
 
-\newcommand{\UNSP}[1]{\textit{\texttt{#1}}}
-\newcommand{\unspec}{\UNSP{unspecified}\xspace}
-\newcommand{\unspecbool}{\UNSP{unspecified-bool-type}}
-\newcommand{\seebelow}{\UNSP{see below}}
-\newcommand{\unspecuniqtype}{\UNSP{unspecified unique type}}
-\newcommand{\unspecalloctype}{\UNSP{unspecified allocator type}}
+%\newcommand{\UNSP}[1]{\textit{\texttt{#1}}}% dyp: too generic formatting, using more specific replacements
+%\newcommand{\unspec}{\UNSP{unspecified}\xspace}
+\newcommand{\unspec}{\xEmptyA{unspecified}{category=code}}
+%\newcommand{\unspecbool}{\UNSP{unspecified-bool-type}}
+\newcommand{\unspecbool}{\xEmptyA{unspecified-bool-type}{category=code}}
+%\newcommand{\seebelow}{\UNSP{see below}}
+\newcommand{\seebelow}{\xEmptyA{see-below}{category=code}}
+%\newcommand{\unspecuniqtype}{\UNSP{unspecified unique type}}
+\newcommand{\unspecuniqtype}{\xEmptyA{unspecified-unique-type}{category=code}}
+%\newcommand{\unspecalloctype}{\UNSP{unspecified allocator type}}
+\newcommand{\unspecalloctype}{\xEmptyA{unspecified-allocator-type}{category=code}}
 
 %% Double underscore
-\newcommand{\unun}{\_\,\_}
-\newcommand{\xname}[1]{\unun\,#1}
-\newcommand{\mname}[1]{\tcode{\unun\,#1\,\unun}}
+% dyp: multiple underscores seem to have been separated with spaces for formatting reasons
+%      they should actually be adjacent (w/o space characters)
+%\newcommand{\unun}{\_\,\_}
+\newcommand{\unun}{\_\_}
+%\newcommand{\xname}[1]{\unun\,#1}
+\newcommand{\xname}[1]{\unun#1}
+%\newcommand{\mname}[1]{\tcode{\unun\,#1\,\unun}}
+\newcommand{\mname}[1]{\tcode{\unun#1\unun}}
 
 %% Ranges
 \newcommand{\Range}[4]{\tcode{#1\brk{}#3,\brk{}#4\brk{}#2}\xspace}
@@ -221,22 +357,30 @@
 \newcommand{\range}[2]{\Range{[}{)}{#1}{#2}}
 
 %% Change descriptions
-\newcommand{\diffdef}[1]{\hfill\break\textbf{#1:}\xspace}
-\newcommand{\change}{\diffdef{Change}}
-\newcommand{\rationale}{\diffdef{Rationale}}
-\newcommand{\effect}{\diffdef{Effect on original feature}}
-\newcommand{\difficulty}{\diffdef{Difficulty of converting}}
-\newcommand{\howwide}{\diffdef{How widely used}}
+% dyp: currently unused (?)
+%\newcommand{\diffdef}[1]{\hfill\break\textbf{#1:}\xspace}
+%\newcommand{\change}{\diffdef{Change}}
+%\newcommand{\rationale}{\diffdef{Rationale}}
+%\newcommand{\effect}{\diffdef{Effect on original feature}}
+%\newcommand{\difficulty}{\diffdef{Difficulty of converting}}
+%\newcommand{\howwide}{\diffdef{How widely used}}
 
 %% Miscellaneous
-\newcommand{\uniquens}{\textrm{\textit{\textbf{unique}}} }
-\newcommand{\stage}[1]{\item{\textbf{Stage #1:}}\xspace}
-\newcommand{\doccite}[1]{\textit{#1}\xspace}
-\newcommand{\cvqual}[1]{\textit{#1}}
+% dyp: uniquens means "unique namespace"
+%\newcommand{\uniquens}{\textrm{\textit{\textbf{unique}}} }
+\newcommand{\uniquens}{\xEmpty{uniquens}}
+%\newcommand{\stage}[1]{\item{\textbf{Stage #1:}}\xspace}% dyp: currently not supported
+%\newcommand{\doccite}[1]{\textit{#1}\xspace}
+\newcommand{\doccite}[1]{\xBegin{doccite}#1\xEnd{doccite}\xspace}
+%\newcommand{\cvqual}[1]{\textit{#1}}
+\newcommand{\cvqual}[1]{\xBegin{cvqual}#1\xEnd{cvqual}}
 \newcommand{\cv}{\cvqual{cv}}
-\renewcommand{\emph}[1]{\textit{#1}\xspace}
-\newcommand{\numconst}[1]{\textsl{#1}\xspace}
-\newcommand{\logop}[1]{{\footnotesize #1}\xspace}
+%\renewcommand{\emph}[1]{\textit{#1}\xspace}
+\renewcommand{\emph}[1]{\xBegin{emph}#1\xEnd{emph}\xspace}
+%\newcommand{\numconst}[1]{\textsl{#1}\xspace}
+\newcommand{\numconst}[1]{\xBegin{numconst}#1\xEnd{numconst}}
+%\newcommand{\logop}[1]{{\footnotesize #1}\xspace}
+\newcommand{\logop}[1]{\xBegin{logop}#1\xEnd{logop}}
 
 %%--------------------------------------------------
 %% Environments for code listings.
@@ -245,7 +389,7 @@
 % most interesting customization: all TeX commands are available
 % within comments.  Comments are set in italics, keywords and strings
 % don't get special treatment.
-
+\newcommand{\foo}{\xEmpty{newline}}
 \lstset{language=C++,
         basicstyle=\small\CodeStyle,
         keywordstyle=,
@@ -260,18 +404,39 @@
 % Our usual abbreviation for 'listings'.  Comments are in 
 % italics.  Arbitrary TeX commands can be used if they're 
 % surrounded by @ signs.
+
+% dyp: I hacked the lst environment similarly to how LXir hacked the verbatim environment:
+% overwriting the macros used in the implementation to inject certain tags
+% and later replacing them in xslt
+\makeatletter
+  \let\lstoutputspaceorig=\lst@outputspace
+  \def\lst@outputspace{\xEmpty{verbatimSpace}\lstoutputspaceorig}
+  
+  \let\lstNewLineorig=\lst@NewLine
+  \def\lst@NewLine{\xEmpty{verbatimLineBreak}\lstNewLineorig}
+\makeatother
+
 \lstnewenvironment{codeblock}
 {
  \lstset{escapechar=@}
- \renewcommand{\tcode}[1]{\textup{\CodeStylex{##1}}}
- \renewcommand{\techterm}[1]{\textit{\CodeStylex{##1}}}
- \renewcommand{\term}[1]{\textit{##1}}
- \renewcommand{\grammarterm}[1]{\textit{##1}}
+%\renewcommand{\tcode}[1]{\textup{\CodeStylex{##1}}}
+ \renewcommand{\tcode}[1]{\xBegin{tcode}##1\xEnd{tcode}}
+%\renewcommand{\techterm}[1]{\textit{\CodeStylex{##1}}}
+ \renewcommand{\techterm}[1]{\xBegin{techterm}##1\xEnd{techterm}}
+%\renewcommand{\term}[1]{\textit{##1}}
+ \renewcommand{\term}[1]{\xBegin{term}##1\xEnd{term}}
+%\renewcommand{\grammarterm}[1]{\textit{##1}}
+ \renewcommand{\grammarterm}[1]{\xBegin{grammarterm}##1\xEnd{grammarterm}}
+ \xBegin{codeblock}
 }
 {
+ \xEnd{codeblock}
 }
 
 % Permit use of '@' inside codeblock blocks (don't ask)
+% dyp: "don't ask" means that '@' is used as the listing's escape character,
+%      i.e. to be able to insert latex code
+%      not sure why '$' has not been used.
 \makeatletter
 \newcommand{\atsign}{@}
 \makeatother
@@ -279,112 +444,208 @@
 %%--------------------------------------------------
 %% Indented text
 \newenvironment{indented}
-{\list{}{}\item\relax}
-{\endlist}
+%{\list{}{}\item\relax}
+%{\endlist}
+{\xBegin{indented}}
+{\xEnd{indented}}
 
-%%--------------------------------------------------
-%% Library item descriptions
-\lstnewenvironment{itemdecl}
-{
- \lstset{escapechar=@,
- xleftmargin=0em,
- aboveskip=2ex,
- belowskip=0ex	% leave this alone: it keeps these things out of the
-				% footnote area
- }
-}
-{
-}
-
-\newenvironment{itemdescr}
-{
- \begin{indented}}
-{
- \end{indented}
-}
+% dyp: library not supported (yet)
+%
+%%%--------------------------------------------------
+%%% Library item descriptions
+%\lstnewenvironment{itemdecl}
+%{
+% \lstset{escapechar=@,
+% xleftmargin=0em,
+% aboveskip=2ex,
+% belowskip=0ex	% leave this alone: it keeps these things out of the
+%				% footnote area
+% }
+%}
+%{
+%}
+%
+%\newenvironment{itemdescr}
+%{
+% \begin{indented}}
+%{
+% \end{indented}
+%}
 
 
 %%--------------------------------------------------
 %% Bnf environments
-\newlength{\BnfIndent}
-\setlength{\BnfIndent}{\leftmargini}
-\newlength{\BnfInc}
-\setlength{\BnfInc}{\BnfIndent}
-\newlength{\BnfRest}
-\setlength{\BnfRest}{2\BnfIndent}
-\newcommand{\BnfNontermshape}{\small\rmfamily\itshape}
-\newcommand{\BnfTermshape}{\small\ttfamily\upshape}
-\newcommand{\nonterminal}[1]{{\BnfNontermshape #1}}
+
+% dyp:
+% bnf probably stands for Backus-Naur Form
+% (well it's the environment used to describe the grammar rules)
+% The bnf environment itself describes the rule for ONE nonterminal.
+% If multiple nonterminals shall be defined, multiple bnf environments are used (contiguously).
+% Here's an example from [declarations]
+%
+% \begin{bnf}
+% \nontermdef{declaration-seq}\br
+%     declaration\br
+%     declaration-seq declaration
+% \end{bnf}%
+%
+% As you can see, the first element is always a \nontermdef (or \nonterm), which
+% * indexes a nonterminal (\nontermdef)
+% * introduces a special formatting (both).
+% Then, multiple sequences follow, each preceded by an \br.
+% All but the first \br can be interpreted as an OR ('|' in Backus-Naur notation).
+% Since I think it's awful to introduce the semantics solely via this linebreak notation,
+% I'll hack the \br and add an XSLT to get a proper list.
+% (Note: Although a \list is used here, it only serves indentation purposes, as far as I can see.)
+%
+% .... p.s. the \br sometimes is also used for pure formatting, see [dcl.enum]
+
+
+%\newlength{\BnfIndent}
+%\setlength{\BnfIndent}{\leftmargini}
+%\newlength{\BnfInc}
+%\setlength{\BnfInc}{\BnfIndent}
+%\newlength{\BnfRest}
+%\setlength{\BnfRest}{2\BnfIndent}
+%\newcommand{\BnfNontermshape}{\small\rmfamily\itshape}
+%\newcommand{\BnfTermshape}{\small\ttfamily\upshape}
+%\newcommand{\nonterminal}[1]{{\BnfNontermshape #1}}
+\newcommand{\nonterminal}[1]{\xBegin{nonterminal}#1\xEnd{nonterminal}}%{{\BnfNontermshape #1}}
+
 
 \newenvironment{bnfbase}
  {
- \newcommand{\nontermdef}[1]{\indexgrammar{\idxgram{##1}}\nonterminal{##1}:}
- \newcommand{\terminal}[1]{{\BnfTermshape ##1}\xspace}
- \newcommand{\descr}[1]{\normalfont{##1}}
- \newcommand{\bnfindentfirst}{\BnfIndent}
- \newcommand{\bnfindentinc}{\BnfInc}
- \newcommand{\bnfindentrest}{\BnfRest}
- \begin{minipage}{.9\hsize}
- \newcommand{\br}{\hfill\\}
+%\newcommand{\nontermdef}[1]{\indexgrammar{\idxgram{##1}}\nonterminal{##1}:}
+ \newcommand{\nontermdef}[1]{\indexgrammar{\idxgram{##1}}\xBegin{nontermdef}##1\xEnd{nontermdef}}% dyp: removed a trailing ':'
+%\newcommand{\terminal}[1]{{\BnfTermshape ##1}\xspace}
+ \newcommand{\terminal}[1]{\xBegin{terminal}##1\xEnd{terminal}\xspace}
+%\newcommand{\descr}[1]{\normalfont{##1}}
+ \newcommand{\descr}[1]{\xBegin{description}##1\xEnd{description}}
+%\newcommand{\bnfindentfirst}{\BnfIndent}
+ \newcommand{\bnfindentfirst}{}
+%\newcommand{\bnfindentinc}{\BnfInc}
+ \newcommand{\bnfindentinc}{\leftmargini}
+%\newcommand{\bnfindentrest}{\BnfRest}
+%\begin{minipage}{.9\hsize}
+%\newcommand{\br}{\hfill\\}
+ \newcommand{\br}{\xEmpty{grammar-rule}}
+ \renewcommand{\textnormal}[1]{\xBegin{description}##1\xEnd{description}}
  }
  {
- \end{minipage}
+ %\end{minipage}
  }
 
-\newenvironment{BnfTabBase}[1]
+% dyp: I have no need for this, I directly hacked bnfkeywordtab instead
+%\newenvironment{BnfTabBase}[1]
+%{
+% \begin{bnfbase}
+% #1
+% \begin{indented}
+% \begin{tabbing}
+% \hspace*{\bnfindentfirst}\=\hspace{\bnfindentinc}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\kill}
+%{
+% \end{tabbing}
+% \end{indented}
+% \end{bnfbase}
+%}
+
+% dyp:
+% This environment is used twice (in [lex.operators]/1 and [over.oper]/1).
+% It defines a nonterminal, where the rules are simple terminals and there are so many of them
+% that you cannot (practically) put them on individual lines.
+% In LaTeX code, the rules are separated by \> and the line breaks defined via \br
+% 
+% Example:
+% 
+% operator: one of
+%     new  delete  new  delete[]
+%     +  -  *  /  %  ^  &  |  ~
+%     [...]
+%
+% note the spacing between the keywords, produced by a \> (a \medmuskip)
+\newenvironment{bnfkeywordtab}
 {
+%\begin{BnfTabBase}{\BnfTermshape}
  \begin{bnfbase}
- #1
- \begin{indented}
- \begin{tabbing}
- \hspace*{\bnfindentfirst}\=\hspace{\bnfindentinc}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\hspace{.6in}\=\kill}
+ \xBegin{bnfkeywordtab}
+ \renewcommand{\>}{\xEmpty{next-keyword}}
+ \renewcommand{\br}{\xEmpty{br-hint}}
+}
 {
- \end{tabbing}
- \end{indented}
+%\end{BnfTabBase}
+ \xEnd{bnfkeywordtab}
  \end{bnfbase}
 }
 
-\newenvironment{bnfkeywordtab}
-{
- \begin{BnfTabBase}{\BnfTermshape}
-}
-{
- \end{BnfTabBase}
-}
-
+% dyp: This environment is used differently than the bnfkeywordtab, despite the similar name.
+% It defines a nonterminal; the rules are manually indented.
+% Allows additional indentation within the rule [cpp] and line-breaks within a rule,
+% the following line is then continued with one more level of indentation [lex.ccon].
+% ex. from [gram.lex]
+% \begin{bnftab}
+% \nontermdef{c-char}\br
+% \>\textnormal{any member of the source character set except}\br
+% \>\>\textnormal{the single-quote \terminal{'}, [...]}
+% \>escape-sequence\br
+% \>universal-character-name
+% \end{bnftab}
 \newenvironment{bnftab}
 {
- \begin{BnfTabBase}{\BnfNontermshape}
+%\begin{BnfTabBase}{\BnfNontermshape}
+ \begin{bnfbase}
+ \xBegin{bnftab}
+ \renewcommand{\br}{\xEmpty{br}}
+ \renewcommand\>{\xEmpty{indent}}
 }
 {
- \end{BnfTabBase}
+ %\end{BnfTabBase}
+ \xEnd{bnftab}
+ \end{bnfbase}
 }
 
+% dyp: the simple bnf looks just like a list of rules, what they define is specified in the text
+%      surrounding the simplebnf environment
+% Only occurs as ncsimplebnf.
+% Does not contain manual indenting and does not define a nonterminal inside the environment.
 \newenvironment{simplebnf}
 {
  \begin{bnfbase}
- \BnfNontermshape
- \begin{indented}
+%\BnfNontermshape
+%\begin{indented}
+ \xBegin{simplebnf}
+ \renewcommand{\\}{\xEmpty{grammar-rule}}
 }
 {
- \end{indented}
+%\end{indented}
+ \xEnd{simplebnf}
  \end{bnfbase}
 }
 
+
+% dyp:
+% Always contains a \nontermdef.
+% Defines the nonterminal using one or more rules (automatic indenting).
+% One exception is [dcl.fct.def.general]/1, where "function-body:" has been used
+% as the nonterminal which is to be defined, instead of \nontermdef{function-body}
+% or \nonterminal{function-body:}
+% The non-copied version usually doesn't contain a nonterminal definition;
+% the single exception being [over.match.call]/3
 \newenvironment{bnf}
 {
  \begin{bnfbase}
- \list{}
-	{
-	\setlength{\leftmargin}{\bnfindentrest}
-	\setlength{\listparindent}{-\bnfindentinc}
-	\setlength{\itemindent}{\listparindent}
-	}
- \BnfNontermshape
- \item\relax
+%\list{}
+%   {
+%   \setlength{\leftmargin}{\bnfindentrest}
+%   \setlength{\listparindent}{-\bnfindentinc}
+%   \setlength{\itemindent}{\listparindent}
+%   }
+%\BnfNontermshape
+%\item\relax
+ \xBegin{bnf}
 }
 {
- \endlist
+%\endlist
+ \xEnd{bnf}
  \end{bnfbase}
 }
 
@@ -436,15 +697,21 @@
 %% Environment for imported graphics
 % usage: \begin{importgraphic}{CAPTION}{TAG}{FILE}
 
+% dyp: graphics are not yet supported
+%      the current macros should allow adding this support easily
+
 \newenvironment{importgraphic}[3]
 {%
-\newcommand{\cptn}{#1}
-\newcommand{\lbl}{#2}
-\begin{figure}[htp]\centering%
-\includegraphics[scale=.35]{#3}
+%\newcommand{\cptn}{#1}
+%\newcommand{\lbl}{#2}
+%\begin{figure}[htp]\centering%
+%\includegraphics[scale=.35]{#3}
+\begin{figure}[htp]%
+\xBegin{importgraphic}#3\xEnd{importgraphic}%
+\caption{#1}\label{#2}
 }
 {
-\caption{\cptn}\label{\lbl}%
+%\caption{\cptn}\label{\lbl}%
 \end{figure}}
 
 %% enumeration display overrides
@@ -473,9 +740,12 @@
 % usage: \definition{name}{xref}
 %\newcommand{\definition}[2]{\rSec2[#2]{#1}}
 % for ISO format, use:
+% dyp: definitions only occur in [intro.defs] and are a hybrid of subsections and list items
 \newcommand{\definition}[2]
  {\hfill\vspace{.25ex plus .5ex minus .2ex}\\
  \addtocounter{subsection}{1}%
- \textbf{\thesubsection\hfill\relax[#2]}\\
- \textbf{#1}\label{#2}\\
+%\textbf{\thesubsection\hfill\relax[#2]}\\
+%\textbf{#1}
+ \xBegin{definition}\xAttr{position=\thesubsection}\xAttr{level=2}#1\xEnd{definition}
+ \label{#2}\\
  }

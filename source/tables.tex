@@ -10,17 +10,23 @@
 % Base definitions for tables
 \newenvironment{TableBase}
 {
- \renewcommand{\tcode}[1]{{\CodeStylex{##1}}}
- \newcommand{\topline}{\hline}
- \newcommand{\capsep}{\hline\hline}
- \newcommand{\rowsep}{\hline}
- \newcommand{\bottomline}{\hline}
+%\renewcommand{\tcode}[1]{{\CodeStylex{##1}}}
+ \renewcommand{\tcode}[1]{\xBegin{tcode}##1\xEnd{tcode}}
+%\newcommand{\topline}{\hline}
+ \newcommand{\topline}{}
+%\newcommand{\capsep}{\hline\hline}
+ \newcommand{\capsep}{\xEmpty{capsep}}
+%\newcommand{\rowsep}{\hline}
+ \newcommand{\rowsep}{}
+%\newcommand{\bottomline}{\hline}
+ \newcommand{\bottomline}{}
 
 %% vertical alignment
  \newcommand{\rb}[1]{\raisebox{1.5ex}[0pt]{##1}}	% move argument up half a row
 
 %% header helpers
- \newcommand{\hdstyle}[1]{\textbf{##1}}				% set header style
+%\newcommand{\hdstyle}[1]{\textbf{##1}}				% set header style
+ \newcommand{\hdstyle}[1]{##1}				% set header style
  \newcommand{\Head}[3]{\multicolumn{##1}{##2}{\hdstyle{##3}}}	% add title spanning multiple columns
  \newcommand{\lhdrx}[2]{\Head{##1}{|c}{##2}}		% set header for left column spanning #1 columns
  \newcommand{\chdrx}[2]{\Head{##1}{c}{##2}}			% set header for center column spanning #1 columns
@@ -30,7 +36,8 @@
  \newcommand{\chdr}[1]{\chdrx{1}{##1}}				% set header for single center column
  \newcommand{\rhdr}[1]{\rhdrx{1}{##1}}				% set header for single right column
  \newcommand{\ohdr}[1]{\ohdrx{1}{##1}}
- \newcommand{\br}{\hfill\break}						% force newline within table entry
+%\newcommand{\br}{\hfill\break}						% force newline within table entry
+ \newcommand{\br}{\xEmpty{br}}						% force newline within table entry
 
 %% column styles
  \newcolumntype{x}[1]{>{\raggedright\let\\=\tabularnewline}p{##1}}	% word-wrapped ragged-right
@@ -326,16 +333,28 @@
 
 % usage: \begin{LongTable}{TITLE}{XREF}{LAYOUT}
 % produces table that handles page breaks sensibly.
+% dyp: I struggled a bit with this one, since LXir does quite a good job at tagging
+% normal tables. So I just replaced the longtable with a normal tabular and provided extra
+% macros for the longtable extensions.
 \newenvironment{LongTable}[3]
 {
- \newcommand{\continuedcaption}{\caption[]{#1 (continued)}}
+%\newcommand{\continuedcaption}{\caption[]{#1 (continued)}}
+ \newcommand{\continuedcaption}{\xBegin{continuedcaption}#1\xEnd{continuedcaption}}
+ \renewcommand{\endfirsthead}{\xEmpty{endFirstHead}}
+ \renewcommand{\endhead}{\xEmpty{endHead}}
  \begin{TableBase}
- \begin{longtable}
- {|#3|}\caption{#1}\label{#2}
+%\begin{longtable}
+%{|#3|}\caption{#1}\label{#2}
+ \begin{table}
+ \xEmpty{longtable}
+ \caption{\label{#2}#1}
+ \begin{tabular}{|#3|}
 }
 {
  \bottomline
- \end{longtable}
+%\end{longtable}
+ \end{tabular}
+ \end{table}
  \end{TableBase}
 }
 
