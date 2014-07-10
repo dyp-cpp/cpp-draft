@@ -22,7 +22,8 @@
 %\checkandfixthelayout
 
 %%--------------------------------------------------
-%% Paragraph numbering
+%% Paragraph and bullet numbering
+
 \newcounter{Paras}
 \counterwithin{Paras}{chapter}
 \counterwithin{Paras}{section}
@@ -30,16 +31,48 @@
 \counterwithin{Paras}{subsubsection}
 \counterwithin{Paras}{paragraph}
 \counterwithin{Paras}{subparagraph}
+
+\newcounter{Bullets1}[Paras]
+\newcounter{Bullets2}[Bullets1]
+\newcounter{Bullets3}[Bullets2]
+\newcounter{Bullets4}[Bullets3]
+
 \makeatletter
 % dyp: original
-%\def\pnum{\vspace{1ex}\addtocounter{Paras}{1}\noindent\llap{{%
-%  \scriptsize\raisebox{.7ex}{\arabic{Paras}}}\hspace{\@totalleftmargin}\quad}}
-%dyp: lxir
-\def\pnum{%
-  \addtocounter{Paras}{1}%
-  \xEmptyA{pnum}{number=\arabic{Paras}}%
+%\newcommand{\parabullnum}[2]{%
+%\stepcounter{#1}%
+%\noindent\makebox[0pt][l]{\makebox[#2][r]{%
+%\scriptsize\raisebox{.7ex}%
+%{%
+%\ifnum \value{Paras}>0
+%\ifnum \value{Bullets1}>0 (\fi%
+%                          \arabic{Paras}%
+%\ifnum \value{Bullets1}>0 .\arabic{Bullets1}%
+%\ifnum \value{Bullets2}>0 .\arabic{Bullets2}%
+%\ifnum \value{Bullets3}>0 .\arabic{Bullets3}%
+%\fi\fi\fi%
+%\ifnum \value{Bullets1}>0 )\fi%
+%\fi%
+%}%
+%\hspace{\@totalleftmargin}\quad%
+%}}}
+% dyp: lxir version;
+%      had problems with expansion of \value
+\newcommand{\parabullnum}[2]{%
+\stepcounter{#1}%
+\xEmptyA{number}{value=%
+\ifnum \arabic{Paras}>0
+\arabic{Paras}%
+\ifnum \arabic{Bullets1}>0 .\arabic{Bullets1}%
+\ifnum \arabic{Bullets2}>0 .\arabic{Bullets2}%
+\ifnum \arabic{Bullets3}>0 .\arabic{Bullets3}%
+\fi\fi\fi%
+\fi%
+}%
 }
 \makeatother
+
+\def\pnum{\parabullnum{Paras}{0pt}}
 
 % Leave more room for section numbers in TOC
 % dyp: not required

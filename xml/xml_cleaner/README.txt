@@ -11,7 +11,7 @@ When not defining NDEBUG, it prints the current node traversed to cerr.
 
 Examplary compiler call:
 
-g++ -std=c++11 -Wall -Wextra -pedantic -O3 -march=native -fwhole-program -DNDEBUG -I/path/to/pugixml-1.4/src/ xml-cleaner.cpp -o xml-cleaner
+g++ -std=c++11 -Wall -Wextra -pedantic -O3 -march=native -fwhole-program -DNDEBUG -I/path/to/pugixml-1.4/src/ xml_cleaner.cpp -o xml_cleaner
 
 
 The current version uses static polymorphism and is overengineered.

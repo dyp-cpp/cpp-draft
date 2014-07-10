@@ -7,10 +7,19 @@
 Various simplifications of lists.
 -->
 
+<xsl:template match="list//item">
+	<xsl:copy>
+		<xsl:attribute name="number">
+			<xsl:value-of select="descendant::itemMark[1]/number/@lxir:value"/>
+		</xsl:attribute>
+		<xsl:apply-templates select="@* | * | text()"/>
+	</xsl:copy>
+</xsl:template>
+
 <!-- If this is not an enumeration, drop simple item marks like bullets or special dashes -->
 <xsl:template match="list//itemMark">
 	<xsl:if test="    ancestor::list[1]/@lxir:listType != 'enumerate'
-	              and (string-length(./text) > 1 or count(*) != count(./text))">
+	              and (string-length(./text) > 0 or count(*) != count(number) + count(./text))">
 		<xsl:copy>
 			<xsl:apply-templates select="@* | * | text()"/>
 		</xsl:copy>
@@ -22,7 +31,7 @@ Various simplifications of lists.
 
 <xsl:template match="list//par | indented/par">
 	<xsl:choose>
-		<xsl:when test="descendant::pnum">
+		<xsl:when test="number">
 			<error name="numbered paragraph inside list"/>
 			<xsl:copy>
 				<xsl:apply-templates select="@* | * | text()"/>

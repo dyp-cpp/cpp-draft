@@ -404,7 +404,6 @@
 % Our usual abbreviation for 'listings'.  Comments are in 
 % italics.  Arbitrary TeX commands can be used if they're 
 % surrounded by @ signs.
-
 % dyp: I hacked the lst environment similarly to how LXir hacked the verbatim environment:
 % overwriting the macros used in the implementation to inject certain tags
 % and later replacing them in xslt
@@ -416,8 +415,7 @@
   \def\lst@NewLine{\xEmpty{verbatimLineBreak}\lstNewLineorig}
 \makeatother
 
-\lstnewenvironment{codeblock}
-{
+\newcommand{\CodeBlockSetup}{
  \lstset{escapechar=@}
 %\renewcommand{\tcode}[1]{\textup{\CodeStylex{##1}}}
  \renewcommand{\tcode}[1]{\xBegin{tcode}##1\xEnd{tcode}}
@@ -427,11 +425,16 @@
  \renewcommand{\term}[1]{\xBegin{term}##1\xEnd{term}}
 %\renewcommand{\grammarterm}[1]{\textit{##1}}
  \renewcommand{\grammarterm}[1]{\xBegin{grammarterm}##1\xEnd{grammarterm}}
+}
+\lstnewenvironment{codeblock}{\CodeBlockSetup\xBegin{codeblock}}{\xEnd{codeblock}}
+
+% A code block in which single-quotes are digit separators
+% rather than character literals.
+\lstnewenvironment{codeblockdigitsep}{
+ \CodeBlockSetup
  \xBegin{codeblock}
-}
-{
- \xEnd{codeblock}
-}
+ \lstset{deletestring=[b]{'}}
+}{\xEnd{codeblock}}
 
 % Permit use of '@' inside codeblock blocks (don't ask)
 % dyp: "don't ask" means that '@' is used as the listing's escape character,
@@ -515,7 +518,7 @@
 
 \newenvironment{bnfbase}
  {
-%\newcommand{\nontermdef}[1]{\indexgrammar{\idxgram{##1}}\nonterminal{##1}:}
+%\newcommand{\nontermdef}[1]{\nonterminal{##1}\indexgrammar{\idxgram{##1}}:}
  \newcommand{\nontermdef}[1]{\indexgrammar{\idxgram{##1}}\xBegin{nontermdef}##1\xEnd{nontermdef}}% dyp: removed a trailing ':'
 %\newcommand{\terminal}[1]{{\BnfTermshape ##1}\xspace}
  \newcommand{\terminal}[1]{\xBegin{terminal}##1\xEnd{terminal}\xspace}

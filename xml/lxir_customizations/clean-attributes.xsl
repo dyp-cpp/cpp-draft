@@ -14,8 +14,8 @@ Clean up some attributes which aren't required and just introduce noise.
 	<xsl:template match="mathml:math/@begin-id | mathml:math/@end-id"/>
 
 <!-- rename -->
-	<xsl:template match="pnum/@lxir:number">
-		<xsl:attribute name="number"><xsl:value-of select="."/></xsl:attribute>
+	<xsl:template match="number/@lxir:value">
+		<xsl:attribute name="value"><xsl:value-of select="."/></xsl:attribute>
 	</xsl:template>
 
 <!-- default -->

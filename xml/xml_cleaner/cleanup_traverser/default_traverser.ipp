@@ -18,7 +18,7 @@ traverse_element(pugi::xml_node const node)
 	static auto const traversers = std::map<std::string, func_t>
 	{
 		 {"par"         , &self_t::traverse_par}
-		,{"pnum"        , t_epsilon}
+		,{"number"      , t_epsilon}
 		,{"text"        , &self_t::traverse_text_element}
 		,{"cvqual"      , t_inline}
 		,{"cpp"         , t_inline}
@@ -53,11 +53,11 @@ template<class OldTop, class Derived>
 void cleanup_traverser::default_traverser<OldTop, Derived>::
 traverse_par(pugi::xml_node const node)
 {
-	if(auto const res = node.child("pnum"))
+	if(auto const res = node.child("number"))
 	{
 		// this is a numbered paragraph; output a <par number="X">
 		auto new_node = this->gState.current_node.append_child("par");
-		auto const number = res.attribute("number").value();
+		auto const number = res.attribute("value").value();
 		new_node.append_attribute("number").set_value(number);
 		
 		this->push_and_do(new_node, [&]
