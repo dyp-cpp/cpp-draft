@@ -9,9 +9,12 @@ Various simplifications of lists.
 
 <xsl:template match="list//item">
 	<xsl:copy>
-		<xsl:attribute name="number">
-			<xsl:value-of select="descendant::itemMark[1]/number/@lxir:value"/>
-		</xsl:attribute>
+		<xsl:if test="ancestor::list[1]/@lxir:listType != 'enumerate'">
+			<xsl:attribute name="number">
+				<xsl:value-of select="descendant::itemMark[1]/number/@lxir:value"/>
+			</xsl:attribute>
+		</xsl:if>
+	
 		<xsl:apply-templates select="@* | * | text()"/>
 	</xsl:copy>
 </xsl:template>
