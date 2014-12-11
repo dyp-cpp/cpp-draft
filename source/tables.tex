@@ -37,6 +37,12 @@
  																	% column, width specified by #1
  % \newcolumntype{m}[1]{>{\CodeStyle}l{##1}}              % variable width column, all entries in CodeStyle
  \newcolumntype{m}[1]{l{##1}}							% variable width column, all entries in CodeStyle
+
+  % do not number bullets within tables
+  \renewcommand{\labelitemi}{---}
+  \renewcommand{\labelitemii}{---}
+  \renewcommand{\labelitemiii}{---}
+  \renewcommand{\labelitemiv}{---}
 }
 {
 }
@@ -80,7 +86,7 @@
 % produces six-column table used for lists of replacement tokens;
 % the columns are in pairs -- left-hand column has header HDR1,
 % right hand column has header HDR2; pairs of columns are separated
-% by vertical lines. Used in "trigraph sequences" table in standard.
+% by vertical lines. Used in the "Alternative tokens" table.
 \newenvironment{tokentable}[4]
 {
  \begin{floattablebase}{#1}{#2}{cc|cc|cc}{htbp}

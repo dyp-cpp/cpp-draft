@@ -475,7 +475,7 @@ is equivalent to
 \end{codeblock}
 
 except that names declared in the \grammarterm{for-init-statement} are in
-the same declarative-region as those declared in the
+the same declarative region as those declared in the
 \grammarterm{condition}, and except that a
 \indextext{statement!\tcode{continue}~in \tcode{for}}%
 \tcode{continue} in \grammarterm{statement} (not enclosed in another
@@ -498,7 +498,7 @@ equivalent to \tcode{while(true)}.
 \indextext{statement!declaration~in \tcode{for}}%
 \indextext{\idxcode{for}!scope~of declaration~in}%
 If the \grammarterm{for-init-statement} is a declaration, the scope of the
-name(s) declared extends to the end of the \grammarterm{for-statement}.
+name(s) declared extends to the end of the \tcode{for} statement.
 \enterexample
 
 \begin{codeblock}
@@ -706,43 +706,44 @@ equivalent to \tcode{goto} \tcode{contin}.
 A function returns to its caller by the \tcode{return} statement.
 
 \pnum
-A return statement
-with neither an \grammarterm{expression} nor a \grammarterm{braced-init-list}
-can be used only in functions
-that do not return a value, that is, a function with the return type
+The \grammarterm{expression} or \grammarterm{braced-init-list}
+of a return statement is called its operand. A return statement with
+no operand shall be used only in a function whose return type is
 \cv\ \tcode{void}, a constructor~(\ref{class.ctor}), or a
 destructor~(\ref{class.dtor}).
 \indextext{\idxcode{return}!constructor~and}%
 \indextext{\idxcode{return}!constructor~and}%
-A return statement with an expression of non-void type can be used only
-in functions returning a value; the value of the expression is returned
-to the caller of the function.
+A return statement with an operand of type \tcode{void} shall be used only
+in a function whose return type is \cv\ \tcode{void}.
+A return statement with any other operand shall be used only
+in a function whose return type is not \cv\ \tcode{void};
 \indextext{conversion!return~type}%
-The value of the expression is implicitly converted to the return type of the
-function in which it appears. A return statement can involve the
-construction and copy or move of a temporary object~(\ref{class.temporary}).
+the return statement initializes the object or reference to be returned
+by copy-initialization~(\ref{dcl.init}) from the operand.
 \enternote
+A return statement can involve the
+construction and copy or move of a temporary object~(\ref{class.temporary}).
 A copy or move operation associated with a return statement may be elided or
 considered as an rvalue for the purpose of overload resolution in
 selecting a constructor~(\ref{class.copy}).
-\exitnote A return statement with a \grammarterm{braced-init-list} initializes the object or reference to be returned from the function by copy-list-initialization~(\ref{dcl.init.list}) from the specified initializer list. \enterexample
-
+\exitnote
+\enterexample
 \begin{codeblock}
 std::pair<std::string,int> f(const char* p, int x) {
   return {p,x};
 }
 \end{codeblock}
 \exitexample
-
 Flowing off the end of a function is equivalent to a \tcode{return} with
 no value; this results in undefined behavior in a value-returning
 function.
 
 \pnum
-A return statement with an expression of type \tcode{void}
-can be used only in functions with a return type of
-\cvqual{cv} \tcode{void}; the expression is evaluated just before the function
-returns to its caller.
+The copy-initialization of the returned entity is sequenced before the
+destruction of temporaries at the end of the full-expression established
+by the operand of the return statement, which, in turn, is sequenced
+before the destruction of local variables~(\ref{stmt.jump}) of the block
+enclosing the return statement.
 
 \rSec2[stmt.goto]{The \tcode{goto} statement}%
 \indextext{statement!\idxcode{goto}}
@@ -858,12 +859,18 @@ There is an ambiguity in the grammar involving
 conversion~(\ref{expr.type.conv}) as its leftmost subexpression can be
 indistinguishable from a \grammarterm{declaration} where the first
 \grammarterm{declarator} starts with a \tcode{(}. In those cases the
-\grammarterm{statement} is a \grammarterm{declaration}. \enternote To
-disambiguate, the whole \grammarterm{statement} might have to be examined
-to determine if it is an \grammarterm{expression-statement} or a
-\grammarterm{declaration}. This disambiguates many examples.
+\grammarterm{statement} is a \grammarterm{declaration}.
+
+\pnum
+\enternote
+If the \grammarterm{statement} cannot syntactically be a
+\grammarterm{declaration}, there is no ambiguity,
+so this rule does not apply.
+The whole \grammarterm{statement} might need to be examined
+to determine whether this is the case. This resolves the meaning
+of many examples.
 \enterexample
-assuming \tcode{T} is a
+Assuming \tcode{T} is a
 \grammarterm{simple-type-specifier}~(\ref{dcl.type}),
 
 \begin{codeblock}
@@ -882,7 +889,6 @@ is initialized to \tcode{double(3)}. This is of course ill-formed for
 semantic reasons, but that does not affect the syntactic analysis.
 \exitexample
 
-\pnum
 The remaining cases are \grammarterm{declaration}{s}.
 \enterexample
 

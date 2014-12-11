@@ -66,8 +66,7 @@ to the basic source character set (introducing new-line characters for end-of-li
 indicators) if necessary.
 The set of physical source file characters accepted is \impldef{physical source file
 characters}.
-\indextext{trigraph sequence}Trigraph sequences~(\ref{lex.trigraph}) are
-replaced by corresponding single-character internal representations. Any
+Any
 source file character not in the basic source character
 set~(\ref{lex.charset}) is replaced by the
 \indextext{universal character name}universal-character-name that
@@ -194,7 +193,7 @@ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 
 0 1 2 3 4 5 6 7 8 9
 
-_ { } [ ] # ( ) < > % : ; . ? * + - / ^ & | @\tilde@ ! = , @\textbackslash@ " '
+_ { } [ ] # ( ) < > % : ; . ? * + - / ^ & | ~ ! = , @\textbackslash@ " '
 \end{codeblock}
 
 \pnum
@@ -234,8 +233,8 @@ The \term{basic execution character set} and the \term{basic
 execution wide-character set} shall each contain all the members of the
 basic source character set, plus control characters representing alert,
 backspace, and carriage return, plus a \term{null character}
-(respectively, \term{null wide character}), whose representation has
-all zero bits. For each basic execution character set, the values of the
+(respectively, \term{null wide character}), whose value is 0.
+For each basic execution character set, the values of the
 members shall be non-negative and distinct from one another. In both the
 source and execution basic character sets, the value of each character
 after \tcode{0} in the above list of decimal digits shall be one greater
@@ -249,45 +248,6 @@ set, respectively. The values of the members of the execution character sets
 and the sets of additional members
 are locale-specific.%
 \indextext{character set|)}
-
-\rSec1[lex.trigraph]{Trigraph sequences}
-
-\pnum
-\indextext{trigraph sequence|(}%
-Before any other processing takes place, each occurrence of one of the
-following sequences of three characters (``\term{trigraph
-sequences}'') is replaced by the single character indicated in
-Table~\ref{tab:trigraph.sequences}.
-
-\begin{tokentable}{Trigraph sequences}{tab:trigraph.sequences}{Trigraph}{Replacement}
-\tcode{??=}        &   \tcode{\#}             &
-\tcode{??(}        &   \tcode{[}              &
-\tcode{??<}        &   \tcode{\{}             \\ \rowsep
-\tcode{??/}        &   \tcode{\textbackslash} &
-\tcode{??)}        &   \tcode{]}              &
-\tcode{??>}        &   \tcode{\}}             \\ \rowsep
-\tcode{??'}        &   \tcode{\^{}}           &
-\tcode{??!}        &   \tcode{|}              &
-\tcode{??-}        &   \tcode{\tilde}         \\
-\end{tokentable}
-
-\pnum
-\enterexample
-\begin{codeblock}
-??=define arraycheck(a,b) a??(b??) ??!??! b??(a??)
-\end{codeblock}
-
-becomes
-
-\begin{codeblock}
-#define arraycheck(a,b) a[b] || b[a]
-\end{codeblock}
-\exitexample
-
-\pnum
-No other trigraph sequence exists. Each \tcode{?} that does not begin
-one of the trigraphs listed above is not changed.%
-\indextext{trigraph sequence|)}
 
 \rSec1[lex.pptoken]{Preprocessing tokens}
 
@@ -340,7 +300,7 @@ given character:
 and initial double quote of a raw string literal, such as \tcode{R"}, the next preprocessing
 token shall be a raw string literal. Between the initial and final
 double quote characters of the raw string, any transformations performed in phases
-1 and 2 (trigraphs, universal-character-names, and line splicing) are reverted; this reversion
+1 and 2 (universal-character-names and line splicing) are reverted; this reversion
 shall apply before any \grammarterm{d-char}, \grammarterm{r-char}, or delimiting
 parenthesis is identified. The raw string literal is defined as the shortest sequence
 of characters that matches the raw-string pattern
@@ -367,11 +327,11 @@ const char* s = R"y";           // ill-formed raw string, not \tcode{"x" "y"}
 \exitexample
 
 \pnum
-\enterexample The program fragment \tcode{1Ex} is parsed as a
+\enterexample The program fragment \tcode{0xe+foo} is parsed as a
 preprocessing number token (one that is not a valid floating or integer
-literal token), even though a parse as the pair of preprocessing tokens
-\tcode{1} and \tcode{Ex} might produce a valid expression (for example,
-if \tcode{Ex} were a macro defined as \tcode{+1}). Similarly, the
+literal token), even though a parse as three preprocessing tokens
+\tcode{0xe}, \tcode{+}, and \tcode{foo} might produce a valid expression (for example,
+if \tcode{foo} were a macro defined as \tcode{1}). Similarly, the
 program fragment \tcode{1E1} is parsed as a preprocessing number (one
 that is a valid floating literal token), whether or not \tcode{E} is a
 macro name. \exitexample
@@ -418,7 +378,7 @@ Table~\ref{tab:alternative.tokens}.
 \tcode{xor}             &   \tcode{\^{}}       &
 \tcode{not}             &   \tcode{!}          \\ \rowsep
 \tcode{\%:}             &   \tcode{\#}         &
-\tcode{compl}           &   \tcode{\tilde}     &
+\tcode{compl}           &   \tcode{\~}         &
 \tcode{not_eq}          &   \tcode{!=}         \\ \rowsep
 \tcode{\%:\%:}          &   \tcode{\#\#}       &
 \tcode{bitand}          &   \tcode{\&}         &
@@ -461,7 +421,7 @@ literals, and alternative tokens containing alphabetic characters.
 The characters \tcode{/*} start a comment, which terminates with the
 characters \tcode{*/}. These comments do not nest.
 \indextext{comment!\tcode{//}}%
-The characters \tcode{//} start a comment, which terminates with the
+The characters \tcode{//} start a comment, which terminates immediately before the
 next new-line character. If there is a form-feed or a vertical-tab
 character in such a comment, only white-space characters shall appear
 between it and the new-line that terminates the comment; no diagnostic
@@ -530,9 +490,9 @@ have a completely different meaning, depending on the implementation.}%
     digit\br
     \terminal{.} digit\br
     pp-number digit\br
+    pp-number identifier-nondigit\br
     pp-number \terminal{'} digit\br
     pp-number \terminal{'} nondigit\br
-    pp-number identifier-nondigit\br
     pp-number \terminal{e} sign\br
     pp-number \terminal{E} sign\br
     pp-number \terminal{.}
@@ -620,9 +580,24 @@ token as a regular \grammarterm{identifier}.
 \indextext{character!underscore!in identifier}%
 \indextext{reserved~identifier}%
 In addition, some identifiers are reserved for use by \Cpp
-implementations and standard libraries~(\ref{global.names}) and shall
+implementations and shall
 not be used otherwise; no diagnostic is required.%
 \indextext{identifier|)}
+\begin{itemize}
+\item
+Each identifier that contains a double underscore
+\tcode{\unun}
+\indextext{character!underscore}%
+or begins with an underscore followed by
+an uppercase letter
+\indextext{uppercase}%
+is reserved to the implementation for any use.
+\item
+Each identifier that begins with an underscore is
+\indextext{character!underscore}%
+reserved to the implementation for use as a name in the global namespace.%
+\indextext{namespace!global}
+\end{itemize}
 
 \rSec1[lex.key]{Keywords}
 
@@ -799,29 +774,10 @@ ISO C. }
 \indextext{literal!integer}%
 \begin{bnf}
 \nontermdef{integer-literal}\br
-    decimal-literal integer-suffix\opt\br
+    binary-literal integer-suffix\opt\br
     octal-literal integer-suffix\opt\br
-    hexadecimal-literal integer-suffix\opt\br
-    binary-literal integer-suffix\opt
-\end{bnf}
-
-\begin{bnf}
-\nontermdef{decimal-literal}\br
-    nonzero-digit\br
-    decimal-literal \terminal{'}\opt digit
-\end{bnf}
-
-\begin{bnf}
-\nontermdef{octal-literal}\br
-    \terminal{0}\br
-    octal-literal \terminal{'}\opt octal-digit
-\end{bnf}
-
-\begin{bnf}
-\nontermdef{hexadecimal-literal}\br
-    \terminal{0x} hexadecimal-digit\br
-    \terminal{0X} hexadecimal-digit\br
-    hexadecimal-literal \terminal{'}\opt hexadecimal-digit
+    decimal-literal integer-suffix\opt\br
+    hexadecimal-literal integer-suffix\opt
 \end{bnf}
 
 \begin{bnf}
@@ -832,8 +788,28 @@ ISO C. }
 \end{bnf}
 
 \begin{bnf}
-\nontermdef{nonzero-digit} \textnormal{one of}\br
-    \terminal{1  2  3  4  5  6  7  8  9}
+\nontermdef{octal-literal}\br
+    \terminal{0}\br
+    octal-literal \terminal{'}\opt octal-digit
+\end{bnf}
+
+\begin{bnf}
+\nontermdef{decimal-literal}\br
+    nonzero-digit\br
+    decimal-literal \terminal{'}\opt digit
+\end{bnf}
+
+\begin{bnf}
+\nontermdef{hexadecimal-literal}\br
+    \terminal{0x} hexadecimal-digit\br
+    \terminal{0X} hexadecimal-digit\br
+    hexadecimal-literal \terminal{'}\opt hexadecimal-digit
+\end{bnf}
+
+\begin{bnf}
+\nontermdef{binary-digit}\br
+    \terminal{0}\br
+    \terminal{1}
 \end{bnf}
 
 \begin{bnf}
@@ -842,16 +818,15 @@ ISO C. }
 \end{bnf}
 
 \begin{bnf}
+\nontermdef{nonzero-digit} \textnormal{one of}\br
+    \terminal{1  2  3  4  5  6  7  8  9}
+\end{bnf}
+
+\begin{bnf}
 \nontermdef{hexadecimal-digit} \textnormal{one of}\br
     \terminal{0  1  2  3  4  5  6  7  8  9}\br
     \terminal{a  b  c  d  e  f}\br
     \terminal{A  B  C  D  E  F}
-\end{bnf}
-
-\begin{bnf}
-\nontermdef{binary-digit}\br
-    \terminal{0}\br
-    \terminal{1}
 \end{bnf}
 
 \begin{bnf}
@@ -881,26 +856,29 @@ ISO C. }
 \indextext{literal!\idxcode{unsigned}}%
 \indextext{literal!\idxcode{long}}%
 \indextext{literal!integer}%
-\indextext{literal!hexadecimal}%
+\indextext{literal!binary}%
 \indextext{literal!octal}%
 \indextext{literal!decimal}%
-\indextext{literal!binary}%
+\indextext{literal!hexadecimal}%
 \indextext{literal!base~of integer}%
 An \term{integer literal} is a sequence of digits that has no period
 or exponent part, with optional separating single quotes that are ignored
 when determining its value. An integer literal may have a prefix that specifies
 its base and a suffix that specifies its type. The lexically first digit
-of the sequence of digits is the most significant. A \term{decimal}
-integer literal (base ten) begins with a digit other than \tcode{0} and
-consists of a sequence of decimal digits. An \term{octal} integer
+of the sequence of digits is the most significant.
+A \term{binary} integer literal (base two) begins with
+\tcode{0b} or \tcode{0B} and consists of a sequence of binary digits.
+An \term{octal} integer
 literal (base eight) begins with the digit \tcode{0} and consists of a
 sequence of octal digits.\footnote{The digits \tcode{8} and \tcode{9} are not octal digits. }
+A \term{decimal}
+integer literal (base ten) begins with a digit other than \tcode{0} and
+consists of a sequence of decimal digits.
 A \term{hexadecimal} integer literal (base sixteen) begins with
 \tcode{0x} or \tcode{0X} and consists of a sequence of hexadecimal
 digits, which include the decimal digits and the letters \tcode{a}
 through \tcode{f} and \tcode{A} through \tcode{F} with decimal values
-ten through fifteen. A \term{binary} integer literal (base two) begins with
-\tcode{0b} or \tcode{0B} and consists of a sequence of binary digits.
+ten through fifteen.
 \enterexample The number twelve can be written \tcode{12}, \tcode{014},
 \tcode{0XC}, or \tcode{0b1100}. The literals \tcode{1048576},
 \tcode{1'048'576}, \tcode{0X100000}, \tcode{0x10'0000}, and
@@ -1003,10 +981,12 @@ that cannot be represented by any of the allowed types.
 \indextext{literal!character}%
 \begin{bnf}
 \nontermdef{character-literal}\br
-    \terminal{'} c-char-sequence \terminal{'}\br
-    u\terminal{'} c-char-sequence \terminal{'}\br
-    U\terminal{'} c-char-sequence \terminal{'}\br
-    L\terminal{'} c-char-sequence \terminal{'}
+    encoding-prefix\opt \terminal{'} c-char-sequence \terminal{'}
+\end{bnf}
+
+\begin{bnf}
+\nontermdef{encoding-prefix} \textnormal{one of}\br
+    \terminal{u8}\quad\terminal{u}\quad\terminal{U}\quad\terminal{L}
 \end{bnf}
 
 \begin{bnf}
@@ -1055,13 +1035,18 @@ that cannot be represented by any of the allowed types.
 \indextext{literal!\idxcode{char16_t}}%
 \indextext{literal!\idxcode{char32_t}}%
 A character literal is one or more characters enclosed in single quotes,
-as in \tcode{'x'}, optionally preceded by one of the letters \tcode{u},
-\tcode{U}, or \tcode{L}, as in \tcode{u'y'}, \tcode{U'z'}, or
-\tcode{L'x'}, respectively.
+as in \tcode{'x'}, optionally preceded by
+\tcode{u8}, \tcode{u}, \tcode{U}, or \tcode{L},
+as in
+\tcode{u8'w'}, \tcode{u'x'}, \tcode{U'y'}, or \tcode{L'z'},
+respectively.
+
+\pnum
 \indextext{literal!type~of character}%
-A character literal that does not begin with \tcode{u}, \tcode{U}, or
-\tcode{L} is an ordinary character literal, also referred to as a
-narrow-character literal. An ordinary character literal that contains a
+A character literal that does not begin with
+\tcode{u8}, \tcode{u}, \tcode{U}, or \tcode{L}
+is an \defn{ordinary character literal}.
+An ordinary character literal that contains a
 single \grammarterm{c-char} representable in the execution character
 set has type \tcode{char}, with value equal to the
 numerical value of the encoding of the \grammarterm{c-char} in the
@@ -1074,29 +1059,49 @@ a single \grammarterm{c-char} not representable in the execution
 character set, is conditionally-supported, has type \tcode{int},
 \indextext{literal!multicharacter!implementation-defined value of}%
 and has an \impldef{value of multicharacter literal} value.
+ 
+\pnum
+A character literal that begins with \tcode{u8},
+such as \tcode{u8'w'},
+is a character literal of type \tcode{char},
+known as a \defn{UTF-8 character literal}.
+The value of a UTF-8 character literal
+is equal to its ISO 10646 code point value,
+provided that the code point value
+is representable with a single UTF-8 code unit
+(that is, provided it is in the C0 Controls and Basic Latin Unicode block).
+If the value is not representable with a single UTF-8 code unit,
+the program is ill-formed.
+A UTF-8 character literal containing multiple \grammarterm{c-char}{s} is ill-formed.
 
 \pnum
-\indextext{wide-character}%
 \indextext{char16_t character@\tcode{char16_t} character}%
-\indextext{char32_t character@\tcode{char32_t} character}%
-\indextext{\idxhdr{stddef.h}}%
-\indextext{\idxcode{wchar_t}}%
 \indextext{\idxcode{char16_t}}%
-\indextext{\idxcode{char32_t}}%
 A character literal that begins with the letter \tcode{u}, such as
-\tcode{u'y'}, is a character literal of type \tcode{char16_t}. The value
+\tcode{u'x'}, is a character literal of type \tcode{char16_t}. The value
 of a \tcode{char16_t} literal containing a single \grammarterm{c-char} is
 equal to its ISO 10646 code point value, provided that the code point is
 representable with a single 16-bit code unit. (That is, provided it is a
 basic multi-lingual plane code point.) If the value is not representable
 within 16 bits, the program is ill-formed. A \tcode{char16_t} literal
-containing multiple \grammarterm{c-char}{s} is ill-formed. A character
-literal that begins with the letter \tcode{U}, such as \tcode{U'z'}, is
+containing multiple \grammarterm{c-char}{s} is ill-formed.
+
+\pnum
+\indextext{char32_t character@\tcode{char32_t} character}%
+\indextext{\idxcode{char32_t}}%
+A character
+literal that begins with the letter \tcode{U}, such as \tcode{U'y'}, is
 a character literal of type \tcode{char32_t}. The value of a
 \tcode{char32_t} literal containing a single \grammarterm{c-char} is equal
 to its ISO 10646 code point value. A \tcode{char32_t} literal containing
-multiple \grammarterm{c-char}{s} is ill-formed. A character literal that
-begins with the letter \tcode{L}, such as \tcode{L'x'},
+multiple \grammarterm{c-char}{s} is ill-formed.
+
+\pnum
+\indextext{wide-character}%
+\indextext{\idxhdr{stddef.h}}%
+\indextext{\idxcode{wchar_t}}%
+A character literal that
+begins with the letter \tcode{L}, such as \tcode{L'z'},
 \indextext{prefix!\idxcode{L}}%
 is a wide-character literal. A wide-character literal has type
 \tcode{wchar_t}.\footnote{They are intended for character sets where a character does
@@ -1114,8 +1119,9 @@ of a wide-character literal containing multiple \grammarterm{c-char}{s} is
 
 \pnum
 Certain nongraphic characters, the single quote \tcode{'}, the double quote \tcode{"},
-the question mark \tcode{?},\footnote{Using an escape sequence for a question mark can
-avoid accidentally creating a trigraph.} and the backslash
+the question mark \tcode{?},\footnote{Using an escape sequence for a question mark
+is supported for compatibility with ISO C++14 and ISO C.}
+and the backslash
 \indextext{backslash~character}%
 \indextext{\idxcode{\textbackslash}|see{backslash}}%
 \indextext{escape~character|see{backslash}}%
@@ -1168,10 +1174,14 @@ respectively.
 \indextext{literal!implementation-defined value~of \idxcode{char}}%
 The value of a character literal is \impldef{value of character literal outside range of
 corresponding type} if it falls outside of the implementation-defined range defined for
-\tcode{char}
-(for literals with no prefix), \tcode{char16_t} (for literals prefixed
-by \tcode{'u'}), \tcode{char32_t} (for literals prefixed by
-\tcode{'U'}), or \tcode{wchar_t} (for literals prefixed by \tcode{'L'}).
+\tcode{char} (for literals with no prefix) or
+\tcode{wchar_t} (for literals prefixed by \tcode{L}).
+\enternote
+If the value of a character literal prefixed by
+\tcode{u}, \tcode{u8}, or \tcode{U}
+is outside the range defined for its type,
+the program is ill-formed.
+\exitnote
 
 \pnum
 A universal-character-name is translated to the encoding, in the appropriate
@@ -1270,14 +1280,6 @@ values for its type, the program is ill-formed.
 \end{bnf}
 
 \begin{bnf}
-\nontermdef{encoding-prefix}\br
-  \terminal{u8}\br
-  \terminal{u}\br
-  \terminal{U}\br
-  \terminal{L}
-\end{bnf}
-
-\begin{bnf}
 \nontermdef{s-char-sequence}\br
     s-char\br
     s-char-sequence s-char
@@ -1306,7 +1308,7 @@ values for its type, the program is ill-formed.
 \nontermdef{r-char}\br
 \>\textnormal{any member of the source character set, except}\br
 \>\>\textnormal{a right parenthesis \terminal{)} followed by the initial \nonterminal{d-char-sequence}}\br
-\>\>\textnormal{(which may be empty) followed by a double quote \terminal{"}.}\br
+\>\>\textnormal{(which may be empty) followed by a double quote \terminal{"}.}
 \end{bnftab}
 
 \begin{bnf}
@@ -1330,7 +1332,7 @@ values for its type, the program is ill-formed.
 \indextext{literal!string!\idxcode{char16_t}}%
 \indextext{literal!string!\idxcode{char32_t}}%
 \indextext{character~string}%
-A string literal is a sequence of characters (as defined
+A \grammarterm{string-literal} is a sequence of characters (as defined
 in~\ref{lex.ccon}) surrounded by double quotes, optionally prefixed by
 \tcode{R},
 \tcode{u8},
@@ -1355,7 +1357,7 @@ or \tcode{LR"(...)"},
 respectively.
 
 \pnum
-A string literal that has an \tcode{R} in the prefix is a \defn{raw string literal}. The
+A \grammarterm{string-literal} that has an \tcode{R} in the prefix is a \defn{raw string literal}. The
 \grammarterm{d-char-sequence} serves as a delimiter. The terminating
 \grammarterm{d-char-sequence} of a \grammarterm{raw-string} is the same sequence of
 characters as the initial \grammarterm{d-char-sequence}. A \grammarterm{d-char-sequence}
@@ -1408,10 +1410,10 @@ is equivalent to \tcode{"\textbackslash n)\textbackslash?\textbackslash?=\textba
 \pnum
 \indextext{string!type~of}%
 \indextext{literal!string!narrow}%
-After translation phase 6, a string literal that does not begin with an \grammarterm{encoding-prefix} is an ordinary string literal, and is initialized with the given characters.
+After translation phase 6, a \grammarterm{string-literal} that does not begin with an \grammarterm{encoding-prefix} is an ordinary string literal, and is initialized with the given characters.
 
 \pnum
-A string literal that begins with \tcode{u8}, such as \tcode{u8"asdf"}, is a UTF-8 string literal.
+A \grammarterm{string-literal} that begins with \tcode{u8}, such as \tcode{u8"asdf"}, is a UTF-8 string literal.
 
 \pnum
 Ordinary string literals and UTF-8 string literals are
@@ -1429,25 +1431,25 @@ code unit of the UTF-8 encoding of the string.
 
 \pnum
 \indextext{literal!string!\idxcode{char16_t}}%
-A string literal that begins with \tcode{u}, such as \tcode{u"asdf"}, is
+A \grammarterm{string-literal} that begins with \tcode{u}, such as \tcode{u"asdf"}, is
 a \tcode{char16_t} string literal. A \tcode{char16_t} string literal has
 type ``array of \term{n} \tcode{const char16_t}'', where \term{n} is the
-size of the string as defined below; it has static storage duration and
+size of the string as defined below; it
 is initialized with the given characters. A single \grammarterm{c-char} may
 produce more than one \tcode{char16_t} character in the form of
 surrogate pairs.
 
 \pnum
 \indextext{literal!string!\idxcode{char32_t}}%
-A string literal that begins with \tcode{U}, such as \tcode{U"asdf"}, is
+A \grammarterm{string-literal} that begins with \tcode{U}, such as \tcode{U"asdf"}, is
 a \tcode{char32_t} string literal. A \tcode{char32_t} string literal has
 type ``array of \term{n} \tcode{const char32_t}'', where \term{n} is the
-size of the string as defined below; it has static storage duration and
+size of the string as defined below; it
 is initialized with the given characters.
 
 \pnum
 \indextext{literal!string!wide}%
-A string literal that begins with
+A \grammarterm{string-literal} that begins with
 \tcode{L},
 such as \tcode{L"asdf"},
 is a wide string literal.
@@ -1457,31 +1459,22 @@ is a wide string literal.
 \indextext{prefix!\idxcode{L}}%
 A wide string literal has type ``array of \term{n} \tcode{const
 wchar_t}'', where \term{n} is the size of the string as defined below; it
-has static storage duration and is initialized with the given
-characters.
-
-\pnum
-\indextext{literal!string!implementation-defined}%
-\indextext{string!distinct}%
-Whether all string literals are distinct (that is, are stored in
-nonoverlapping objects) is \impldef{distinctness of string literals}.
-\indextext{literal!string!undefined change~to}%
-The effect of attempting to modify a string literal is undefined.
+is initialized with the given characters.
 
 \pnum
 \indextext{concatenation!string}%
-In translation phase 6~(\ref{lex.phases}), adjacent string literals are concatenated. If
-both string literals have the same \grammarterm{encoding-prefix}, the resulting concatenated string literal has
-that \grammarterm{encoding-prefix}. If one string literal has no \grammarterm{encoding-prefix}, it is treated as a string literal of
+In translation phase 6~(\ref{lex.phases}), adjacent \grammarterm{string-literal}{s} are concatenated. If
+both \grammarterm{string-literal}{s} have the same \grammarterm{encoding-prefix}, the resulting concatenated string literal has
+that \grammarterm{encoding-prefix}. If one \grammarterm{string-literal} has no \grammarterm{encoding-prefix}, it is treated as a \grammarterm{string-literal} of
 the same \grammarterm{encoding-prefix} as the other operand. If a UTF-8 string literal token is adjacent to a
 wide string literal token, the program is ill-formed. Any other concatenations are
 conditionally-supported with \impldef{concatenation of some types of string literals}
 behavior. \enternote This
 concatenation is an interpretation, not a conversion.
 Because the interpretation happens in translation phase 6 (after each character from a
-literal has been translated into a value from the appropriate character set), a string
-literal's initial rawness has no effect on the interpretation or well-formedness of the
-concatenation.
+literal has been translated into a value from the appropriate character set), a
+\grammarterm{string-literal}'s initial rawness has no effect on the interpretation or
+well-formedness of the concatenation.
 \exitnote
 Table~\ref{tab:lex.string.concat} has some examples of valid concatenations.
 
@@ -1531,7 +1524,9 @@ Escape sequences and universal-character-names in non-raw string literals
 have the same meaning as in character literals~(\ref{lex.ccon}), except that
 the single quote \tcode{'} is representable either by itself or by the escape sequence
 \tcode{\textbackslash'}, and the double quote \tcode{"} shall be preceded by a
-\tcode{\textbackslash}.
+\tcode{\textbackslash},
+and except that a universal-character-name in a
+\tcode{char16_t} string literal may yield a surrogate pair.
 \indextext{string!\idxcode{sizeof}}%
 In a narrow string literal, a universal-character-name may map to more
 than one \tcode{char} element due to \term{multibyte encoding}. The
@@ -1550,6 +1545,19 @@ literals, any universal-character-names shall be within the range
 the total number of escape sequences and other characters, plus at least
 one for the multibyte encoding of each universal-character-name, plus
 one for the terminating \tcode{'\textbackslash 0'}.
+
+\pnum
+Evaluating a \grammarterm{string-literal} results in a string literal object
+with static storage duration, initialized from the given characters as
+specified above.
+\indextext{string!distinct}%
+Whether all string literals are distinct (that is, are stored in
+nonoverlapping objects) and whether successive evaluations of a
+\grammarterm{string-literal} yield the same or a different object is
+unspecified.
+\enternote
+\indextext{literal!string!undefined change~to}%
+The effect of attempting to modify a string literal is undefined. \exitnote
 
 \rSec2[lex.bool]{Boolean literals}
 
@@ -1729,7 +1737,7 @@ operator "" @\term{X}@(@\term{ch}{}@)
 
 \begin{codeblock}
 long double operator "" _w(long double);
-std::string operator "" _w(const char16_t*, size_t);
+std::string operator "" _w(const char16_t*, std::size_t);
 unsigned operator "" _w(const char*);
 int main() {
   1.2_w;      // calls \tcode{operator "" _w(1.2L)}
@@ -1760,10 +1768,5 @@ int main() {
 }
 \end{codeblock}
 \exitexample%
-
-\pnum
-Some \grammarterm{identifier}{s} appearing as \grammarterm{ud-suffix}{es} are
-reserved for future standardization~(\ref{usrlit.suffix}). A program containing
-such a \grammarterm{ud-suffix} is ill-formed, no diagnostic required.
 \indextext{literal|)}%
 \indextext{conventions!lexical|)}

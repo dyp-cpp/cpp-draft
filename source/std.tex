@@ -14,6 +14,7 @@
 \usepackage[final]
            {listings}     % code listings
 \usepackage{longtable}    % auto-breaking tables
+\usepackage{ltcaption}    % fix captions for long tables
 \usepackage{booktabs}     % fancy tables
 \usepackage{relsize}      % provide relative font size changes
 \usepackage{underscore}   % remove special status of '_' in ordinary text
@@ -33,7 +34,7 @@
 \usepackage[pdftex,
             pdftitle={C++ International Standard},
             pdfsubject={C++ International Standard},
-            pdfcreator={Stefanus Du Toit},
+            pdfcreator={Richard Smith},
             bookmarks=true,
             bookmarksnumbered=true,
             pdfpagelabels=true,
@@ -58,6 +59,14 @@
 \makeindex[libraryindex]
 \makeindex[grammarindex]
 \makeindex[impldefindex]
+
+%%--------------------------------------------------
+%% fix interaction between hyperref and other
+%% commands
+\pdfstringdefDisableCommands{\def\smaller#1{#1}}
+\pdfstringdefDisableCommands{\def\textbf#1{#1}}
+\pdfstringdefDisableCommands{\def\raisebox#1{}}
+\pdfstringdefDisableCommands{\def\hspace#1{}}
 
 %%--------------------------------------------------
 %% add special hyphenation rules

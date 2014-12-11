@@ -25,10 +25,8 @@ between threads, as summarized in Table~\ref{tab:thread.lib.summary}.
 \pnum
 Throughout this Clause, the names of template parameters are used to express type
 requirements.
-
-\pnum
-If a parameter is \tcode{Predicate}, \tcode{operator()} applied to the actual template
-argument shall return a value that is convertible to \tcode{bool}.
+If a template parameter is named \tcode{Predicate}, \tcode{operator()} applied to
+the template argument shall return a value that is convertible to \tcode{bool}.
 
 \rSec2[thread.req.exception]{Exceptions}
 
@@ -744,16 +742,14 @@ void swap(thread& x, thread& y) noexcept;
 \rSec2[thread.thread.this]{Namespace \tcode{this_thread}}
 
 \begin{codeblock}
-namespace std {
-  namespace this_thread {
-    thread::id get_id() noexcept;
+namespace std::this_thread {
+  thread::id get_id() noexcept;
 
-    void yield() noexcept;
-    template <class Clock, class Duration>
-      void sleep_until(const chrono::time_point<Clock, Duration>& abs_time);
-    template <class Rep, class Period>
-      void sleep_for(const chrono::duration<Rep, Period>& rel_time);
-  }
+  void yield() noexcept;
+  template <class Clock, class Duration>
+    void sleep_until(const chrono::time_point<Clock, Duration>& abs_time);
+  template <class Rep, class Period>
+    void sleep_for(const chrono::duration<Rep, Period>& rel_time);
 }
 \end{codeblock}
 
@@ -890,8 +886,7 @@ A mutex object facilitates protection against data races and allows safe synchro
 data between execution agents~(\ref{thread.req.lockable}).
 An execution agent \term{owns} a mutex from the time it successfully calls one of the
 lock functions until it calls unlock. Mutexes can be either recursive or non-recursive, and can
-grant simultaneous ownership to one or many execution agents. The mutex types supplied by the standard
-library provide exclusive ownership semantics: only one thread may own the mutex at a time. Both
+grant simultaneous ownership to one or many execution agents. Both
 recursive and non-recursive mutexes are supplied.
 
 \rSec3[thread.mutex.requirements.mutex]{Mutex types}
@@ -1233,7 +1228,7 @@ namespace std {
     timed_mutex(const timed_mutex&) = delete;
     timed_mutex& operator=(const timed_mutex&) = delete;
 
-    void lock();
+    void lock();  // blocking
     bool try_lock();
     template <class Rep, class Period>
       bool try_lock_for(const chrono::duration<Rep, Period>& rel_time);
@@ -1283,7 +1278,7 @@ namespace std {
     recursive_timed_mutex(const recursive_timed_mutex&) = delete;
     recursive_timed_mutex& operator=(const recursive_timed_mutex&) = delete;
 
-    void lock();
+    void lock();  // blocking
     bool try_lock() noexcept;
     template <class Rep, class Period>
       bool try_lock_for(const chrono::duration<Rep, Period>& rel_time);
@@ -1518,36 +1513,34 @@ with~(\ref{intro.multithread}) this operation.
 
 \begin{codeblock}
 namespace std {
-
-class shared_timed_mutex {
-public:
-  shared_timed_mutex();
-  ~shared_timed_mutex();
-
-  shared_timed_mutex(const shared_timed_mutex&) = delete;
-  shared_timed_mutex& operator=(const shared_timed_mutex&) = delete;
-
-  // Exclusive ownership
-  void lock();  // blocking
-  bool try_lock();
-  template <class Rep, class Period>
-    bool try_lock_for(const chrono::duration<Rep, Period>& rel_time);
-  template <class Clock, class Duration>
-    bool try_lock_until(const chrono::time_point<Clock, Duration>& abs_time);
-  void unlock();
-
-  // Shared ownership
-  void lock_shared();  // blocking
-  bool try_lock_shared();
-  template <class Rep, class Period>
-    bool
-    try_lock_shared_for(const chrono::duration<Rep, Period>& rel_time);
-  template <class Clock, class Duration>
-    bool
-    try_lock_shared_until(const chrono::time_point<Clock, Duration>& abs_time);
-  void unlock_shared();
-};
-
+  class shared_timed_mutex {
+  public:
+    shared_timed_mutex();
+    ~shared_timed_mutex();
+  
+    shared_timed_mutex(const shared_timed_mutex&) = delete;
+    shared_timed_mutex& operator=(const shared_timed_mutex&) = delete;
+  
+    // Exclusive ownership
+    void lock();  // blocking
+    bool try_lock();
+    template <class Rep, class Period>
+      bool try_lock_for(const chrono::duration<Rep, Period>& rel_time);
+    template <class Clock, class Duration>
+      bool try_lock_until(const chrono::time_point<Clock, Duration>& abs_time);
+    void unlock();
+  
+    // Shared ownership
+    void lock_shared();  // blocking
+    bool try_lock_shared();
+    template <class Rep, class Period>
+      bool
+      try_lock_shared_for(const chrono::duration<Rep, Period>& rel_time);
+    template <class Clock, class Duration>
+      bool
+      try_lock_shared_until(const chrono::time_point<Clock, Duration>& abs_time);
+    void unlock_shared();
+  };
 }
 \end{codeblock}
 
@@ -1564,7 +1557,7 @@ standard-layout class (Clause~\ref{class}).
 The behavior of a program is undefined if:
 \begin{itemize}
 \item it destroys a \tcode{shared_timed_mutex} object owned by any thread,
-\item a thread attempts to recursively gain any ownership of a \tcode{shared_timed_mutex}.
+\item a thread attempts to recursively gain any ownership of a \tcode{shared_timed_mutex}, or
 \item a thread terminates while possessing any ownership of a \tcode{shared_timed_mutex}.
 \end{itemize}
 
@@ -2552,7 +2545,7 @@ template <class L1, class L2, class... L3> int try_lock(L1&, L2&, L3&...);
 first until all arguments have been processed or a call to \tcode{try_lock()} fails,
 either by returning \tcode{false} or by throwing an exception. If a call to
 \tcode{try_lock()} fails, \tcode{unlock()} shall be called for all prior arguments
-and there shall be no further calls to try_lock().
+and there shall be no further calls to \tcode{try_lock()}.
 
 \pnum
 \returns \tcode{-1} if all calls to \tcode{try_lock()} returned \tcode{true},
@@ -2727,7 +2720,7 @@ namespace std {
 }
 \end{codeblock}
 
-\indextext{\idxcode{notify_all_at_thread_exit}}%
+\indexlibrary{\idxcode{notify_all_at_thread_exit}}%
 \begin{itemdecl}
 void notify_all_at_thread_exit(condition_variable& cond, unique_lock<mutex> lk);
 \end{itemdecl}
@@ -3506,7 +3499,7 @@ namespace std {
   template <class R, class... ArgTypes>
     class packaged_task<R(ArgTypes...)>;
 
-  template <class R>
+  template <class R, class... ArgTypes>
     void swap(packaged_task<R(ArgTypes...)>&, packaged_task<R(ArgTypes...)>&) noexcept;
 
   template <class R, class Alloc>

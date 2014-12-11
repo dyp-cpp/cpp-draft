@@ -1654,7 +1654,7 @@ returns the result of that call. Otherwise, returns a null pointer.
 \enterexample
 \begin{codeblock}
 T* p1 = new T;                  // throws \tcode{bad_alloc} if it fails
-T* p2 = new(nothrow) T;         // returns \tcode{0} if it fails
+T* p2 = new(nothrow) T;         // returns \tcode{nullptr} if it fails
 \end{codeblock}
 \exitexample
 \end{itemdescr}
@@ -2061,7 +2061,7 @@ then \tcode{ptr} shall be a safely-derived pointer.
 \pnum
 \notes
 Default function called when any part of the initialization in a
-placement new expression that invokes the library's
+placement \grammarterm{new-expression} that invokes the library's
 non-array placement operator new
 terminates by throwing an exception~(\ref{expr.new}).
 \end{itemdescr}
@@ -2084,7 +2084,7 @@ then \tcode{ptr} shall be a safely-derived pointer.
 \pnum
 \notes
 Default function called when any part of the initialization in a
-placement new expression that invokes the library's
+placement \grammarterm{new-expression} that invokes the library's
 array placement operator new
 terminates by throwing an exception~(\ref{expr.new}).
 \end{itemdescr}
@@ -2588,6 +2588,7 @@ namespace std {
   [[noreturn]] void terminate() noexcept;
 
   bool uncaught_exception() noexcept;
+  int uncaught_exceptions() noexcept;
 
   typedef @\unspec@ exception_ptr;
 
@@ -2595,7 +2596,7 @@ namespace std {
   [[noreturn]] void rethrow_exception(exception_ptr p);
   template<class E> exception_ptr make_exception_ptr(E e) noexcept;
 
-  [[noreturn]] template <class T> void throw_with_nested(T&& t);
+  template <class T> [[noreturn]] void throw_with_nested(T&& t);
   template <class E> void rethrow_if_nested(const E& e);
 }
 \end{codeblock}
@@ -2644,10 +2645,6 @@ exception() noexcept;
 \effects
 Constructs an object of class
 \tcode{exception}.
-
-\pnum
-\notes
-Does not throw any exceptions.
 \end{itemdescr}
 
 \indexlibrary{\idxcode{operator=}!\idxcode{exception}}%
@@ -2679,10 +2676,6 @@ virtual ~exception();
 \effects
 Destroys an object of class
 \tcode{exception}.
-
-\pnum
-\notes
-Does not throw any exceptions.
 \end{itemdescr}
 
 \indexlibrary{\idxcode{what}!\tcode{exception}}%
@@ -2749,8 +2742,8 @@ on the newly constructed object is implementation-defined.%
 \indexlibrary{\idxcode{bad_exception}!\tcode{bad_exception}}%
 \indexlibrary{\idxcode{operator=}!\tcode{bad_exception}}%
 \begin{itemdecl}
-    bad_exception(const bad_exception&) noexcept;
-    bad_exception& operator=(const bad_exception&) noexcept;
+bad_exception(const bad_exception&) noexcept;
+bad_exception& operator=(const bad_exception&) noexcept;
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -2864,33 +2857,22 @@ default \tcode{terminate_handler} is always considered a callable handler in
 this context. \exitnote
 \end{itemdescr}
 
-\rSec2[uncaught]{\tcode{uncaught_exception}}
+\rSec2[uncaught.exceptions]{\tcode{uncaught_exceptions}}
 
-\indexlibrary{\idxcode{uncaught_exception}}%
+\indexlibrary{\idxcode{uncaught_exceptions}}%
 \begin{itemdecl}
-bool uncaught_exception() noexcept;
+int uncaught_exceptions() noexcept;
 \end{itemdecl}
 
 \begin{itemdescr}
 \pnum
 \returns
-\tcode{true}
-after
-the current thread has initialized
-an exception object~(\ref{except.throw})
-until a handler for the exception (including \tcode{std::unexpected()}
-or \tcode{std::terminate()}) is activated~(\ref{except.handle}).
-\enternote
-This includes stack unwinding~(\ref{except.ctor}).
-\exitnote
+The number of uncaught exceptions~(\ref{except.uncaught}).
 
 \pnum
 \notes
-When
-\tcode{uncaught_exception()}
-returns
-\tcode{true},
-throwing an exception can result in a call of
+When \tcode{uncaught_exceptions() > 0},
+throwing an exception can result in a call of\\
 \tcode{std::terminate()}~(\ref{except.terminate}).
 \end{itemdescr}
 
@@ -3014,7 +2996,7 @@ namespace std {
     exception_ptr nested_ptr() const noexcept;
   };
 
-  [[noreturn]] template<class T> void throw_with_nested(T&& t);
+  template<class T> [[noreturn]] void throw_with_nested(T&& t);
   template <class E> void rethrow_if_nested(const E& e);
 }
 \end{codeblock}
@@ -3066,7 +3048,7 @@ exception_ptr nested_ptr() const noexcept;
 \indexlibrary{\idxcode{throw_with_nested}!\idxcode{nested_exception}}
 \indexlibrary{\idxcode{nested_exception}!\idxcode{throw_with_nested}}
 \begin{itemdecl}
-[[noreturn]] template <class T> void throw_with_nested(T&& t);
+template <class T> [[noreturn]] void throw_with_nested(T&& t);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -3105,7 +3087,8 @@ If the dynamic type of \tcode{e} is publicly and unambiguously derived from
 \indextext{\idxhdr{initializer\_list}}%
 \indexlibrary{\idxhdr{initializer_list}}%
 \pnum
-The header \tcode{<initializer_list>} defines one type.
+The header \tcode{<initializer_list>} defines a class template and several
+support functions related to list-initialization~(see \ref{dcl.init.list}).
 
 \synopsis{Header \tcode{<initializer_list>} synopsis}
 
@@ -3144,6 +3127,10 @@ a length would be obvious representations for \tcode{initializer_list}.
 \tcode{initializer_list} is used to implement initializer lists as specified
 in~\ref{dcl.init.list}. Copying an initializer list does not copy the underlying
 elements. \exitnote
+
+\pnum
+If an explicit specialization or partial specialization of
+\tcode{initializer_list} is declared, the program is ill-formed.
 
 \rSec2[support.initlist.cons]{Initializer list constructors}
 

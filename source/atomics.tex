@@ -81,9 +81,9 @@ namespace std {
   bool atomic_compare_exchange_strong(@\textit{atomic-type}@*, T*, T) noexcept;
   bool atomic_compare_exchange_weak_explicit(volatile @\textit{atomic-type}@*, T*, T, 
     memory_order, memory_order) noexcept;
-  bool atomic_compare_exchange_weak_explicit(@\textit{atomic-type}@*, T*, T.
+  bool atomic_compare_exchange_weak_explicit(@\textit{atomic-type}@*, T*, T,
     memory_order, memory_order) noexcept;
-  bool atomic_compare)exchange_strong_explicit(volatile @\textit{atomic-type}@*, T*, T,
+  bool atomic_compare_exchange_strong_explicit(volatile @\textit{atomic-type}@*, T*, T,
     memory_order, memory_order) noexcept;
   bool atomic_compare_exchange_strong_explicit(@\textit{atomic-type}@*, T*, T,
     memory_order, memory_order) noexcept;
@@ -721,13 +721,12 @@ In the following operation definitions:
 
 \begin{itemize}
 \item  an \textit{A} refers to one of the atomic types.
-\item a \textit{C} refers to its corresponding non-atomic type. The
-\tcode{atomic_address} atomic type corresponds to the \tcode{void*} non-atomic type.
+\item a \textit{C} refers to its corresponding non-atomic type.
 \item an \textit{M} refers to type of the other argument for arithmetic operations. For
 integral atomic types, \textit{M} is \textit{C}. For atomic address types, \textit{M} is
 \tcode{std::ptrdiff_t}.
-\item the non member functions not ending in \tcode{_explicit} have the semantics of their
-corresponding \tcode{_explicit} with \tcode{memory_order} arguments of
+\item the non-member functions not ending in \tcode{_explicit} have the semantics of their
+corresponding \tcode{_explicit} functions with \tcode{memory_order} arguments of
 \tcode{memory_order_seq_cst}.
 \end{itemize}
 

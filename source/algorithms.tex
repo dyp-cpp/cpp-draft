@@ -270,15 +270,6 @@ namespace std {
       ForwardIterator first, ForwardIterator middle,
       ForwardIterator last, OutputIterator result);
 
-  // \ref{depr.alg.random.shuffle}, random_shuffle (deprecated):
-  template<class RandomAccessIterator>
-    void random_shuffle(RandomAccessIterator first,
-                        RandomAccessIterator last);
-  template<class RandomAccessIterator, class RandomNumberGenerator>
-    void random_shuffle(RandomAccessIterator first,
-                        RandomAccessIterator last,
-                        RandomNumberGenerator&& rng);
-
   // \ref{alg.random.shuffle}, shuffle:
   template<class RandomAccessIterator, class UniformRandomNumberGenerator>
     void shuffle(RandomAccessIterator first,
@@ -582,41 +573,48 @@ specification requires such modification.
 \pnum
 Throughout this Clause, the names of template parameters
 are used to express type requirements.
-If an algorithm's template parameter is
+\begin{itemize}
+\item
+If an algorithm's template parameter is named
 \tcode{InputIterator},
 \tcode{InputIterator1},
 or
 \tcode{InputIterator2},
-the actual template argument shall satisfy the
+the template argument shall satisfy the
 requirements of an input iterator~(\ref{input.iterators}).
-If an algorithm's template parameter is
+\item
+If an algorithm's template parameter is named
 \tcode{OutputIterator},
 \tcode{OutputIterator1},
 or
 \tcode{OutputIterator2},
-the actual template argument shall satisfy the requirements
+the template argument shall satisfy the requirements
 of an output iterator~(\ref{output.iterators}).
-If an algorithm's template parameter is
+\item
+If an algorithm's template parameter is named
 \tcode{ForwardIterator},
 \tcode{ForwardIterator1},
 or
 \tcode{ForwardIterator2},
-the actual template argument shall satisfy the requirements
+the template argument shall satisfy the requirements
 of a forward iterator~(\ref{forward.iterators}).
-If an algorithm's template parameter is
+\item
+If an algorithm's template parameter is named
 \tcode{BidirectionalIterator},
 \tcode{Bidirectional\-Iterator1},
 or
 \tcode{BidirectionalIterator2},
-the actual template argument shall satisfy the requirements
+the template argument shall satisfy the requirements
 of a bidirectional iterator~(\ref{bidirectional.iterators}).
-If an algorithm's template parameter is
+\item
+If an algorithm's template parameter is named
 \tcode{RandomAccessIterator},
 \tcode{Random\-AccessIterator1},
 or
 \tcode{RandomAccessIterator2},
-the actual template argument shall satisfy the requirements
+the template argument shall satisfy the requirements
 of a random-access iterator~(\ref{random.access.iterators}).
+\end{itemize}
 
 \pnum
 If an algorithm's
@@ -627,7 +625,7 @@ type requirement:
 The type of that argument shall satisfy the requirements
 of a mutable iterator~(\ref{iterator.requirements}).
 \enternote
-This requirement does not affect arguments that are declared as
+This requirement does not affect arguments that are named
 \tcode{OutputIterator},
 \tcode{OutputIterator1},
 or
@@ -1090,7 +1088,7 @@ is not found.
 \pnum
 \complexity
 At most
-\tcode{last1 - first1}
+\tcode{min(last1 - first1, last2 - first2)}
 applications of the corresponding predicate.
 \end{itemdescr}
 
@@ -3775,7 +3773,9 @@ template<class ForwardIterator, class Compare>
 \returns
 \tcode{make_pair(first, first)} if \range{first}{last} is empty, otherwise
 \tcode{make_pair(m, M)}, where \tcode{m} is
-the first iterator in \range{first}{last} such that no iterator in the range refers to a smaller element, and where \tcode{M} is the last iterator in \range{first}{last} such that no iterator in the range refers to a larger element.
+the first iterator in \range{first}{last} such that no iterator in the range refers to a smaller element, and where \tcode{M} is the last iterator
+\footnote{This behavior intentionally differs from \tcode{max_element()}.}
+in \range{first}{last} such that no iterator in the range refers to a larger element.
 
 \pnum
 \complexity

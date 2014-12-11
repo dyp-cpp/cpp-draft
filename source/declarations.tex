@@ -44,7 +44,7 @@ the form
 
 \begin{bnf}
 \nontermdef{alias-declaration}\br
-    \terminal{using} identifier attribute-specifier-seq\opt = type-id \terminal{;}
+    \terminal{using} identifier attribute-specifier-seq\opt \terminal{=} type-id \terminal{;}
 \end{bnf}
 
 \begin{bnf}
@@ -55,6 +55,7 @@ the form
 
 \begin{bnf}
 \nontermdef{static_assert-declaration}\br
+  \terminal{static_assert} \terminal{(} constant-expression \terminal{)} \terminal{;}\br
   \terminal{static_assert} \terminal{(} constant-expression \terminal{,} string-literal \terminal{)} \terminal{;}
 \end{bnf}
 
@@ -78,6 +79,7 @@ the form
 \grammarterm{using-directive}{s} are described in~\ref{namespace.udir}.
 \exitnote
 
+\pnum
 The
 \grammarterm{simple-declaration}
 
@@ -104,6 +106,7 @@ entity may appear at the start of the declaration and after the
 \end{codeblock}
 \exitexample
 
+\pnum
 Except where otherwise specified, the meaning of an \grammarterm{attribute-declaration}
 is \impldef{meaning of attribute declaration}.
 
@@ -155,7 +158,8 @@ expression~(\ref{expr.const}) that can be contextually converted to \tcode{bool}
 so converted is \tcode{true}, the declaration has no
 effect. Otherwise, the program is ill-formed, and the resulting
 diagnostic message~(\ref{intro.compliance}) shall include the text of
-the \grammarterm{string-literal}, except that characters not in the basic
+the \grammarterm{string-literal}, if one is supplied,
+except that characters not in the basic
 source character set~(\ref{lex.charset}) are not required to appear in
 the diagnostic message.
 \enterexample
@@ -234,6 +238,11 @@ appertains to the type determined by the preceding
 \grammarterm{decl-specifier}{s}~(\ref{dcl.meaning}). The \grammarterm{attribute-specifier-seq}
 affects the type only for the declaration it appears in, not other declarations involving the
 same type.
+
+\pnum
+Each \grammarterm{decl-specifier} shall appear at most once in the complete
+\grammarterm{decl-specifier-seq} of a declaration, except that
+\tcode{long} may appear twice.
 
 \pnum
 \indextext{ambiguity!declaration type}%
@@ -317,7 +326,9 @@ global namespace, which shall be declared
 \tcode{static}~(\ref{class.union})). The
 \grammarterm{storage-class-specifier} applies to the name declared by each
 \grammarterm{init-declarator} in the list and not to any names declared by
-other specifiers. A \grammarterm{storage-class-specifier} shall not be
+other specifiers. A \grammarterm{storage-class-specifier}
+other than \tcode{thread_local}
+shall not be
 specified in an explicit specialization~(\ref{temp.expl.spec}) or an
 explicit instantiation~(\ref{temp.explicit}) directive.
 
@@ -447,10 +458,9 @@ void h() {
 \exitexample
 
 \pnum
-The \tcode{mutable} specifier can be applied only to names of class data
-members~(\ref{class.mem}) and cannot be applied to names declared
-\tcode{const} or \tcode{static}, and cannot be applied to reference
-members.
+The \tcode{mutable} specifier shall appear only in the declaration of
+a non-static data member~(\ref{class.mem})
+whose type is neither const-qualified nor a reference type.
 \enterexample
 
 \begin{codeblock}
@@ -518,14 +528,7 @@ shall be declared inline in all translation units in which it appears;
 no diagnostic is required. An \tcode{inline} function with external
 linkage shall have the same address in all translation units. A
 \tcode{static} local variable in an \tcode{extern} \tcode{inline}
-function always refers to the same object. A string literal in the body
-of an \tcode{extern} \tcode{inline} function is the same object in
-different translation units.
-\enternote
-A string literal appearing in a default argument is not in
-the body of an inline function merely because the expression is used in
-a function call from that inline function.
-\exitnote
+function always refers to the same object. 
 A type defined within the body of an \tcode{extern inline} function is the
 same type in every translation unit.
 
@@ -741,7 +744,7 @@ a variable or variable template,
 the declaration of a
 function or function template, or the declaration of a static
 data member of a literal type~(\ref{basic.types}).
-If any declaration of a function, function template, or variable template has
+If any declaration of a function or function template has
 a \tcode{constexpr} specifier,
 then all its declarations shall contain the \tcode{constexpr} specifier. \enternote An
 explicit specialization can differ from the template declaration with respect to the
@@ -896,7 +899,7 @@ constructor.
 \enterexample
 \begin{codeblock}
 struct Length { 
-  explicit constexpr Length(int i = 0) : val(i) { }
+  constexpr explicit Length(int i = 0) : val(i) { }
 private: 
   int val; 
 }; 
@@ -908,8 +911,9 @@ For a non-template, non-defaulted
 \tcode{constexpr} function or a non-template, non-defaulted, non-inheriting
 \tcode{constexpr} constructor, if no argument values exist such that
 an invocation of the function or constructor could be an evaluated subexpression of a core
-constant expression~(\ref{expr.const}), the program is ill-formed; no diagnostic
-required.
+constant expression~(\ref{expr.const}), or,
+for a constructor, a constant initializer for some object~(\ref{basic.start.init}),
+the program is ill-formed; no diagnostic required.
 \enterexample
 \begin{codeblock}
 constexpr int f(bool b)
@@ -954,14 +958,6 @@ function can appear in a constant expression.
 The \tcode{constexpr} specifier has no
 effect on the type of a \tcode{constexpr} function or a \tcode{constexpr} constructor.  \enterexample
 \begin{codeblock}
-class debug_flag { 
-public: 
-  explicit debug_flag(bool); 
-  constexpr bool is_on() const; // error: \tcode{debug_flag} not 
-                                // literal type 
-private: 
-  bool flag; 
-}; 
 constexpr int bar(int x, int y) // OK 
     { return x + y + x*y; } 
 // ... 
@@ -1253,7 +1249,7 @@ The simple type specifiers are
 \indextext{type~specifier!\idxcode{decltype}}%
 \indextext{\idxgram{type-name}}%
 \indextext{\idxgram{lambda-introducer}}%
-The \tcode{auto} specifier is a placeholder for a type to be
+The \grammarterm{simple-type-specifier} \tcode{auto} is a placeholder for a type to be
 deduced~(\ref{dcl.spec.auto}).
 The other
 \grammarterm{simple-type-specifier}{s}
@@ -1352,7 +1348,7 @@ const int&& foo();
 int i;
 struct A { double x; };
 const A* a = new A();
-decltype(foo()) x1 = 0;         // type is \tcode{const int\&\&}
+decltype(foo()) x1 = 17;        // type is \tcode{const int\&\&}
 decltype(i) x2;                 // type is \tcode{int}
 decltype(a->x) x3;              // type is \tcode{double}
 decltype((a->x)) x4 = x3;       // type is \tcode{const double\&}
@@ -1493,11 +1489,12 @@ enum E x = E::a;                // OK
 
 \pnum
 The \tcode{auto} and \tcode{decltype(auto)} \grammarterm{type-specifier}{s}
-designate a placeholder type that will be replaced later, either by deduction
-from an initializer or by explicit specification with a
-\grammarterm{trailing-return-type}{}. The \tcode{auto}
-\grammarterm{type-specifier} is also used to signify that a lambda is a
-generic lambda.
+are used to
+designate a placeholder type that will be replaced later by deduction
+from an initializer. The \tcode{auto}
+\grammarterm{type-specifier} is also used to
+introduce a function type having a \grammarterm{trailing-return-type} or to
+signify that a lambda is a generic lambda.
 
 \pnum
 The placeholder type can appear with a function declarator in the
@@ -1505,7 +1502,8 @@ The placeholder type can appear with a function declarator in the
 \grammarterm{conversion-function-id}, or \grammarterm{trailing-return-type},
 in any context where such a declarator is valid. If the function declarator
 includes a \grammarterm{trailing-return-type}~(\ref{dcl.fct}), that specifies
-the declared return type of the function. If the declared return type of the
+the declared return type of the function. Otherwise, the function declarator
+shall declare a function. If the declared return type of the
 function contains a placeholder type, the return type of the function is
 deduced from \tcode{return} statements in the body of the function, if any.
 
@@ -1572,28 +1570,37 @@ When a variable declared using a placeholder type is initialized, or a
 \tcode{return} statement occurs in a function declared with a return type that
 contains a placeholder type, the deduced return type or variable type is
 determined from the type of its initializer. In the case of a \tcode{return}
-with no operand, the initializer is considered to be \tcode{void()}.
-Let \tcode{T} be the declared type of the variable or return type of the
-function.
+with no operand or with an operand of type \tcode{void}, the declared return
+type shall be \tcode{auto} and the deduced return type is \tcode{void}.
+Otherwise, let \tcode{T} be the declared type of the variable or return type of
+the function.
 If the placeholder is the \tcode{auto} \grammarterm{type-specifier}, the
 deduced type is determined using the rules for template argument deduction.
+If the initialization is direct-list-initialization
+then the \grammarterm{braced-init-list} shall contain
+only a single \grammarterm{initializer-clause} \tcode{L}. 
 If the deduction is for a \tcode{return} statement and the initializer is a
 \grammarterm{braced-init-list}~(\ref{dcl.init.list}), the program is
 ill-formed. Otherwise, obtain \tcode{P} from
 \tcode{T} by replacing the occurrences of \tcode{auto} with either a new
-invented type template parameter \tcode{U} or, if the initializer is a
-\grammarterm{braced-init-list}, with
+invented type template parameter \tcode{U} or,
+if the initialization is copy-list-initialization, with
 \tcode{std::initializer_list<U>}. Deduce a value for \tcode{U} using the rules
 of template argument deduction from a function call~(\ref{temp.deduct.call}),
 where \tcode{P} is a
-function template parameter type and the initializer is the
-corresponding argument. If the deduction fails, the declaration is ill-formed.
+function template parameter type and
+the corresponding argument is the initializer,
+or \tcode{L} in the case of direct-list-initialization.
+If the deduction fails, the declaration is ill-formed.
 Otherwise, the type deduced for the variable or return type is obtained by
 substituting the deduced \tcode{U} into \tcode{P}.
 \enterexample
 \begin{codeblock}
 auto x1 = { 1, 2 };         // \tcode{decltype(x1)} is \tcode{std::initializer_list<int>}
 auto x2 = { 1, 2.0 };       // error: cannot deduce element type
+auto x3{ 1, 2 };            // error: not a single element
+auto x4 = { 3 };            // \tcode{decltype(x4)} is \tcode{std::initializer_list<int>}
+auto x5{ 3 };               // \tcode{decltype(x5)} is \tcode{int}
 \end{codeblock}
 \exitexample
 
@@ -1808,7 +1815,7 @@ constants. Its name becomes an \grammarterm{enum-name}, within its scope.
 
 \begin{bnf}
 \nontermdef{enumerator}\br
-    identifier
+    identifier attribute-specifier-seq\opt
 \end{bnf}
 
 The optional \grammarterm{attribute-specifier-seq} in the \grammarterm{enum-head} and
@@ -1860,7 +1867,6 @@ is zero. An \grammarterm{enumerator-definition} without an
 \grammarterm{initializer} gives the \grammarterm{enumerator} the value
 obtained by increasing the value of the previous \grammarterm{enumerator}
 by one.
-
 \enterexample
 
 \begin{codeblock}
@@ -1871,6 +1877,8 @@ enum { d, e, f=e+2 };
 defines \tcode{a}, \tcode{c}, and \tcode{d} to be zero, \tcode{b} and
 \tcode{e} to be \tcode{1}, and \tcode{f} to be \tcode{3}.
 \exitexample
+The optional \grammarterm{attribute-specifier-seq} in an
+\grammarterm{enumerator} appertains to that enumerator.
 
 \pnum
 An \grammarterm{opaque-enum-declaration} is either a redeclaration
@@ -1898,9 +1906,9 @@ declaration.
 \indextext{\idxcode{enum}!underlying~type}%
 Each enumeration defines a type that is different from all other types.
 Each enumeration also has an underlying type.
-The underlying type can be explicitly specified using \grammarterm{enum-base};
-if not explicitly specified, the underlying type of a scoped enumeration type
-is \tcode{int}. In these cases, the underlying type is said to be
+The underlying type can be explicitly specified using an \grammarterm{enum-base}.
+For a scoped enumeration type, the underlying type is \tcode{int} if it is not
+explicitly specified. In both of these cases, the underlying type is said to be
 \term{fixed}.
 Following the closing brace of an \grammarterm{enum-specifier}, each
 enumerator has the type of its enumeration.
@@ -1943,7 +1951,6 @@ its point of declaration to immediately after the closing \tcode{\}} of its
 \grammarterm{enum-specifier}, at which point it becomes a complete type.
 
 \pnum
-\indextext{type!enumeration underlying}%
 For an enumeration whose underlying type is not fixed,
 the underlying type
 is an
@@ -1979,8 +1986,7 @@ expression of enumeration type from having a value that falls outside
 this range.}
 
 \pnum
-\indextext{layout-compatible type}%
-Two enumeration types are layout-compatible if they have the same
+Two enumeration types are \defn{layout-compatible} if they have the same
 \term{underlying type}.
 
 \pnum
@@ -2100,40 +2106,36 @@ is
 
 \begin{bnf}
 \nontermdef{namespace-name}\br
-        original-namespace-name\br
+        identifier\br
         namespace-alias
-\end{bnf}
-
-\begin{bnf}
-\nontermdef{original-namespace-name}\br
-        identifier
 \end{bnf}
 
 \begin{bnf}
 \nontermdef{namespace-definition}\br
         named-namespace-definition\br
-        unnamed-namespace-definition
+        unnamed-namespace-definition\br
+        nested-namespace-definition
 \end{bnf}
 
 \begin{bnf}
 \nontermdef{named-namespace-definition}\br
-        original-namespace-definition\br
-        extension-namespace-definition
-\end{bnf}
-
-\begin{bnf}
-\nontermdef{original-namespace-definition}\br
-        \terminal{inline\opt} \terminal{namespace} identifier \terminal{\{} namespace-body \terminal{\}}
-\end{bnf}
-
-\begin{bnf}
-\nontermdef{extension-namespace-definition}\br
-        \terminal{inline\opt} \terminal{namespace} original-namespace-name \terminal{\{} namespace-body \terminal{\}}
+        \terminal{inline\opt} \terminal{namespace} attribute-specifier-seq\opt identifier \terminal{\{} namespace-body \terminal{\}}
 \end{bnf}
 
 \begin{bnf}
 \nontermdef{unnamed-namespace-definition}\br
-        \terminal{inline\opt} \terminal{namespace \{} namespace-body \terminal{\}}
+        \terminal{inline\opt} \terminal{namespace} attribute-specifier-seq\opt \terminal{\{} namespace-body \terminal{\}}
+\end{bnf}
+
+\begin{bnf}
+\nontermdef{nested-namespace-definition}\br
+        \terminal{namespace} enclosing-namespace-specifier \terminal{::} identifier \terminal{\{} namespace-body \terminal{\}}
+\end{bnf}
+
+\begin{bnf}
+\nontermdef{enclosing-namespace-specifier}\br
+        identifier\br
+        enclosing-namespace-specifier \terminal{::} identifier
 \end{bnf}
 
 \begin{bnf}
@@ -2142,22 +2144,22 @@ is
 \end{bnf}
 
 \pnum
-The \grammarterm{identifier} in an \grammarterm{original-namespace-definition}
-shall not have been previously defined in the declarative region in
-which the \grammarterm{original-namespace-definition} appears. The
-\grammarterm{identifier} in an \grammarterm{original-namespace-definition} is
-the name of the namespace. Subsequently in that declarative region, it
-is treated as an \grammarterm{original-namespace-name}.
-
-\pnum
-The \grammarterm{original-namespace-name} in an
-\grammarterm{extension-namespace-definition} shall have previously been
-defined in an \grammarterm{original-namespace-definition} in the same
-declarative region.
-
-\pnum
 Every \grammarterm{namespace-definition} shall appear in the global scope
 or in a namespace scope~(\ref{basic.scope.namespace}).
+
+\pnum
+In a \grammarterm{named-namespace-definition},
+the \grammarterm{identifier} is the name of the namespace.
+If the \grammarterm{identifier}, when looked up~(\ref{basic.lookup.unqual}),
+refers to a \grammarterm{namespace-name} (but not a \grammarterm{namespace-alias})
+introduced in the declarative region
+in which the \grammarterm{named-namespace-definition} appears,
+the \grammarterm{namespace-definition}
+\indextext{extend|see{namespace, extend}}
+\defnx{extends}{namespace!extend} the previously-declared namespace.
+Otherwise, the \grammarterm{identifier} is introduced
+as a \grammarterm{namespace-name} into the declarative region
+in which the \grammarterm{named-namespace-definition} appears.
 
 \pnum
 Because a \grammarterm{namespace-definition} contains
@@ -2205,9 +2207,14 @@ namespace Q {
 If the optional initial \tcode{inline} keyword appears in a
 \grammarterm{namespace-definition} for a particular namespace, that namespace is
 declared to be an \term{inline namespace}. The \tcode{inline} keyword may be
-used on an \grammarterm{extension-namespace-definition} only if it was
-previously used on the \grammarterm{original-namespace-definition} for that
-namespace.
+used on a \grammarterm{namespace-definition} that extends a namespace
+only if it was previously used on the \grammarterm{namespace-definition} 
+that initially declared the \grammarterm{namespace-name} for that namespace.
+
+\pnum
+The optional \grammarterm{attribute-specifier-seq}
+in a \grammarterm{named-namespace-definition}
+appertains to the namespace being defined or extended.
 
 \pnum
 Members of an inline namespace can be used in most respects as though they were members
@@ -2217,8 +2224,9 @@ argument-dependent lookup~(\ref{basic.lookup.argdep}) whenever one of them is,
 and a \grammarterm{using-directive}~(\ref{namespace.udir}) that names the inline
 namespace is implicitly inserted into the enclosing namespace as for an unnamed
 namespace~(\ref{namespace.unnamed}). Furthermore, each
-member of the inline namespace can subsequently be explicitly
-instantiated~(\ref{temp.explicit}) or explicitly specialized~(\ref{temp.expl.spec}) as
+member of the inline namespace can subsequently be partially
+specialized~(\ref{temp.class.spec}), explicitly
+instantiated~(\ref{temp.explicit}), or explicitly specialized~(\ref{temp.expl.spec}) as
 though it were a member of the enclosing namespace. Finally, looking up a name in the
 enclosing namespace via explicit qualification~(\ref{namespace.qual}) will include
 members of the inline namespace brought in by the \grammarterm{using-directive} even if
@@ -2234,6 +2242,32 @@ The \term{enclosing namespace set} of \tcode{O} is the set of namespaces
 consisting of the innermost non-inline namespace enclosing
 an inline namespace \tcode{O}, together with any intervening inline namespaces.
 
+\pnum
+A \grammarterm{nested-namespace-definition} with an
+\grammarterm{enclosing-namespace-specifier} \tcode{E},
+\grammarterm{identifier} \tcode{I} and
+\grammarterm{namespace-body} \tcode{B}
+is equivalent to
+\begin{codeblock}
+namespace E { namespace I { B } }
+\end{codeblock}
+\enterexample
+\begin{codeblock}
+namespace A::B::C {
+  int i;
+}
+\end{codeblock}
+The above has the same effect as:
+\begin{codeblock}
+namespace A {
+  namespace B {
+    namespace C {
+      int i;
+    }
+  }
+}
+\end{codeblock}
+\exitexample
 
 \rSec3[namespace.unnamed]{Unnamed namespaces}%
 \indextext{namespace!unnamed}
@@ -2243,39 +2277,39 @@ An \grammarterm{unnamed-namespace-definition} behaves as if it were
 replaced by
 
 \begin{ncsimplebnf}
-\terminal{inline}\opt \terminal{namespace} \uniquens \terminal{\{ /* empty body */ \}}\br
-\terminal{using namespace} \uniquens \terminal{;}\br
-\terminal{namespace} \uniquens \terminal{\{} namespace-body \terminal{\}}
+\terminal{inline}\opt \terminal{namespace} \uniquens{} \terminal{\{ /* empty body */ \}}\br
+\terminal{using namespace} \uniquens{} \terminal{;}\br
+\terminal{namespace} \uniquens{} \terminal{\{} namespace-body \terminal{\}}
 \end{ncsimplebnf}
 
 where
 \tcode{inline} appears if and only if it appears in the
-\grammarterm{unnamed-namespace-definition},
-all occurrences of \uniquens in a translation unit are replaced by
+\grammarterm{unnamed-namespace-definition}
+and all occurrences of \uniquens{} in a translation unit are replaced by
 the same identifier, and this identifier differs from all other
-identifiers in the entire program.\footnote{Although entities in an unnamed
-namespace might have external linkage,
-they are effectively qualified by a name unique to their translation
-unit and therefore can never be seen from any other translation unit.}
+identifiers in the translation unit.
+The optional \grammarterm{attribute-specifier-seq}
+in the \grammarterm{unnamed-namespace-definition}
+appertains to \uniquens{}.
 \enterexample
 
 \begin{codeblock}
-namespace { int i; }            // \uniquens \tcode{::i}
-void f() { i++; }               // \uniquens \tcode{::i++}
+namespace { int i; }            // \uniquens\tcode{::i}
+void f() { i++; }               // \uniquens\tcode{::i++}
 
 namespace A {
   namespace {
-    int i;                      // \tcode{A::} \uniquens \tcode{::i}
-    int j;                      // \tcode{A::} \uniquens \tcode{::j}
+    int i;                      // \tcode{A::}\uniquens\tcode{::i}
+    int j;                      // \tcode{A::}\uniquens\tcode{::j}
   }
-  void g() { i++; }             // \tcode{A::} \uniquens \tcode{::i++}
+  void g() { i++; }             // \tcode{A::}\uniquens\tcode{::i++}
 }
 
 using namespace A;
 void h() {
-  i++;                          // error: \uniquens \tcode{::i} or \tcode{A::} \uniquens \tcode{::i}
-  A::i++;                       // \tcode{A::} \uniquens \tcode{::i}
-  j++;                          // \tcode{A::} \uniquens \tcode{::j}
+  i++;                          // error: \uniquens\tcode{::i} or \tcode{A::}\uniquens\tcode{::i}
+  A::i++;                       // \tcode{A::}\uniquens\tcode{::i}
+  j++;                          // \tcode{A::}\uniquens\tcode{::j}
 }
 \end{codeblock}
 \exitexample
@@ -2284,14 +2318,25 @@ void h() {
 \indextext{namespace!member definition}
 
 \pnum
-Members (including explicit specializations of
-templates~(\ref{temp.expl.spec})) of a namespace can be defined within
-that namespace.
+A declaration in a namespace \tcode{N} (excluding declarations in nested scopes)
+whose \grammarterm{declarator-id} is an \grammarterm{unqualified-id}
+declares (or redeclares) a member of \tcode{N}, and may be a definition.
+\enternote An explicit instantiation~(\ref{temp.explicit}) or
+explicit specialization~(\ref{temp.expl.spec}) of a template
+does not introduce a name and thus may be declared using an
+\grammarterm{unqualified-id} in a member of the enclosing namespace set,
+if the primary template is declared in an inline namespace. \exitnote
 \enterexample
 
 \begin{codeblock}
 namespace X {
-  void f() { /* ... */ }
+  void f() { /* ... */ }  // OK: introduces \tcode{X::f()}
+
+  namespace M {
+    void g();             // OK: introduces \tcode{X::M::g()}
+  }
+  using M::g;
+  void g();               // error: conflicts with \tcode{X::M::g()}
 }
 \end{codeblock}
 \exitexample
@@ -2324,7 +2369,6 @@ namespace R {
 \exitexample
 
 \pnum
-Every name first declared in a namespace is a member of that namespace.
 If a \tcode{friend} declaration in a non-local class first declares a
 class, function, class template or function template\footnote{this implies that the name of the class or function is unqualified.}
 the friend is a member of the innermost enclosing
@@ -2432,14 +2476,6 @@ namespace CWVLN = CWVLN;
 \end{codeblock}
 \exitexample
 
-\pnum
-A \grammarterm{namespace-name} or \grammarterm{namespace-alias} shall not be
-declared as the name of any other entity in the same declarative region.
-A \grammarterm{namespace-name} defined at global scope shall not be
-declared as the name of any other entity in any global scope of the
-program. No diagnostic is required for a violation of this rule by
-declarations in different translation units.
-
 \rSec2[namespace.udecl]{The \tcode{using} declaration}%
 \indextext{using-declaration|(}
 
@@ -2450,7 +2486,6 @@ region in which the \grammarterm{using-declaration} appears.
 \begin{bnf}
 \nontermdef{using-declaration}\br
     \terminal{using typename\opt} nested-name-specifier unqualified-id \terminal{;}\br
-    \terminal{using ::} unqualified-id \terminal{;}
 \end{bnf}
 
 The member name specified in a \grammarterm{using-declaration} is declared
@@ -2576,8 +2611,7 @@ void f() {
 \pnum
 Members declared by a \grammarterm{using-declaration} can be referred to by
 explicit qualification just like other member
-names~(\ref{namespace.qual}). In a \grammarterm{using-declaration}, a
-prefix \tcode{::} refers to the global namespace.
+names~(\ref{namespace.qual}).
 \enterexample
 
 \begin{codeblock}
@@ -2984,14 +3018,14 @@ namespace B {
 \end{codeblock}
 \exitexample
 
+
 \pnum
-If a namespace is extended by an
-\grammarterm{extension-namespace-definition} after a
+If a namespace is extended~(\ref{namespace.def}) after a
 \grammarterm{using-directive} for that namespace is given, the additional
 members of the extended namespace and the members of namespaces
 nominated by \grammarterm{using-directive}{s} in the
-\grammarterm{extension-namespace-definition} can be used after the
-\grammarterm{extension-namespace-definition}.
+extending \grammarterm{namespace-definition} can be used after the
+extending \grammarterm{namespace-definition}.
 
 \pnum
 If name lookup finds a declaration for a name in two different
@@ -3018,8 +3052,8 @@ using namespace B;
 
 void f() {
   X(1);             // error: name \tcode{X} found in two namespaces
-  g();              // okay: name \tcode{g} refers to the same entity
-  h();              // okay: overload resolution selects \tcode{A::h}
+  g();              // OK: name \tcode{g} refers to the same entity
+  h();              // OK: overload resolution selects \tcode{A::h}
 }
 \end{codeblock}
 \exitnote
@@ -3196,19 +3230,19 @@ extern "C" {
 extern "C" void f5() {
   extern void f4();             // OK: Name linkage (internal)
                                 // and function type linkage (C
-                                // language linkage) gotten from
+                                // language linkage) obtained from
                                 // previous declaration.
 }
 
 extern void f4();               // OK: Name linkage (internal)
                                 // and function type linkage (C
-                                // language linkage) gotten from
+                                // language linkage) obtained from
                                 // previous declaration.
 
 void f6() {
   extern void f4();             // OK: Name linkage (internal)
                                 // and function type linkage (C
-                                // language linkage) gotten from
+                                // language linkage) obtained from
                                 // previous declaration.
 }
 \end{codeblock}
@@ -3270,7 +3304,7 @@ declarations for a variable with C language linkage with the same name
 (ignoring the namespace names that qualify it) that appear in different
 namespace scopes refer to the same variable.
 An entity with C language linkage shall not be declared with the same name
-as an entity in global scope, unless both declarations denote the same entity;
+as a variable in global scope, unless both declarations denote the same entity;
 no diagnostic is required if the declarations appear in different translation units.
 A variable with C language linkage shall not be declared with the same name as a
 function with C language linkage (ignoring the namespace names that qualify the
@@ -3534,7 +3568,17 @@ alignment requirement shall be set to the strictest specified alignment.
 The combined effect of all \grammarterm{alignment-specifier}{s} in a declaration shall not
 specify an alignment that is less strict than the alignment that would
 be required for the entity being declared if all \grammarterm{alignment-specifier}{s}
-were omitted (including those in other declarations).
+appertaining to that entity
+were omitted.
+\enterexample
+\begin{codeblock}
+struct alignas(8) S {};
+struct alignas(1) U {
+  S s;
+};   // Error: \tcode{U} specifies an alignment that is less strict than
+     // if the \tcode{alignas(1)} were omitted.
+\end{codeblock}
+\exitexample
 
 \pnum
 If the defining declaration of an entity has an
@@ -3719,8 +3763,16 @@ could be used to explain the rationale for deprecation and/or to suggest a repla
 \exitnote
 
 \pnum
-The attribute may be applied to the declaration of a class, a \grammarterm{typedef-name}, a
-variable, a non-static data member, a function, an enumeration, or a template specialization.
+The attribute may be applied to the declaration of
+a class,
+a \grammarterm{typedef-name},
+a variable,
+a non-static data member,
+a function,
+a namespace,
+an enumeration,
+an enumerator, or
+a template specialization.
 
 \pnum
 A name or entity declared without the \tcode{deprecated} attribute can later be re-declared

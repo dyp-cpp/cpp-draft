@@ -32,7 +32,7 @@ Clauses. \exitnote
 \indextext{region!declarative}%
 \indextext{entity}%
 An \defn{entity} is a value, object, reference, function, enumerator, type,
-class member, template, template specialization, namespace, parameter
+class member, bit-field, template, template specialization, namespace, parameter
 pack, or \tcode{this}.
 
 \pnum
@@ -72,7 +72,8 @@ Two names are \term{the same} if
 the same operator, or
 \item they are \grammarterm{conversion-function-id}{s} formed
 with the same type, or
-\item they are \grammarterm{template-id}{s} that refer to the same class or function~(\ref{temp.type}), or
+\item they are \grammarterm{template-id}{s} that refer to the same class,
+function, or variable~(\ref{temp.type}), or
 \item they are the names of literal operators~(\ref{over.literal}) formed with
 the same literal suffix identifier.
 \end{itemize}
@@ -144,7 +145,10 @@ a
 a \grammarterm{static_assert-declaration} (Clause~\ref{dcl.dcl}), an
 \grammarterm{attribute-declaration} (Clause~\ref{dcl.dcl}), an
 \grammarterm{empty-declaration} (Clause~\ref{dcl.dcl}),
-or a \grammarterm{using-directive}~(\ref{namespace.udir}).
+a \grammarterm{using-directive}~(\ref{namespace.udir}),
+an explicit instantiation declaration~(\ref{temp.explicit}), or
+an explicit specialization~(\ref{temp.expl.spec}) whose
+\grammarterm{declaration} is not a definition.
 
 \enterexample all but one of the following are definitions:
 
@@ -270,10 +274,26 @@ potential results of the second and third operands.
 contains the potential results of the right operand.
 \item Otherwise, the set is empty.
 \end{itemize}
+\enternote
+This set is a (possibly-empty) set of \grammarterm{id-expression}{s},
+each of which is either \tcode{e} or a subexpression of \tcode{e}.
+\enterexample
+In the following example, the set of potential results of the initializer
+of \tcode{n} contains the first \tcode{S::x} subexpression, but not the second
+\tcode{S::x} subexpression.
+\begin{codeblock}
+struct S { static const int x = 0; };
+const int &f(const int &r);
+int n = b ? (1, S::x)  // \tcode{S::x} is not odr-used here
+          : f(S::x);   // \tcode{S::x} is odr-used here, so
+                       // a definition is required
+\end{codeblock}
+\exitexample
+\exitnote
 
 \pnum
 A variable \tcode{x} whose name appears as a
-potentially-evaluated expression \tcode{ex} is \defn{odr-used} unless
+potentially-evaluated expression \tcode{ex} is \defn{odr-used} by \tcode{ex} unless
 applying the lvalue-to-rvalue conversion (\ref{conv.lval}) to \tcode{x} yields
 a constant expression~(\ref{expr.const}) that does not invoke any non-trivial
 functions
@@ -288,8 +308,10 @@ A virtual member
 function is odr-used if it is not pure.
 A function whose name appears as a potentially-evaluated
 expression is odr-used if it is the unique lookup result or the selected
-member of a set of overloaded functions~(\ref{basic.lookup}, \ref{over.match}, \ref{over.over}), unless it is a pure virtual
-function and its name is not explicitly qualified.
+member of a set of overloaded functions~(\ref{basic.lookup}, \ref{over.match}, \ref{over.over}),
+unless it is a pure virtual function and either
+its name is not explicitly qualified or
+the expression forms a pointer to member~(\ref{expr.unary.op}).
 \enternote This covers calls to named
 functions~(\ref{expr.call}), operator overloading (Clause~\ref{over}),
 user-defined conversions~(\ref{class.conv.fct}), allocation function for
@@ -297,7 +319,7 @@ placement new~(\ref{expr.new}), as well as non-default
 initialization~(\ref{dcl.init}). A constructor selected to copy or move an
 object of class type is odr-used even if the
 call is actually elided by the implementation~(\ref{class.copy}). \exitnote An allocation
-or deallocation function for a class is odr-used by a new expression
+or deallocation function for a class is odr-used by a \grammarterm{new-expression}
 appearing in a potentially-evaluated expression as specified
 in~\ref{expr.new} and~\ref{class.free}. A deallocation function for a
 class is odr-used by a delete expression appearing in a
@@ -315,9 +337,7 @@ An assignment operator function in a class is odr-used by an
 implicitly-defined
 copy-assignment or move-assignment function for another class as specified
 in~\ref{class.copy}.
-A default constructor for a class is odr-used by
-default initialization or value initialization as specified
-in~\ref{dcl.init}. A constructor for a class is odr-used as specified
+A constructor for a class is odr-used as specified
 in~\ref{dcl.init}. A destructor for a class is odr-used if it is potentially
 invoked~(\ref{class.dtor}).
 
@@ -456,7 +476,7 @@ translation unit, then the preceding requirements
 shall apply both to names from the template's enclosing scope used in the
 template definition~(\ref{temp.nondep}), and also to dependent names at
 the point of instantiation~(\ref{temp.dep}). If the definitions of
-\tcode{D} satisfy all these requirements, then the program shall behave
+\tcode{D} satisfy all these requirements, then the behavior is
 as if there were a single definition of \tcode{D}. If the definitions of
 \tcode{D} do not satisfy these requirements, then the behavior is
 undefined.%
@@ -761,11 +781,7 @@ labels have function scope.
 \pnum
 \indextext{scope!namespace}%
 The declarative region of a \grammarterm{namespace-definition} is its
-\grammarterm{namespace-body}. The potential scope denoted by an
-\grammarterm{original-namespace-name} is the concatenation of the
-declarative regions established by each of the
-\grammarterm{namespace-definition}{s} in the same declarative region with
-that \grammarterm{original-namespace-name}. Entities declared in a
+\grammarterm{namespace-body}.  Entities declared in a
 \grammarterm{namespace-body} are said to be \defn{members} of the
 namespace, and names introduced by these declarations into the
 declarative region of the namespace are said to be \defn{member
@@ -1730,12 +1746,12 @@ the name of its class followed by the \tcode{::} operator.
 \pnum
 \indextext{lookup!namespace~member}%
 If the \grammarterm{nested-name-specifier} of a \grammarterm{qualified-id}
-nominates a namespace, the name specified after the
+nominates a namespace (including the case where the
+\grammarterm{nested-name-specifier} is \tcode{::}, i.e., nominating
+the global namespace), the name specified after the
 \grammarterm{nested-name-specifier} is looked up in the scope of the
 namespace.
-If a \grammarterm{qualified-id} starts with \tcode{::}, the name after the
-\tcode{::} is looked up in the global namespace. In either case,
-the names in a \grammarterm{template-argument} of a
+The names in a \grammarterm{template-argument} of a
 \grammarterm{template-id} are looked up in the context in which the
 entire \grammarterm{postfix-expression} occurs.
 
@@ -2071,7 +2087,7 @@ the \grammarterm{unqualified-id} is looked up in the context of the complete
 \grammarterm{postfix-expression}.
 
 \pnum
-If the \grammarterm{unqualified-id} is \grammarterm{\tilde{}type-name}, the
+If the \grammarterm{unqualified-id} is \tcode{\~}\grammarterm{type-name}, the
 \grammarterm{type-name} is looked up in the context of the entire
 \grammarterm{postfix-expression}. If the type \tcode{T} of the object
 expression is of a class type \tcode{C}, the \grammarterm{type-name} is
@@ -2213,8 +2229,8 @@ linkage if it is the name of
 \item a variable, function or function template that is
 explicitly declared \tcode{static}; or,
 
-\item a non-volatile variable that is explicitly declared \tcode{const} or
-\tcode{constexpr} and neither explicitly declared \tcode{extern} nor previously
+\item a variable of non-volatile const-qualified type that is
+neither explicitly declared \tcode{extern} nor previously
 declared to have external linkage; or
 
 \item a data member of an anonymous union.
@@ -2252,7 +2268,8 @@ In addition, a member function, static data member, a named class or
 enumeration of class scope, or an unnamed class or enumeration defined
 in a class-scope typedef declaration such that the class or enumeration
 has the typedef name for linkage purposes~(\ref{dcl.typedef}), has
-external linkage if the name of the class has external linkage.
+the same linkage, if any, as the name of the class of which it is a
+member.
 
 \pnum
 The name of a function declared in block scope and the name of a variable declared by a
@@ -2320,9 +2337,8 @@ linkage purposes~(\ref{dcl.typedef})) and the name has linkage; or
 \item it is an unnamed class or enumeration member of a class with linkage; or
 
 \item it is a specialization of a class template (Clause~\ref{temp})\footnote{A class
-template always has external linkage, and the
-requirements of~\ref{temp.arg.type} and~\ref{temp.arg.nontype} ensure
-that the template arguments will also have appropriate linkage.};
+template has the linkage of the innermost enclosing class or namespace in which
+it is declared.};
 or
 
 \item it is a fundamental type~(\ref{basic.fundamental}); or
@@ -2462,7 +2478,7 @@ a program.
 The linkage~(\ref{basic.link}) of \tcode{main} is
 \impldef{linkage of \tcode{main}}. A program that defines \tcode{main} as
 deleted or that declares \tcode{main} to be
-\tcode{inline,} \tcode{static}, or \tcode{constexpr} is ill-formed. The name \tcode{main} is
+\tcode{inline}, \tcode{static}, or \tcode{constexpr} is ill-formed. The name \tcode{main} is
 not otherwise reserved. \enterexample member functions, classes, and
 enumerations can be called \tcode{main}, as can entities in other
 namespaces. \exitexample
@@ -2524,9 +2540,9 @@ types \enternote such a class may have a non-trivial destructor \exitnote.
 \item
 if each full-expression (including implicit conversions) that appears in
 the initializer of a reference with static or thread storage duration is a
-constant expression~(\ref{expr.const}) and the reference is bound to an lvalue
-designating an object with static storage duration, to a temporary
-(see~\ref{class.temporary}), or to a function;
+constant expression~(\ref{expr.const}) and the reference is bound to a glvalue
+designating an object with static storage duration, to a temporary object
+(see~\ref{class.temporary}) or subobject thereof, or to a function;
 
 \item
 if an object with static or thread storage duration is initialized
@@ -2543,11 +2559,11 @@ appears in its initializer is a constant expression.
 Together, zero-initialization and constant initialization are called \defn{static
 initialization}; all other initialization is \defn{dynamic initialization}. Static
 initialization shall be performed before any dynamic initialization takes place. Dynamic
-initialization of a non-local variable with static storage duration is either ordered or
-unordered. Definitions of explicitly specialized class template static data members have
-ordered initialization. Other class template static data members (i.e., implicitly or
-explicitly instantiated specializations) have unordered initialization. Other non-local
-variables with static storage duration have ordered initialization. Variables with ordered
+initialization of a non-local variable with static storage duration is 
+\defn{unordered} if the variable is an implicitly or explicitly instantiated
+specialization, and otherwise is \defn{ordered} \enternote an explicitly
+specialized static data member or variable template specialization has
+ordered initialization.\exitnote. Variables with ordered
 initialization defined within a single translation unit shall be initialized in the order of
 their definitions in the translation unit. If a program starts a thread~(\ref{thread.threads}),
 the subsequent initialization of a variable is unsequenced with respect to the initialization
@@ -2821,7 +2837,7 @@ its first odr-use~(\ref{basic.def.odr}) and, if constructed, shall be destroyed 
 \indextext{storage~duration!\idxcode{register}}%
 \indextext{storage~duration!local object}%
 Block-scope variables explicitly declared \tcode{register} or
-not explicitly declared \tcode{static} or \tcode{extern} have
+not explicitly declared \tcode{static}, \tcode{thread_local}, or \tcode{extern} have
 \defn{automatic storage duration}. The storage
 for these entities lasts until the block in which they are created exits.
 
@@ -2927,7 +2943,12 @@ requested is zero, the request can fail. If the request succeeds, the
 value returned shall be a non-null pointer value~(\ref{conv.ptr})
 \tcode{p0} different from any previously returned value \tcode{p1},
 unless that value \tcode{p1} was subsequently passed to an
-\tcode{operator} \tcode{delete}. The effect of indirecting through a pointer
+\tcode{operator} \tcode{delete}.
+Furthermore, for the library allocation functions
+in~\ref{new.delete.single} and~\ref{new.delete.array},
+\tcode{p0} shall point to a block of storage disjoint from the storage
+for any other object accessible to the caller.
+The effect of indirecting through a pointer
 returned as a request for zero size is undefined.\footnote{The intent is
 to have \tcode{operator new()} implementable by
 calling \tcode{std::malloc()} or \tcode{std::calloc()}, so the rules are
@@ -2942,8 +2963,8 @@ currently installed new-handler function~(\ref{new.handler}), if any.
 A program-supplied allocation function can obtain the address of the
 currently installed \tcode{new_handler} using the
 \tcode{std::get_new_handler} function~(\ref{set.new.handler}). \exitnote
-If an allocation function declared with a non-throwing
-\grammarterm{exception-specification}~(\ref{except.spec})
+If an allocation function that has a non-throwing
+exception specification~(\ref{except.spec})
 fails to allocate storage, it shall return a null pointer. Any other
 allocation function that fails to allocate storage shall indicate
 failure only by throwing an exception~(\ref{except.throw}) of a type
@@ -3146,19 +3167,20 @@ array elements is that of their complete object~(\ref{intro.object}).
 
 \pnum
 \indextext{object~lifetime|(}%
+\indextext{initialization!non-vacuous}%
 The \defn{lifetime} of an object is a runtime property of the
 object.
-An object is said to have non-trivial initialization if it is of a class or
+An object is said to have \term{non-vacuous initialization} if it is of a class or
 aggregate type and it or one of its members is initialized by a constructor
 other than a trivial default constructor. \enternote initialization by a
-trivial copy/move constructor is non-trivial initialization. \exitnote
+trivial copy/move constructor is non-vacuous initialization. \exitnote
 The lifetime of an object of type \tcode{T} begins when:
 
 \begin{itemize}
 \item storage with the proper alignment and size for type \tcode{T} is
 obtained, and
 
-\item if the object has non-trivial initialization, its initialization is complete.
+\item if the object has non-vacuous initialization, its initialization is complete.
 \end{itemize}
 
 The lifetime of an object of type \tcode{T} ends when:
@@ -3477,13 +3499,15 @@ with that of ISO/IEC 9899 Programming Language C.}
 
 \pnum
 \indextext{type!incomplete}%
+\indextext{type!incompletely-defined object}%
+\indextext{object type!incompletely-defined}%
 A class that has been declared but not defined, an enumeration type in certain
 contexts~(\ref{dcl.enum}), or an array of unknown
-size or of incomplete element type, is an incompletely-defined object
-type.\footnote{The size and layout of an instance of an incompletely-defined
+size or of incomplete element type, is an \defn{incompletely-defined object
+type}.\footnote{The size and layout of an instance of an incompletely-defined
 object type is unknown.}
-Incompletely-defined object types and the void types are incomplete
-types~(\ref{basic.fundamental}). Objects shall not be defined to have an
+Incompletely-defined object types and the void types are \term{incomplete
+types}~(\ref{basic.fundamental}). Objects shall not be defined to have an
 incomplete type.
 
 \pnum
@@ -3494,7 +3518,7 @@ of an array object might be an array of incomplete class type and
 therefore incomplete; if the class type is completed later on in the
 translation unit, the array type becomes complete; the array type at
 those two points is the same type. The declared type of an array object
-might be an array of unknown size and therefore be incomplete at one
+might be an array of unknown bound and therefore be incomplete at one
 point in a translation unit and complete later on; the array types at
 those two points (``array of unknown bound of \tcode{T}'' and ``array of
 \tcode{N} \tcode{T}'') are different types. The type of a pointer to array of
@@ -3585,12 +3609,11 @@ of non-volatile literal types.
 
 \pnum
 \indextext{layout-compatible~type}%
-If two types \tcode{T1} and \tcode{T2} are the same type, then
-\tcode{T1} and \tcode{T2} are \grammarterm{layout-compatible} types.
-\enternote Layout-compatible enumerations are described
-in~\ref{dcl.enum}. Layout-compatible standard-layout
-structs and standard-layout unions are
-described in~\ref{class.mem}. \exitnote
+Two types \cvqual{cv1} \tcode{T1} and \cvqual{cv2} \tcode{T2} are
+\defn{layout-compatible} types
+if \tcode{T1} and \tcode{T2} are the same type,
+layout-compatible enumerations~(\ref{dcl.enum}), or
+layout-compatible standard-layout class types~(\ref{class.mem}).
 
 \rSec2[basic.fundamental]{Fundamental types}
 
@@ -3622,8 +3645,8 @@ A \tcode{char}, a \tcode{signed char}, and an
 same alignment requirements~(\ref{basic.align}); that is, they have the
 same object representation. For narrow character types, all bits of the object
 representation participate in the value representation. For unsigned narrow
-character types, all possible bit patterns of the value representation
-represent numbers. These requirements do not hold for other types. In
+character types, each possible bit pattern of the value representation
+represents a distinct number. These requirements do not hold for other types. In
 any particular implementation, a plain \tcode{char} object can take on
 either the same values as a \tcode{signed char} or an \tcode{unsigned
 char}; which one is \impldef{representation of \tcode{char}}.
@@ -3909,8 +3932,7 @@ object of the array's element type that might be located at that
 address. There are further restrictions on pointers to objects with dynamic storage
 duration; see~\ref{basic.stc.dynamic.safety}. \exitnote The value representation of
 pointer types is \impldef{value representation of pointer types}. Pointers to
-cv-qualified and cv-unqualified
-versions~(\ref{basic.type.qualifier}) of layout-compatible types shall
+layout-compatible types shall
 have the same value representation and alignment
 requirements~(\ref{basic.align}).
 \enternote Pointers to over-aligned types~(\ref{basic.align}) have no special
@@ -4006,7 +4028,25 @@ In this International Standard, the notation \term{cv} (or
 \term{cv1}, \term{cv2}, etc.), used in the description of types,
 represents an arbitrary set of cv-qualifiers, i.e., one of
 \{\tcode{const}\}, \{\tcode{volatile}\}, \{\tcode{const},
-\tcode{volatile}\}, or the empty set. Cv-qualifiers applied to an array
+\tcode{volatile}\}, or the empty set.
+\indextext{cv-qualifier!top-level}
+For a type \cv\ \tcode{T}, the \term{top-level cv-qualifiers}
+of that type are those denoted by \cv.
+\enterexample
+The type corresponding to the \grammarterm{type-id}
+\tcode{const int\&}
+has no top-level cv-qualifiers.
+The type corresponding to the \grammarterm{type-id}
+\tcode{volatile int * const}
+has the top-level cv-qualifier \tcode{const}.
+For a class type \tcode{C},
+the type corresponding to the \grammarterm{type-id}
+\tcode{void (C::* volatile)(int) const}
+has the top-level cv-qualifier \tcode{volatile}.
+\exitexample
+
+\pnum
+Cv-qualifiers applied to an array
 type attach to the underlying element type, so the notation
 ``\term{cv} \tcode{T},'' where \tcode{T} is an array type, refers to
 an array whose elements are so-qualified. An array type whose elements
@@ -4044,10 +4084,10 @@ As another example, the result of calling a function whose return type is an
 lvalue reference is an lvalue. \exitexample
 
 \item An \defn{xvalue} (an ``eXpiring'' value) also refers to an object, usually near
-the end of its lifetime (so that its resources may be moved, for example). An xvalue
-is the result of certain kinds of expressions involving rvalue references~(\ref{dcl.ref}).
+the end of its lifetime (so that its resources may be moved, for example).
+Certain kinds of expressions involving rvalue references~(\ref{dcl.ref}) yield xvalues.
 \enterexample The result of calling a function whose return type is an rvalue reference
-is an xvalue. \exitexample
+to an object type is an xvalue~(\ref{expr.call}). \exitexample
 
 \item A \defn{glvalue} (``generalized'' lvalue) is an lvalue or an xvalue.
 
