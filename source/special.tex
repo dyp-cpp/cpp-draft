@@ -75,7 +75,8 @@ classes are called its \term{potentially constructed subobjects}.
 
 \pnum
 Constructors do not have names.
-A declaration of a constructor uses a function declarator~(\ref{dcl.fct}) of the form
+In a declaration of a constructor, the \grammarterm{declarator} is a
+function declarator~(\ref{dcl.fct}) of the form
 
 \begin{ncsimplebnf}
 ptr-declarator \terminal{(} parameter-declaration-clause \terminal{)} exception-specification\opt attribute-specifier-seq\opt
@@ -159,7 +160,8 @@ constructor for a class
 \tcode{X}
 is a constructor of class
 \tcode{X}
-that can be called without an argument.
+that either has no parameters or else each parameter that is not a
+function parameter pack has a default argument.
 \indextext{implicitly-declared~default~constructor}%
 If there is no user-declared constructor for class
 \tcode{X},
@@ -246,9 +248,9 @@ all the non-user-provided default constructors for its base classes and
 its non-static data members shall have been implicitly defined.
 \enternote
 An implicitly-declared default constructor has an
-\grammarterm{exception-specification}~(\ref{except.spec}).
+exception specification~(\ref{except.spec}).
 An explicitly-defaulted definition might have an
-implicit \grammarterm{exception-specification,} see~\ref{dcl.fct.def}.
+implicit exception specification, see~\ref{dcl.fct.def}.
 \exitnote
 
 \pnum
@@ -481,9 +483,7 @@ that is the complete object of a subobject to which the reference is bound
 persists for the lifetime of the reference except:
 
 \begin{itemize}
-\item A temporary bound to a reference member in a constructor's \grammarterm{ctor-initializer}~(\ref{class.base.init}) persists until the constructor exits.
-
-\item A temporary bound to a reference parameter in a function call~(\ref{expr.call})
+\item A temporary object bound to a reference parameter in a function call~(\ref{expr.call})
 persists until the completion of the full-expression containing the call.
 
 \item The lifetime of a temporary bound to the returned value in a function return statement~(\ref{stmt.return}) is not extended; the temporary is destroyed at the end of the full-expression in the return statement.
@@ -869,11 +869,17 @@ Conversion functions can be virtual.
 Conversion functions cannot be declared
 \tcode{static}.
 
+\pnum
+\indextext{conversion!deduced~return~type~of user-defined}%
+A conversion function template shall not have a
+deduced return type~(\ref{dcl.spec.auto}).
+
 \rSec1[class.dtor]{Destructors}%
 \indextext{destructor}
 
 \pnum
-A declaration of a destructor uses a function declarator~(\ref{dcl.fct}) of the form
+In a declaration of a destructor, the \grammarterm{declarator} is a
+function declarator~(\ref{dcl.fct}) of the form
 
 \begin{ncsimplebnf}
 ptr-declarator \terminal{(} parameter-declaration-clause \terminal{)} exception-specification\opt attribute-specifier-seq\opt
@@ -934,8 +940,7 @@ most derived object~(\ref{intro.object}) starts.
 
 \pnum
 A declaration of a destructor that does not have an \grammarterm{exception-specification}
-is implicitly considered to have the same \grammarterm{exception-specification} as an
-implicit declaration~(\ref{except.spec}).
+has the same exception specification as if had been implicitly declared~(\ref{except.spec}).
 
 \pnum
 \indextext{generated~destructor|see{destructor, default}}%
@@ -1078,11 +1083,11 @@ or not accessible from the context of the invocation.
 
 \pnum
 At the point of definition of a virtual destructor (including an implicit
-definition~(\ref{class.copy})), the non-array deallocation function is looked up
-in the scope of the destructor's class~(\ref{class.member.lookup}), and, if no
-declaration is found, the function is looked up in the global scope.
-If the result of this lookup is ambiguous or inaccessible, or if the lookup
-selects a placement deallocation function or a function with a deleted definition~(\ref{dcl.fct.def}), the program is ill-formed.
+definition~(\ref{class.copy})), the non-array deallocation function is 
+determined as if for the expression \tcode{delete this} appearing in a
+non-virtual destructor of the destructor's class (see~\ref{expr.delete}).
+If the lookup fails or if the deallocation function has
+a deleted definition~(\ref{dcl.fct.def}), the program is ill-formed.
 \enternote
 This assures that a deallocation function corresponding to the dynamic type of an
 object is available for the
@@ -1141,9 +1146,8 @@ in a member function is not an explicit destructor call~(\ref{expr.unary.op}).
 \indextext{object!destructor~and placement~of}%
 explicit calls of destructors are rarely needed.
 One use of such calls is for objects placed at specific
-addresses using a
-\grammarterm{new-expression}
-with the placement option.
+addresses using a placement
+\grammarterm{new-expression}.
 Such use of explicit placement and destruction of objects can be necessary
 to cope with dedicated hardware resources and for writing memory management
 facilities.
@@ -1365,8 +1369,8 @@ the delete expression would have been ill-formed.
 
 \pnum
 \enternote
-If a deallocation function has no explicit \grammarterm{exception-specification}, it is
-treated as if it were specified with \tcode{noexcept(true)}~(\ref{except.spec}).
+If a deallocation function has no explicit \grammarterm{exception-specification}, it
+has a non-throwing exception specification~(\ref{except.spec}).
 \exitnote
 
 \rSec1[class.init]{Initialization}%
@@ -1541,7 +1545,7 @@ which has the form
 \begin{bnf}
 \nontermdef{mem-initializer-list}\br
     mem-initializer \terminal{...}\opt\br
-    mem-initializer \terminal{...}\opt \terminal{,} mem-initializer-list
+    mem-initializer-list \terminal{,} mem-initializer \terminal{...}\opt
 \end{bnf}
 
 \begin{bnf}
@@ -1691,6 +1695,18 @@ a virtual base class is ignored during execution of a constructor of any class t
 not the most derived class.
 
 \pnum
+A temporary expression bound to a reference member in a \grammarterm{mem-initializer}
+is ill-formed.
+\enterexample
+\begin{codeblock}
+struct A {
+  A() : v(42) { }  // error
+  const int& v;
+};
+\end{codeblock}
+\exitexample
+
+\pnum
 In a non-delegating constructor, if
 a given potentially constructed subobject is not designated by a
 \grammarterm{mem-initializer-id}
@@ -1778,6 +1794,21 @@ the \tcode{A(int)} constructor will simply initialize \tcode{i} to the value of
 \indextext{side effects}%
 side effects in \tcode{i}'s \grammarterm{brace-or-equal-initializer}
 will not take place.
+\exitexample
+
+\pnum
+A temporary expression bound to a reference member from a
+\grammarterm{brace-or-equal-initializer} is ill-formed.
+\enterexample
+\begin{codeblock}
+struct A {
+  A() = default;          // OK
+  A(int v) : v(v) { }     // OK
+  const int& v = 42;      // OK
+};
+A a1;                     // error: ill-formed binding of temporary to reference
+A a2(1);                  // OK, unfortunately
+\end{codeblock}
 \exitexample
 
 \pnum
@@ -2522,7 +2553,7 @@ potentially constructed subobjects
 shall have been implicitly defined.
 \enternote
 An implicitly-declared copy/move constructor has an
-\grammarterm{exception-specification}~(\ref{except.spec}).
+implied exception specification~(\ref{except.spec}).
 \exitnote
 
 \pnum
@@ -2843,7 +2874,7 @@ its direct base classes and
 its non-static data members shall have been implicitly defined.
 \enternote
 An implicitly-declared copy/move assignment operator has an
-\grammarterm{exception-specification}~(\ref{except.spec}).
+implied exception specification~(\ref{except.spec}).
 \exitnote
 
 \pnum
@@ -2874,7 +2905,7 @@ the built-in assignment operator is used.
 
 \indextext{assignment operator!copy!virtual bases and}%
 It is unspecified whether subobjects representing virtual base classes
-are assigned more than once by the implicitly-defined copy assignment
+are assigned more than once by the implicitly-defined copy/move assignment
 operator.
 \enterexample
 
@@ -2887,14 +2918,9 @@ struct C : B, A { };
 
 It is unspecified whether the virtual base class subobject
 \tcode{V}
-is assigned twice by the implicitly-defined copy assignment operator for
+is assigned twice by the implicitly-defined copy/move assignment operator for
 \tcode{C}.
 \exitexample
-\enternote
-\indextext{assignment operator!move!virtual bases and}%
-This does not apply to move assignment, as a defaulted move assignment operator
-is deleted if the class has virtual bases.
-\exitnote
 
 \pnum
 The implicitly-defined copy assignment operator for a
@@ -2954,7 +2980,7 @@ the function return type, the copy/move operation can be
 omitted by constructing the automatic object directly
 into the function's return value
 
-\item in a \nonterminal{throw-expression}, when the operand
+\item in a \nonterminal{throw-expression}~(\ref{expr.throw}), when the operand
 is the name of a non-volatile automatic object
 (other than a function or catch-clause parameter)
 whose scope does not extend beyond the end of the innermost enclosing
@@ -3070,13 +3096,27 @@ constructor implicitly declares a set of \term{inheriting constructors}.
 The \term{candidate set of inherited constructors} from the class \tcode{X}
 named in the \grammarterm{using-declaration} consists of actual constructors and
 notional constructors that result from the transformation of defaulted
-parameters as follows:
+parameters and ellipsis parameter specifications as follows:
 
 \begin{itemize}
-\item all non-template constructors of \tcode{X}, and
-\item for each non-template constructor of \tcode{X} that has at least one parameter with a default argument, the set of constructors that results from omitting any ellipsis parameter specification and successively omitting parameters with a default argument from the end of the parameter-type-list, and
-\item all constructor templates of \tcode{X}, and
-\item for each constructor template of \tcode{X} that has at least one parameter with a default argument, the set of constructor templates that results from omitting any ellipsis parameter specification and successively omitting parameters with a default argument from the end of the parameter-type-list.
+\item for each non-template constructor of \tcode{X},
+the constructor that results from
+omitting any ellipsis parameter specification, and
+\item for each non-template constructor of \tcode{X}
+that has at least one parameter with a default argument,
+the set of constructors that results from
+omitting any ellipsis parameter specification and
+successively omitting parameters with a default argument
+from the end of the parameter-type-list, and
+\item for each constructor template of \tcode{X},
+the constructor template that results from
+omitting any ellipsis parameter specification, and
+\item for each constructor template of \tcode{X}
+that has at least one parameter with a default argument,
+the set of constructor templates that results from
+omitting any ellipsis parameter specification and
+successively omitting parameters with a default argument
+from the end of the parameter-type-list.
 \end{itemize}
 
 \pnum
@@ -3084,9 +3124,8 @@ The \term{constructor characteristics} of a constructor or constructor template 
 
 \begin{itemize}
 \item the template parameter list~(\ref{temp.param}), if any,
-\item the \grammarterm{parameter-type-list}~(\ref{dcl.fct}),
-\item absence or presence of \tcode{explicit}~(\ref{class.conv.ctor}), and
-\item absence or presence of \tcode{constexpr}~(\ref{dcl.constexpr}).
+\item the parameter-type-list~(\ref{dcl.fct}), and
+\item absence or presence of \tcode{explicit}~(\ref{class.conv.ctor}).
 \end{itemize}
 
 \pnum
@@ -3100,13 +3139,21 @@ candidate set of inherited constructors, a constructor template is implicitly de
 with the same constructor characteristics unless there is an equivalent user-declared
 constructor template~(\ref{temp.over.link}) in the complete class where the \grammarterm{using-declaration}
 appears. \enternote Default arguments are not inherited. An
-\grammarterm{exception-specification} is implied as specified
+exception specification is implied as specified
 in~\ref{except.spec}.\exitnote
 
 \pnum
 A constructor so declared has the same access as the corresponding constructor
-in \tcode{X}. It is deleted if the corresponding constructor in \tcode{X} is
-deleted~(\ref{dcl.fct.def}). An inheriting constructor shall not be explicitly 
+in \tcode{X}.
+It is \tcode{constexpr} if the user-written constructor (see below)
+would satisfy the requirements of a
+\tcode{constexpr} constructor~(\ref{dcl.constexpr}).
+It is deleted if the corresponding constructor in \tcode{X} is
+deleted~(\ref{dcl.fct.def.delete})
+or if a defaulted default constructor~(\ref{class.ctor}) would be deleted,
+except that the construction of the direct base
+class \tcode{X} is not considered in the determination.
+An inheriting constructor shall not be explicitly
 instantiated~(\ref{temp.explicit}) or explicitly specialized~(\ref{temp.expl.spec}).
 
 \pnum

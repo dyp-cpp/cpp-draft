@@ -110,6 +110,21 @@ called \defn{mutable iterator}{s}. Nonmutable iterators are referred to
 as \defn{constant iterator}{s}.
 
 \pnum
+Iterators that further satisfy the requirement that,
+for integral values \tcode{n} and
+dereferenceable iterator values \tcode{a} and \tcode{(a + n)},
+\tcode{*(a + n)} is equivalent to \tcode{*(addressof(*a) + n)},
+are called \defn{contiguous iterators}.
+\enternote
+For example, the type ``pointer to \tcode{int}'' is a contiguous iterator,
+but \tcode{reverse_iterator<int *>} is not.
+For a valid iterator range $[$\tcode{a}$, $\tcode{b}$)$ with dereferenceable \tcode{a},
+the corresponding range denoted by pointers is
+$[$\tcode{addressof(*a)}$, $\tcode{addressof(*a) + (b - a)}$)$;
+\tcode{b} might not be dereferenceable.
+\exitnote
+
+\pnum
 Just as a regular pointer to an array guarantees that there is a pointer value pointing past the last element
 of the array, so for any iterator type there is an iterator value that points past the last element of a
 corresponding sequence.
@@ -824,6 +839,17 @@ namespace std {
   template <class E> reverse_iterator<const E*> rend(initializer_list<E> il);
   template <class C> auto crbegin(const C& c) -> decltype(std::rbegin(c));
   template <class C> auto crend(const C& c) -> decltype(std::rend(c));
+
+  // \ref{iterator.container}, container access:
+  template <class C> constexpr auto size(const C& c) -> decltype(c.size());
+  template <class T, size_t N> constexpr size_t size(const T (&array)[N]) noexcept;
+  template <class C> constexpr auto empty(const C& c) -> decltype(c.empty());
+  template <class T, size_t N> constexpr bool empty(const T (&array)[N]) noexcept;
+  template <class E> constexpr bool empty(initializer_list<E> il) noexcept;
+  template <class C> constexpr auto data(C& c) -> decltype(c.data());
+  template <class C> constexpr auto data(const C& c) -> decltype(c.data());
+  template <class T, size_t N> constexpr T* data(T (&array)[N]) noexcept;
+  template <class E> constexpr const E* data(initializer_list<E> il) noexcept;
 }
 \end{codeblock}
 
@@ -872,21 +898,21 @@ iterator_traits<Iterator>::pointer
 may be defined as \tcode{void}.
 
 \pnum
-The template
+If \tcode{Iterator} has valid~(\ref{temp.deduct}) member
+types \tcode{difference_type}, \tcode{value_type}, \tcode{pointer},
+\tcode{reference}, and \tcode{iterator_category},
 \tcode{iterator_traits<Iterator>}
-is defined as
-
+shall have the following as publicly accessible members
+and shall have no other members:
 \begin{codeblock}
-namespace std {
-  template<class Iterator> struct iterator_traits {
-    typedef typename Iterator::difference_type difference_type;
-    typedef typename Iterator::value_type value_type;
-    typedef typename Iterator::pointer pointer;
-    typedef typename Iterator::reference reference;
-    typedef typename Iterator::iterator_category iterator_category;
-  };
-}
+  typedef typename Iterator::difference_type difference_type;
+  typedef typename Iterator::value_type value_type;
+  typedef typename Iterator::pointer pointer;
+  typedef typename Iterator::reference reference;
+  typedef typename Iterator::iterator_category iterator_category;
 \end{codeblock}
+Otherwise, \tcode{iterator_traits<Iterator>}
+shall have no members.
 
 \pnum
 It is specialized for pointers as
@@ -916,27 +942,6 @@ namespace std {
   };
 }
 \end{codeblock}
-
-\pnum
-\enternote
-If there is an additional pointer type
-\tcode{\,\xname{far}}
-such that the difference of two
-\tcode{\,\xname{far}}
-is of type
-\tcode{long},
-an implementation may define
-
-\begin{codeblock}
-  template<class T> struct iterator_traits<T @\xname{far}@*> {
-    typedef long difference_type;
-    typedef T value_type;
-    typedef T @\xname{far}@* pointer;
-    typedef T @\xname{far}@& reference;
-    typedef random_access_iterator_tag iterator_category;
-  };
-\end{codeblock}
-\exitnote
 
 \pnum
 \enterexample
@@ -1776,14 +1781,12 @@ namespace std {
   public:
     typedef Container container_type;
     explicit back_insert_iterator(Container& x);
-    back_insert_iterator<Container>&
-      operator=(const typename Container::value_type& value);
-    back_insert_iterator<Container>&
-      operator=(typename Container::value_type&& value);
+    back_insert_iterator& operator=(const typename Container::value_type& value);
+    back_insert_iterator& operator=(typename Container::value_type&& value);
 
-    back_insert_iterator<Container>& operator*();
-    back_insert_iterator<Container>& operator++();
-    back_insert_iterator<Container>  operator++(int);
+    back_insert_iterator& operator*();
+    back_insert_iterator& operator++();
+    back_insert_iterator  operator++(int);
   };
 
   template <class Container>
@@ -1812,8 +1815,7 @@ with \tcode{std::addressof(x)}.
 
 \indexlibrary{\idxcode{operator=}!\idxcode{back_insert_iterator}}%
 \begin{itemdecl}
-back_insert_iterator<Container>&
-  operator=(const typename Container::value_type& value);
+back_insert_iterator& operator=(const typename Container::value_type& value);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -1828,8 +1830,7 @@ back_insert_iterator<Container>&
 
 \indexlibrary{\idxcode{operator=}!\idxcode{back_insert_iterator}}%
 \begin{itemdecl}
-back_insert_iterator<Container>&
-  operator=(typename Container::value_type&& value);
+back_insert_iterator& operator=(typename Container::value_type&& value);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -1846,7 +1847,7 @@ back_insert_iterator<Container>&
 
 \indexlibrary{\idxcode{operator*}!\idxcode{back_insert_iterator}}%
 \begin{itemdecl}
-back_insert_iterator<Container>& operator*();
+back_insert_iterator& operator*();
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -1859,8 +1860,8 @@ back_insert_iterator<Container>& operator*();
 
 \indexlibrary{\idxcode{operator++}!\idxcode{back_insert_iterator}}%
 \begin{itemdecl}
-back_insert_iterator<Container>& operator++();
-back_insert_iterator<Container>  operator++(int);
+back_insert_iterator& operator++();
+back_insert_iterator  operator++(int);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -1897,14 +1898,12 @@ namespace std {
   public:
     typedef Container container_type;
     explicit front_insert_iterator(Container& x);
-    front_insert_iterator<Container>&
-      operator=(const typename Container::value_type& value);
-    front_insert_iterator<Container>&
-      operator=(typename Container::value_type&& value);
+    front_insert_iterator& operator=(const typename Container::value_type& value);
+    front_insert_iterator& operator=(typename Container::value_type&& value);
 
-    front_insert_iterator<Container>& operator*();
-    front_insert_iterator<Container>& operator++();
-    front_insert_iterator<Container>  operator++(int);
+    front_insert_iterator& operator*();
+    front_insert_iterator& operator++();
+    front_insert_iterator  operator++(int);
   };
 
   template <class Container>
@@ -1933,8 +1932,7 @@ with \tcode{std::addressof(x)}.
 
 \indexlibrary{\idxcode{operator=}!\idxcode{front_insert_iterator}}%
 \begin{itemdecl}
-front_insert_iterator<Container>&
-  operator=(const typename Container::value_type& value);
+front_insert_iterator& operator=(const typename Container::value_type& value);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -1949,8 +1947,7 @@ front_insert_iterator<Container>&
 
 \indexlibrary{\idxcode{operator=}!\idxcode{front_insert_iterator}}%
 \begin{itemdecl}
-front_insert_iterator<Container>&
-  operator=(typename Container::value_type&& value);
+front_insert_iterator& operator=(typename Container::value_type&& value);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -1967,7 +1964,7 @@ front_insert_iterator<Container>&
 
 \indexlibrary{\idxcode{operator*}!\idxcode{front_insert_iterator}}%
 \begin{itemdecl}
-front_insert_iterator<Container>& operator*();
+front_insert_iterator& operator*();
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -1980,8 +1977,8 @@ front_insert_iterator<Container>& operator*();
 
 \indexlibrary{\idxcode{operator++}!\idxcode{front_insert_iterator}}%
 \begin{itemdecl}
-front_insert_iterator<Container>& operator++();
-front_insert_iterator<Container>  operator++(int);
+front_insert_iterator& operator++();
+front_insert_iterator  operator++(int);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -2019,14 +2016,12 @@ namespace std {
   public:
     typedef Container container_type;
     insert_iterator(Container& x, typename Container::iterator i);
-    insert_iterator<Container>&
-      operator=(const typename Container::value_type& value);
-    insert_iterator<Container>&
-      operator=(typename Container::value_type&& value);
+    insert_iterator& operator=(const typename Container::value_type& value);
+    insert_iterator& operator=(typename Container::value_type&& value);
 
-    insert_iterator<Container>& operator*();
-    insert_iterator<Container>& operator++();
-    insert_iterator<Container>& operator++(int);
+    insert_iterator& operator*();
+    insert_iterator& operator++();
+    insert_iterator& operator++(int);
   };
 
   template <class Container>
@@ -2057,8 +2052,7 @@ with \tcode{i}.
 
 \indexlibrary{\idxcode{operator=}!\idxcode{insert_iterator}}%
 \begin{itemdecl}
-insert_iterator<Container>&
-  operator=(const typename Container::value_type& value);
+insert_iterator& operator=(const typename Container::value_type& value);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -2076,8 +2070,7 @@ iter = container->insert(iter, value);
 
 \indexlibrary{\idxcode{operator=}!\idxcode{insert_iterator}}%
 \begin{itemdecl}
-insert_iterator<Container>&
-  operator=(typename Container::value_type&& value);
+insert_iterator& operator=(typename Container::value_type&& value);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -2097,7 +2090,7 @@ iter = container->insert(iter, std::move(value));
 
 \indexlibrary{\idxcode{operator*}!\idxcode{insert_iterator}}%
 \begin{itemdecl}
-insert_iterator<Container>& operator*();
+insert_iterator& operator*();
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -2110,8 +2103,8 @@ insert_iterator<Container>& operator*();
 
 \indexlibrary{\idxcode{operator++}!\idxcode{insert_iterator}}%
 \begin{itemdecl}
-insert_iterator<Container>& operator++();
-insert_iterator<Container>& operator++(int);
+insert_iterator& operator++();
+insert_iterator& operator++(int);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -2140,7 +2133,7 @@ template <class Container>
 Class template \tcode{move_iterator} is an iterator adaptor
 with the same behavior as the underlying iterator except that its
 indirection operator implicitly converts the value returned by the
-underlying iterator's indirection operator to an rvalue reference.
+underlying iterator's indirection operator to an rvalue.
 Some generic algorithms can be called with move iterators to replace
 copying with moving.
 
@@ -2170,7 +2163,7 @@ namespace std {
     typedef Iterator                                              pointer;
     typedef typename iterator_traits<Iterator>::value_type        value_type;
     typedef typename iterator_traits<Iterator>::iterator_category iterator_category;
-    typedef value_type&&                                          reference;
+    typedef @\seebelow@                                             reference;
 
     move_iterator();
     explicit move_iterator(Iterator i);
@@ -2226,6 +2219,14 @@ namespace std {
     move_iterator<Iterator> make_move_iterator(Iterator i);
 }
 \end{codeblock}
+
+\pnum
+Let \placeholder{R} be \tcode{iterator_traits<Iterator>::reference}.
+If \tcode{is_reference<}\placeholder{R}\tcode{>::value} is \tcode{true},
+the template specialization \tcode{move_iterator<Iterator>} shall define
+the nested type named \tcode{reference} as a synonym for
+\tcode{remove_reference<}\placeholder{R}\tcode{>::type\&\&},
+otherwise as a synonym for \placeholder{R}.
 
 \rSec3[move.iter.requirements]{\tcode{move_iterator} requirements}
 
@@ -2323,7 +2324,7 @@ reference operator*() const;
 
 \begin{itemdescr}
 \pnum
-\returns \tcode{std::move(}*current).
+\returns \tcode{static_cast<reference>(*current)}.
 \end{itemdescr}
 
 \rSec4[move.iter.op.ref]{\tcode{move_iterator::operator->}}
@@ -2674,8 +2675,8 @@ namespace std {
 
     const T& operator*() const;
     const T* operator->() const;
-    istream_iterator<T,charT,traits,Distance>& operator++();
-    istream_iterator<T,charT,traits,Distance>  operator++(int);
+    istream_iterator& operator++();
+    istream_iterator  operator++(int);
   private:
     basic_istream<charT,traits>* in_stream; // \expos
     T value;                                // \expos
@@ -2779,7 +2780,7 @@ const T* operator->() const;
 \indexlibrary{\idxcode{operator++}!\idxcode{istream_iterator}}%
 \indexlibrary{\idxcode{istream_iterator}!\idxcode{operator++}}%
 \begin{itemdecl}
-istream_iterator<T,charT,traits,Distance>& operator++();
+istream_iterator& operator++();
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -2798,7 +2799,7 @@ istream_iterator<T,charT,traits,Distance>& operator++();
 \indexlibrary{\idxcode{operator++}!\idxcode{istream_iterator}}%
 \indexlibrary{\idxcode{istream_iterator}!\idxcode{operator++}}%
 \begin{itemdecl}
-istream_iterator<T,charT,traits,Distance> operator++(int);
+istream_iterator operator++(int);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -2808,7 +2809,7 @@ istream_iterator<T,charT,traits,Distance> operator++(int);
 \pnum
 \effects
 \begin{codeblock}
-istream_iterator<T,charT,traits,Distance> tmp = *this;
+istream_iterator tmp = *this;
 *in_stream >> value;
 return (tmp);
 \end{codeblock}
@@ -2882,13 +2883,13 @@ namespace std {
     typedef basic_ostream<charT,traits> ostream_type;
     ostream_iterator(ostream_type& s);
     ostream_iterator(ostream_type& s, const charT* delimiter);
-    ostream_iterator(const ostream_iterator<T,charT,traits>& x);
+    ostream_iterator(const ostream_iterator& x);
    ~ostream_iterator();
-    ostream_iterator<T,charT,traits>& operator=(const T& value);
+    ostream_iterator& operator=(const T& value);
 
-    ostream_iterator<T,charT,traits>& operator*();
-    ostream_iterator<T,charT,traits>& operator++();
-    ostream_iterator<T,charT,traits>& operator++(int);
+    ostream_iterator& operator*();
+    ostream_iterator& operator++();
+    ostream_iterator& operator++(int);
   private:
     basic_ostream<charT,traits>* out_stream;  // \expos
     const charT* delim;                       // \expos
@@ -2958,9 +2959,9 @@ ostream_iterator& operator=(const T& value);
 \effects
 \begin{codeblock}
 *@\textit{out_stream}@ << value;
-if(delim != 0)
+if (@\textit{delim}@ != 0)
   *@\textit{out_stream}@ << @\textit{delim}@;
-return (*this);
+return *this;
 \end{codeblock}
 \end{itemdescr}
 
@@ -3023,7 +3024,7 @@ constructor, a \tcode{constexpr} default constructor, and a trivial destructor.
 The result of
 \tcode{operator*()}
 on an end-of-stream iterator is undefined.
-\indextext{undefined behavior}%
+\indextext{behavior!undefined}%
 For any other iterator value a
 \tcode{char_type}
 value is returned.
@@ -3053,7 +3054,7 @@ namespace std {
     istreambuf_iterator(const proxy& p) noexcept;
     charT operator*() const;
     pointer operator->() const;
-    istreambuf_iterator<charT,traits>& operator++();
+    istreambuf_iterator& operator++();
     proxy operator++(int);
     bool equal(const istreambuf_iterator& b) const;
   private:
@@ -3176,8 +3177,7 @@ member
 
 \indexlibrary{\idxcode{operator++}!\idxcode{istreambuf_iterator}}%
 \begin{itemdecl}
-istreambuf_iterator<charT,traits>&
-    istreambuf_iterator<charT,traits>::operator++();
+istreambuf_iterator& operator++();
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -3193,7 +3193,7 @@ istreambuf_iterator<charT,traits>&
 \indexlibrary{\idxcode{operator++}!\idxcode{istreambuf_iterator}}%
 \indexlibrary{\idxcode{istreambuf_iterator}!\idxcode{operator++}}%
 \begin{itemdecl}
-proxy istreambuf_iterator<charT,traits>::operator++(int);
+proxy operator++(int);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -3206,7 +3206,7 @@ proxy istreambuf_iterator<charT,traits>::operator++(int);
 
 \indexlibrary{\idxcode{equal}!\idxcode{istreambuf_iterator}}%
 \begin{itemdecl}
-bool equal(const istreambuf_iterator<charT,traits>& b) const;
+bool equal(const istreambuf_iterator& b) const;
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -3300,10 +3300,8 @@ ostreambuf_iterator(ostream_type& s) noexcept;
 \pnum
 \requires
 \tcode{s.rdbuf()}
-shall not null pointer.
-\end{itemdescr}
+shall not be a null pointer.
 
-\begin{itemdescr}
 \pnum
 \effects
 Initializes \tcode{sbuf_} with \tcode{s.rdbuf()}.
@@ -3330,8 +3328,7 @@ Initializes \tcode{sbuf_} with \tcode{s}.
 
 \indexlibrary{\idxcode{operator=}!\idxcode{ostreambuf_iterator}}%
 \begin{itemdecl}
-ostreambuf_iterator<charT,traits>&
-  operator=(charT c);
+ostreambuf_iterator& operator=(charT c);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -3352,7 +3349,7 @@ otherwise has no effect.
 
 \indexlibrary{\idxcode{operator*}!\idxcode{ostreambuf_iterator}}%
 \begin{itemdecl}
-ostreambuf_iterator<charT,traits>& operator*();
+ostreambuf_iterator& operator*();
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -3363,8 +3360,8 @@ ostreambuf_iterator<charT,traits>& operator*();
 
 \indexlibrary{\idxcode{operator++}!\idxcode{ostreambuf_iterator}}%
 \begin{itemdecl}
-ostreambuf_iterator<charT,traits>& operator++();
-ostreambuf_iterator<charT,traits>& operator++(int);
+ostreambuf_iterator& operator++();
+ostreambuf_iterator& operator++(int);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -3393,7 +3390,7 @@ or
 otherwise.
 \end{itemdescr}
 
-\rSec1[iterator.range]{range access}
+\rSec1[iterator.range]{Range access}
 
 \pnum
 In addition to being available via inclusion of the \tcode{<iterator>} header,
@@ -3526,4 +3523,71 @@ template <class C> auto crend(const C& c) -> decltype(std::rend(c));
 \end{itemdecl}
 \begin{itemdescr}
 \pnum \returns \tcode{std::rend(c)}.
+\end{itemdescr}
+
+\rSec1[iterator.container]{Container access}
+
+\pnum
+In addition to being available via inclusion of the \tcode{<iterator>} header,
+the function templates in \ref{iterator.container} are available
+when any of the following headers are included:
+\tcode{<array>}, \tcode{<deque>}, \tcode{<forward_list>}, \tcode{<list>},
+\tcode{<map>}, \tcode{<regex>}, \tcode{<set>}, \tcode{<string>},
+\tcode{<unordered_map>}, \tcode{<unordered_set>}, and \tcode{<vector>}.
+
+\begin{itemdecl}
+template <class C> constexpr auto size(const C& c) -> decltype(c.size());
+\end{itemdecl}
+\begin{itemdescr}
+\pnum \returns \tcode{c.size()}.
+\end{itemdescr}
+
+\begin{itemdecl}
+template <class T, size_t N> constexpr size_t size(const T (&array)[N]) noexcept;
+\end{itemdecl}
+\begin{itemdescr}
+\pnum \returns \tcode{N}.
+\end{itemdescr}
+
+\begin{itemdecl}
+template <class C> constexpr auto empty(const C& c) -> decltype(c.empty());
+\end{itemdecl}
+\begin{itemdescr}
+\pnum \returns \tcode{c.empty()}.
+\end{itemdescr}
+
+\begin{itemdecl}
+template <class T, size_t N> constexpr bool empty(const T (&array)[N]) noexcept;
+\end{itemdecl}
+\begin{itemdescr}
+\pnum \returns \tcode{false}.
+\end{itemdescr}
+
+\begin{itemdecl}
+template <class E> constexpr bool empty(initializer_list<E> il) noexcept;
+\end{itemdecl}
+\begin{itemdescr}
+\pnum \returns \tcode{il.size() == 0}.
+\end{itemdescr}
+
+\begin{itemdecl}
+template <class C> constexpr auto data(C& c) -> decltype(c.data());
+template <class C> constexpr auto data(const C& c) -> decltype(c.data());
+\end{itemdecl}
+\begin{itemdescr}
+\pnum \returns \tcode{c.data()}.
+\end{itemdescr}
+
+\begin{itemdecl}
+template <class T, size_t N> constexpr T* data(T (&array)[N]) noexcept;
+\end{itemdecl}
+\begin{itemdescr}
+\pnum \returns \tcode{array}.
+\end{itemdescr}
+
+\begin{itemdecl}
+template <class E> constexpr const E* data(initializer_list<E> il) noexcept;
+\end{itemdecl}
+\begin{itemdescr}
+\pnum \returns \tcode{il.begin()}.
 \end{itemdescr}

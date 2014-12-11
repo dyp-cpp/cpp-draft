@@ -178,7 +178,7 @@ denotes a non-const rvalue of type \tcode{X}.
   had before this assignment   &
    linear                     \\ \rowsep
 
-\tcode{(\&a)->\tilde X()}    &
+\tcode{(\&a)->\~X()}    &
  \tcode{void}               &
                             &
  note: the destructor is applied to every element of \tcode{a}; any memory obtained is deallocated. &
@@ -325,9 +325,6 @@ copy assignment, move assignment, or swapping of the allocator only if
 \tcode{allocator_traits<allocator_type>::propagate_on_container_move_assignment::value},
 or \tcode{alloca\-tor_traits<allocator_type>::propagate_on_container_swap::value} is true
 within the implementation of the corresponding container operation.
-The behavior of a call to a container's \tcode{swap} function is undefined unless the
-objects being swapped have allocators that compare equal or
-\tcode{allocator_traits<allocator_type>::propagate_on_container_swap::value} is true.
 In all container types defined in this Clause, the member \tcode{get_allocator()}
 returns a copy of the allocator used to construct the container or, if that allocator
 has been replaced, a copy of the most recent replacement.
@@ -336,13 +333,17 @@ has been replaced, a copy of the most recent replacement.
 The expression \tcode{a.swap(b)}, for containers \tcode{a} and \tcode{b} of a standard
 container type other than \tcode{array}, shall exchange the values of \tcode{a} and
 \tcode{b} without invoking any move, copy, or swap operations on the individual
-container elements. Any \tcode{Compare}, \tcode{Pred}, or \tcode{Hash} objects
+container elements.
+Lvalues of any \tcode{Compare}, \tcode{Pred}, or \tcode{Hash} types
 belonging to \tcode{a} and \tcode{b} shall be swappable
-and shall be exchanged by unqualified calls to non-member \tcode{swap}. If
+and shall be exchanged by calling \tcode{swap}
+as described in~\ref{swappable.requirements}. If
 \tcode{allocator_traits<allocator_type>::propagate_on_container_swap::value} is
-\tcode{true}, then the allocators of \tcode{a} and \tcode{b} shall also be exchanged
-using an unqualified call to non-member \tcode{swap}. Otherwise, they shall not be
-swapped, and the behavior is
+\tcode{true}, then
+lvalues of type \tcode{allocator_type} shall be swappable and
+the allocators of \tcode{a} and \tcode{b} shall also be exchanged
+by calling \tcode{swap} as described in~\ref{swappable.requirements}.
+Otherwise, the allocators shall not be swapped, and the behavior is
 undefined unless \tcode{a.get_allocator() == b.get_allocator()}. Every iterator
 referring to an element in one container before the swap shall refer to the same
 element in the other container after the swap. It is unspecified whether an iterator
@@ -444,6 +445,13 @@ function in terms of other functions), invoking a container member
 function or passing a container as an argument to a library function
 shall not invalidate iterators to, or change the values of, objects
 within that container.
+
+\pnum
+\indextext{container!contiguous}%
+A \defn{contiguous container}
+is a container that supports random access iterators~(\ref{random.access.iterators})
+and whose member types \tcode{iterator} and \tcode{const_iterator}
+are contiguous iterators~(\ref{iterator.requirements.general}).
 
 \pnum
 Table~\ref{tab:containers.optional.operations} lists operations that are provided
@@ -738,11 +746,13 @@ end of the sequence.
 
 \pnum
 In Tables~\ref{tab:containers.sequence.requirements}
-and \ref{tab:containers.sequence.optional}, \tcode{X}
-denotes a sequence container class,
-\tcode{a} denotes a value of \tcode{X} containing elements of type \tcode{T}, \tcode{A}
-denotes \tcode{X::allocator_type} if it exists and \tcode{std::allocator<T>} if it
-doesn't,
+and \ref{tab:containers.sequence.optional},
+\tcode{X} denotes a sequence container class,
+\tcode{a} denotes a value of \tcode{X} containing elements of type \tcode{T},
+\tcode{A} denotes \tcode{X::allocator_type} if
+the \grammarterm{qualified-id} \tcode{X::allocator_type} is valid and denotes a
+type~(\ref{temp.deduct}) and
+\tcode{std::allocator<T>} if it doesn't,
 \tcode{i} and \tcode{j}
 denote iterators satisfying input iterator requirements
 and refer to elements implicitly convertible to \tcode{value_type},
@@ -781,7 +791,7 @@ The complexities of the expressions are sequence dependent.
 \tcode{X(n, t)}\br
 \tcode{X a(n, t)}   &
                 &
- \requires \tcode{T} shall be
+ \requires\ \tcode{T} shall be
  \tcode{CopyInsertable} into \tcode{X}.\br
  post: \tcode{distance(begin(), end()) == n}\br
  Constructs a sequence container with \tcode{n} copies of \tcode{t}  \\ \rowsep
@@ -823,7 +833,7 @@ The complexities of the expressions are sequence dependent.
 
 \tcode{a.insert(p,t)}   &
  \tcode{iterator}       &
- \requires \tcode{T} shall be
+ \requires\ \tcode{T} shall be
  \tcode{CopyInsertable} into \tcode{X}. For \tcode{vector} and \tcode{deque},
  \tcode{T} shall also be \tcode{CopyAssignable}.\br
  \effects\ Inserts a copy of \tcode{t} before \tcode{p}. \\ \rowsep
@@ -837,17 +847,17 @@ The complexities of the expressions are sequence dependent.
 
 \tcode{a.insert(p,n,t)}     &
  \tcode{iterator}               &
- \requires \tcode{T} shall be
+ \requires\ \tcode{T} shall be
  \tcode{CopyInsertable} into \tcode{X}
  and \tcode{CopyAssignable}.\br
  Inserts \tcode{n} copies of \tcode{t} before \tcode{p}. \\ \rowsep
 
 \tcode{a.insert(p,i,j)}    &
  \tcode{iterator}           &
- \requires \tcode{T} shall be \tcode{EmplaceConstructible} into \tcode{X} from \tcode{*i}. For \tcode{vector}, if the
- iterator does not meet the forward iterator requirements~(\ref{forward.iterators}),
- \tcode{T} shall also be
- \tcode{MoveInsertable} into \tcode{X} and \tcode{MoveAssignable}.
+ \requires\ \tcode{T} shall be \tcode{EmplaceConstructible} into \tcode{X} from \tcode{*i}.
+ For \tcode{vector} and \tcode{deque}, \tcode{T} shall also be
+ \tcode{MoveInsertable} into \tcode{X}, \tcode{MoveConstructible}, \tcode{MoveAssignable},
+ and swappable~(\ref{swappable.requirements}).
  Each iterator in the range \range{i}{j} shall be dereferenced exactly once.\br
  pre: \tcode{i} and \tcode{j} are not iterators into \tcode{a}.\br
  Inserts copies of elements in \tcode{[i, j)} before \tcode{p}  \\ \rowsep
@@ -892,7 +902,7 @@ The complexities of the expressions are sequence dependent.
 
 \tcode{a.assign(n,t)}   &
  \tcode{void}           &
- \requires \tcode{T} shall be
+ \requires\ \tcode{T} shall be
  \tcode{CopyInsertable} into \tcode{X}
  and \tcode{CopyAssignable}.\br
  pre: \tcode{t} is not a reference into \tcode{a}.\br
@@ -1252,7 +1262,7 @@ In Table~\ref{tab:containers.associative.requirements},
 when \tcode{X} supports unique keys,
 \tcode{a_eq} denotes a value of \tcode{X}
 when \tcode{X} supports multiple keys,
-\tcode{a_tran} denotes a value of \tcode{X} when the qualified-id
+\tcode{a_tran} denotes a value of \tcode{X} when the \grammarterm{qualified-id}
 \tcode{X::key_compare::is_transparent} is valid
 and denotes a type~(\ref{temp.deduct}),
 \tcode{i} and \tcode{j}
@@ -1615,7 +1625,7 @@ its constructor.
 \pnum
 The member function templates \tcode{find}, \tcode{count}, \tcode{lower_bound},
 \tcode{upper_bound}, and \tcode{equal_range} shall not participate in overload
-resolution unless the qualified-id \tcode{Compare::is_transparent} is valid
+resolution unless the \grammarterm{qualified-id} \tcode{Compare::is_transparent} is valid
 and denotes a type~(\ref{temp.deduct}).
 
 \indextext{associative containers!exception safety}%
@@ -2440,7 +2450,8 @@ namespace std {
   template <class T, class Allocator>
     bool operator<=(const deque<T,Allocator>& x, const deque<T,Allocator>& y);
   template <class T, class Allocator>
-    void swap(deque<T,Allocator>& x, deque<T,Allocator>& y);
+    void swap(deque<T,Allocator>& x, deque<T,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}
 
@@ -2465,7 +2476,8 @@ namespace std {
   template <class T, class Allocator>
     bool operator<=(const forward_list<T,Allocator>& x, const forward_list<T,Allocator>& y);
   template <class T, class Allocator>
-    void swap(forward_list<T,Allocator>& x, forward_list<T,Allocator>& y);
+    void swap(forward_list<T,Allocator>& x, forward_list<T,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}
 
@@ -2490,7 +2502,8 @@ namespace std {
   template <class T, class Allocator>
     bool operator<=(const list<T,Allocator>& x, const list<T,Allocator>& y);
   template <class T, class Allocator>
-    void swap(list<T,Allocator>& x, list<T,Allocator>& y);
+    void swap(list<T,Allocator>& x, list<T,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}
 
@@ -2515,7 +2528,8 @@ namespace std {
   template <class T, class Allocator>
     bool operator<=(const vector<T,Allocator>& x,const vector<T,Allocator>& y);
   template <class T, class Allocator>
-    void swap(vector<T,Allocator>& x, vector<T,Allocator>& y);
+    void swap(vector<T,Allocator>& x, vector<T,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 
   template <class Allocator> class vector<bool,Allocator>;
 
@@ -2533,11 +2547,10 @@ namespace std {
 \pnum
 \indextext{\idxcode{array}!contiguous storage}%
 The header \tcode{<array>} defines a class template for storing fixed-size
-sequences of objects. An \tcode{array} supports random access iterators. An
-instance of \tcode{array<T, N>} stores \tcode{N} elements of type \tcode{T}, so that
-\tcode{size() == N} is an invariant. The elements of an \tcode{array} are stored contiguously,
-meaning that if \tcode{a} is an \tcode{array<T, N>} then it obeys the identity
-\verb|&a[n] == &a[0] + n| for all \tcode{0 <= n < N}.
+sequences of objects.
+An \tcode{array} is a contiguous container~(\ref{container.requirements.general}).
+An instance of \tcode{array<T, N>} stores \tcode{N} elements of type \tcode{T},
+so that \tcode{size() == N} is an invariant.
 
 \pnum
 \indextext{\idxcode{array}!initialization}%
@@ -2872,7 +2885,8 @@ namespace std {
 
     ~deque();
     deque& operator=(const deque& x);
-    deque& operator=(deque&& x);
+    deque& operator=(deque&& x)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value);
     deque& operator=(initializer_list<T>);
     template <class InputIterator>
       void assign(InputIterator first, InputIterator last);
@@ -2935,7 +2949,8 @@ namespace std {
 
     iterator erase(const_iterator position);
     iterator erase(const_iterator first, const_iterator last);
-    void     swap(deque&);
+    void     swap(deque&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value);
     void     clear() noexcept;
   };
 
@@ -2954,7 +2969,8 @@ namespace std {
 
   // specialized algorithms:
   template <class T, class Allocator>
-    void swap(deque<T,Allocator>& x, deque<T,Allocator>& y);
+    void swap(deque<T,Allocator>& x, deque<T,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}
 
@@ -3182,7 +3198,8 @@ assignment operator, or move assignment operator of
 \indexlibrary{\idxcode{deque}!\idxcode{swap}}%
 \begin{itemdecl}
 template <class T, class Allocator>
-  void swap(deque<T,Allocator>& x, deque<T,Allocator>& y);
+  void swap(deque<T,Allocator>& x, deque<T,Allocator>& y)
+    noexcept(noexcept(x.swap(y)));
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -3257,7 +3274,8 @@ namespace std {
     forward_list(initializer_list<T>, const Allocator& = Allocator());
     ~forward_list();
     forward_list& operator=(const forward_list& x);
-    forward_list& operator=(forward_list&& x);
+    forward_list& operator=(forward_list&& x)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value);
     forward_list& operator=(initializer_list<T>);
     template <class InputIterator>
       void assign(InputIterator first, InputIterator last);
@@ -3302,7 +3320,8 @@ namespace std {
 
     iterator erase_after(const_iterator position);
     iterator erase_after(const_iterator position, const_iterator last);
-    void swap(forward_list&);
+    void swap(forward_list&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value);
 
     void resize(size_type sz);
     void resize(size_type sz, const value_type& c);
@@ -3353,7 +3372,8 @@ namespace std {
 
   // \ref{forwardlist.spec}, specialized algorithms:
   template <class T, class Allocator>
-    void swap(forward_list<T,Allocator>& x, forward_list<T,Allocator>& y);
+    void swap(forward_list<T,Allocator>& x, forward_list<T,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}
 
@@ -3835,8 +3855,8 @@ Invalidates only the iterators and references to the erased elements.
 \begin{itemdecl}
 void merge(forward_list& x);
 void merge(forward_list&& x);
-template <class Compare> void merge(forward_list& x, Compare comp)
-template <class Compare> void merge(forward_list&& x, Compare comp)
+template <class Compare> void merge(forward_list& x, Compare comp);
+template <class Compare> void merge(forward_list&& x, Compare comp);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -3908,7 +3928,8 @@ Does not affect the validity of iterators and references.
 \indexlibrary{\idxcode{forward_list}!\idxcode{swap}}%
 \begin{itemdecl}
 template <class T, class Allocator>
-  void swap(forward_list<T,Allocator>& x, forward_list<T,Allocator>& y);
+  void swap(forward_list<T,Allocator>& x, forward_list<T,Allocator>& y)
+    noexcept(noexcept(x.swap(y)));
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -3984,7 +4005,8 @@ namespace std {
     list(initializer_list<T>, const Allocator& = Allocator());
    ~list();
     list& operator=(const list& x);
-    list& operator=(list&& x);
+    list& operator=(list&& x)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value);
     list& operator=(initializer_list<T>);
     template <class InputIterator>
       void assign(InputIterator first, InputIterator last);
@@ -4041,7 +4063,8 @@ namespace std {
 
     iterator erase(const_iterator position);
     iterator erase(const_iterator position, const_iterator last);
-    void     swap(list&);
+    void     swap(list&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value);
     void     clear() noexcept;
 
     // \ref{list.ops}, list operations:
@@ -4087,7 +4110,8 @@ namespace std {
 
   // specialized algorithms:
   template <class T, class Allocator>
-    void swap(list<T,Allocator>& x, list<T,Allocator>& y);
+    void swap(list<T,Allocator>& x, list<T,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}
 
@@ -4601,7 +4625,8 @@ comparisons, where
 \indexlibrary{\idxcode{list}!\idxcode{swap}}%
 \begin{itemdecl}
 template <class T, class Allocator>
-  void swap(list<T,Allocator>& x, list<T,Allocator>& y);
+  void swap(list<T,Allocator>& x, list<T,Allocator>& y)
+    noexcept(noexcept(x.swap(y)));
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -4620,30 +4645,21 @@ x.swap(y);
 \indexlibrary{\idxcode{vector}}%
 A
 \tcode{vector}
-is a sequence container that supports random access iterators.
-In addition, it supports (amortized) constant time insert and erase operations at the end;
+is a sequence container that supports
+(amortized) constant time insert and erase operations at the end;
 insert and erase in the middle take linear time.
 Storage management is handled automatically, though hints can be given
 to improve efficiency.
-The elements of a vector are stored contiguously, meaning that if
-\tcode{v}
-is a
-\tcode{vector<T, Allocator>}
-where
-\tcode{T}
-is some type other than
-\tcode{bool},
-then it obeys the identity
-\tcode{\&v[n] == \&v[0] + n}
-for all
-\tcode{0 <= n < v.size()}.
 
 \pnum
 A \tcode{vector} satisfies all of the requirements of a container and of a
 reversible container (given in two tables in~\ref{container.requirements}), of a
 sequence container, including most of the optional sequence container
-requirements~(\ref{sequence.reqmts}), and of an allocator-aware container
-(Table~\ref{tab:containers.allocatoraware}). The exceptions are the
+requirements~(\ref{sequence.reqmts}), of an allocator-aware container
+(Table~\ref{tab:containers.allocatoraware}),
+and, for an element type other than \tcode{bool},
+of a contiguous container~(\ref{container.requirements.general}).
+The exceptions are the
 \tcode{push_front}, \tcode{pop_front}, and \tcode{emplace_front} member functions, which are not
 provided. Descriptions are provided here only for operations on \tcode{vector}
 that are not described in one of these tables or for operations where there is
@@ -4669,21 +4685,23 @@ namespace std {
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     // \ref{vector.cons}, construct/copy/destroy:
-    vector() : vector(Allocator()) { }
-    explicit vector(const Allocator&);
+    vector() noexcept : vector(Allocator()) { }
+    explicit vector(const Allocator&) noexcept;
     explicit vector(size_type n, const Allocator& = Allocator());
     vector(size_type n, const T& value, const Allocator& = Allocator());
     template <class InputIterator>
       vector(InputIterator first, InputIterator last,
              const Allocator& = Allocator());
     vector(const vector& x);
-    vector(vector&&);
+    vector(vector&&) noexcept;
     vector(const vector&, const Allocator&);
     vector(vector&&, const Allocator&);
     vector(initializer_list<T>, const Allocator& = Allocator());
    ~vector();
     vector& operator=(const vector& x);
-    vector& operator=(vector&& x);
+    vector& operator=(vector&& x)
+      noexcept(allocator_traits<Allocator>::propagate_on_container_move_assignment::value ||
+               allocator_traits<Allocator>::is_always_equal::value);
     vector& operator=(initializer_list<T>);
     template <class InputIterator>
       void assign(InputIterator first, InputIterator last);
@@ -4746,7 +4764,9 @@ namespace std {
     iterator     insert(const_iterator position, initializer_list<T> il);
     iterator erase(const_iterator position);
     iterator erase(const_iterator first, const_iterator last);
-    void     swap(vector&);
+    void     swap(vector&)
+      noexcept(allocator_traits<Allocator>::propagate_on_container_swap::value ||
+               allocator_traits<Allocator>::is_always_equal::value);
     void     clear() noexcept;
   };
 
@@ -4765,7 +4785,8 @@ namespace std {
 
   // \ref{vector.special}, specialized algorithms:
   template <class T, class Allocator>
-    void swap(vector<T,Allocator>& x, vector<T,Allocator>& y);
+    void swap(vector<T,Allocator>& x, vector<T,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}%
 \indexlibrary{\idxcode{vector}!\tcode{operator==}}%
@@ -4940,7 +4961,9 @@ If an exception is thrown other than by the move constructor of a non-\tcode{Cop
 
 \indexlibrary{\idxcode{swap}!\idxcode{vector}}%
 \begin{itemdecl}
-void swap(vector& x);
+void swap(vector& x)
+  noexcept(allocator_traits<Allocator>::propagate_on_container_swap::value ||
+           allocator_traits<Allocator>::is_always_equal::value);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -5087,7 +5110,8 @@ assignment operator, or move assignment operator of
 \indexlibrary{\idxcode{vector}!\idxcode{swap}}%
 \begin{itemdecl}
 template <class T, class Allocator>
-  void swap(vector<T,Allocator>& x, vector<T,Allocator>& y);
+  void swap(vector<T,Allocator>& x, vector<T,Allocator>& y)
+    noexcept(noexcept(x.swap(y)));
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -5220,8 +5244,8 @@ Unless described below, all operations have the same requirements and
 semantics as the primary \tcode{vector} template, except that operations
 dealing with the \tcode{bool} value type map to bit values in the
 container storage and
-allocator_traits::construct~(\ref{allocator.traits.members}) is not used to
-construct these values.
+\tcode{allocator_traits::construct}~(\ref{allocator.traits.members})
+is not used to construct these values.
 
 \pnum
 There is no requirement that the data be stored as a contiguous allocation
@@ -5315,7 +5339,8 @@ namespace std {
                     const map<Key,T,Compare,Allocator>& y);
   template <class Key, class T, class Compare, class Allocator>
     void swap(map<Key,T,Compare,Allocator>& x,
-              map<Key,T,Compare,Allocator>& y);
+              map<Key,T,Compare,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 
   template <class Key, class T, class Compare = less<Key>,
             class Allocator = allocator<pair<const Key, T> > >
@@ -5340,7 +5365,8 @@ namespace std {
                     const multimap<Key,T,Compare,Allocator>& y);
   template <class Key, class T, class Compare, class Allocator>
     void swap(multimap<Key,T,Compare,Allocator>& x,
-              multimap<Key,T,Compare,Allocator>& y);
+              multimap<Key,T,Compare,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}
 
@@ -5375,7 +5401,8 @@ namespace std {
                     const set<Key,Compare,Allocator>& y);
   template <class Key, class Compare, class Allocator>
     void swap(set<Key,Compare,Allocator>& x,
-              set<Key,Compare,Allocator>& y);
+              set<Key,Compare,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 
   template <class Key, class Compare = less<Key>,
             class Allocator = allocator<Key> >
@@ -5400,7 +5427,8 @@ namespace std {
                     const multiset<Key,Compare,Allocator>& y);
   template <class Key, class Compare, class Allocator>
     void swap(multiset<Key,Compare,Allocator>& x,
-              multiset<Key,Compare,Allocator>& y);
+              multiset<Key,Compare,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}
 
@@ -5506,7 +5534,9 @@ namespace std {
       : map(il, Compare(), a) { }
    ~map();
     map& operator=(const map& x);
-    map& operator=(map&& x);
+    map& operator=(map&& x)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               is_nothrow_move_assignable<Compare>::value);
     map& operator=(initializer_list<value_type>);
     allocator_type get_allocator() const noexcept;
 
@@ -5541,18 +5571,39 @@ namespace std {
     template <class... Args> pair<iterator, bool> emplace(Args&&... args);
     template <class... Args> iterator emplace_hint(const_iterator position, Args&&... args);
     pair<iterator, bool> insert(const value_type& x);
+    pair<iterator, bool> insert(value_type&& x);
     template <class P> pair<iterator, bool> insert(P&& x);
     iterator insert(const_iterator position, const value_type& x);
+    iterator insert(const_iterator position, value_type&& x);
     template <class P>
       iterator insert(const_iterator position, P&&);
     template <class InputIterator>
       void insert(InputIterator first, InputIterator last);
     void insert(initializer_list<value_type>);
 
+    template <class... Args>
+      pair<iterator, bool> try_emplace(const key_type& k, Args&&... args);
+    template <class... Args>
+      pair<iterator, bool> try_emplace(key_type&& k, Args&&... args);
+    template <class... Args>
+      iterator try_emplace(const_iterator hint, const key_type& k, Args&&... args);
+    template <class... Args>
+      iterator try_emplace(const_iterator hint, key_type&& k, Args&&... args);
+    template <class M>
+      pair<iterator, bool> insert_or_assign(const key_type& k, M&& obj);
+    template <class M>
+      pair<iterator, bool> insert_or_assign(key_type&& k, M&& obj);
+    template <class M>
+      iterator insert_or_assign(const_iterator hint, const key_type& k, M&& obj);
+    template <class M>
+      iterator insert_or_assign(const_iterator hint, key_type&& k, M&& obj);
+
     iterator  erase(const_iterator position);
     size_type erase(const key_type& x);
     iterator  erase(const_iterator first, const_iterator last);
-    void swap(map&);
+    void swap(map&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               noexcept(swap(declval<Compare&>(),declval<Compare&>())));
     void clear() noexcept;
 
     // observers:
@@ -5610,7 +5661,8 @@ namespace std {
   // specialized algorithms:
   template <class Key, class T, class Compare, class Allocator>
     void swap(map<Key,T,Compare,Allocator>& x,
-              map<Key,T,Compare,Allocator>& y);
+              map<Key,T,Compare,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}
 
@@ -5771,6 +5823,73 @@ unless \tcode{std::is_constructible<value_type, P\&\&>::value} is
 \tcode{true}.
 \end{itemdescr}
 
+\indexlibrary{\idxcode{try_emplace}!\idxcode{map}}%
+\indexlibrary{\idxcode{map}!\idxcode{try_emplace}}%
+\begin{itemdecl}
+template <class... Args> pair<iterator, bool> try_emplace(const key_type& k, Args&&... args);
+template <class... Args> pair<iterator, bool> try_emplace(key_type&& k, Args&&... args);
+template <class... Args> iterator try_emplace(const_iterator hint, const key_type& k, Args&&... args);
+template <class... Args> iterator try_emplace(const_iterator hint, key_type&& k, Args&&... args);
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\effects
+If the key \tcode{k} already exists in the map, there is no effect.
+Otherwise, inserts an element into the map.
+In the first and third forms,
+the element is constructed from the arguments as
+\tcode{value_type(k, std::forward<Args>(args)...)}.
+In the second and fourth forms,
+the element is constructed from the arguments as
+\tcode{value_type(std::move(k), std::forward<Args>(args)...)}.
+In the first two overloads,
+the \tcode{bool} component of the returned pair is \tcode{true}
+if and only if the insertion took place.
+The returned \tcode{iterator} points to the element of the map whose key
+is equivalent to \tcode{k}.
+
+\pnum
+\complexity
+The same as \tcode{emplace} and \tcode{emplace_hint},
+respectively.
+\end{itemdescr}
+
+\indexlibrary{\idxcode{insert_or_assign}!\idxcode{map}}%
+\indexlibrary{\idxcode{map}!\idxcode{insert_or_assign}}%
+\begin{itemdecl}
+template <class M> pair<iterator, bool> insert_or_assign(const key_type& k, M&& obj);
+template <class M> pair<iterator, bool> insert_or_assign(key_type&& k, M&& obj);
+template <class M> iterator insert_or_assign(const_iterator hint, const key_type& k, M&& obj);
+template <class M> iterator insert_or_assign(const_iterator hint, key_type&& k, M&& obj);
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\effects
+If the key \tcode{k} does not exist in the map,
+inserts an element into the map.
+In the first and third forms,
+the element is constructed from the arguments as
+\tcode{value_type(k, std::forward<Args>(args)...)}.
+In the second and fourth forms,
+the element is constructed from the arguments as
+\tcode{value_type(std::move(k), std::forward<Args>(args)...)}.
+If the key already exists,
+\tcode{std::forward<M>(obj)} is assigned to the
+\tcode{mapped_type} corresponding to the key.
+In the first two overloads,
+the \tcode{bool} component of the returned value is \tcode{true}
+if and only if the insertion took place.
+The returned \tcode{iterator} points to the element
+that was inserted or updated.
+
+\pnum
+\complexity
+The same as \tcode{emplace} and \tcode{emplace_hint},
+respectively.
+\end{itemdescr}
+
 \rSec3[map.special]{\tcode{map} specialized algorithms}
 
 \indexlibrary{\idxcode{swap}!\idxcode{map}}%
@@ -5778,7 +5897,8 @@ unless \tcode{std::is_constructible<value_type, P\&\&>::value} is
 \begin{itemdecl}
 template <class Key, class T, class Compare, class Allocator>
   void swap(map<Key,T,Compare,Allocator>& x,
-            map<Key,T,Compare,Allocator>& y);
+            map<Key,T,Compare,Allocator>& y)
+    noexcept(noexcept(x.swap(y)));
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -5899,7 +6019,9 @@ namespace std {
       : multimap(il, Compare(), a) { }
    ~multimap();
     multimap& operator=(const multimap& x);
-    multimap& operator=(multimap&& x);
+    multimap& operator=(multimap&& x)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               is_nothrow_move_assignable<Compare>::value);
     multimap& operator=(initializer_list<value_type>);
     allocator_type get_allocator() const noexcept;
 
@@ -5928,8 +6050,10 @@ namespace std {
     template <class... Args> iterator emplace(Args&&... args);
     template <class... Args> iterator emplace_hint(const_iterator position, Args&&... args);
     iterator insert(const value_type& x);
+    iterator insert(value_type&& x);
     template <class P> iterator insert(P&& x);
     iterator insert(const_iterator position, const value_type& x);
+    iterator insert(const_iterator position, value_type&& x);
     template <class P> iterator insert(const_iterator position, P&& x);
     template <class InputIterator>
       void insert(InputIterator first, InputIterator last);
@@ -5938,7 +6062,9 @@ namespace std {
     iterator  erase(const_iterator position);
     size_type erase(const key_type& x);
     iterator  erase(const_iterator first, const_iterator last);
-    void swap(multimap&);
+    void swap(multimap&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               noexcept(swap(declval<Compare&>(),declval<Compare&>())));
     void clear() noexcept;
 
     // observers:
@@ -5996,7 +6122,8 @@ namespace std {
   // specialized algorithms:
   template <class Key, class T, class Compare, class Allocator>
     void swap(multimap<Key,T,Compare,Allocator>& x,
-              multimap<Key,T,Compare,Allocator>& y);
+              multimap<Key,T,Compare,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}%
 \indexlibrary{\idxcode{multimap}!\idxcode{operator==}}%
@@ -6087,7 +6214,8 @@ unless \tcode{std::is_constructible<value_type, P\&\&>::value} is
 \begin{itemdecl}
 template <class Key, class T, class Compare, class Allocator>
   void swap(multimap<Key,T,Compare,Allocator>& x,
-            multimap<Key,T,Compare,Allocator>& y);
+            multimap<Key,T,Compare,Allocator>& y)
+    noexcept(noexcept(x.swap(y)));
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -6187,7 +6315,9 @@ namespace std {
       : set(il, Compare(), a) { }
    ~set();
     set& operator=(const set& x);
-    set& operator=(set&& x);
+    set& operator=(set&& x)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               is_nothrow_move_assignable<Compare>::value);
     set& operator=(initializer_list<value_type>);
     allocator_type get_allocator() const noexcept;
 
@@ -6226,7 +6356,9 @@ namespace std {
     iterator  erase(const_iterator position);
     size_type erase(const key_type& x);
     iterator  erase(const_iterator first, const_iterator last);
-    void swap(set&);
+    void swap(set&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               noexcept(swap(declval<Compare&>(),declval<Compare&>())));
     void clear() noexcept;
 
     // observers:
@@ -6282,7 +6414,8 @@ namespace std {
   // specialized algorithms:
   template <class Key, class Compare, class Allocator>
     void swap(set<Key,Compare,Allocator>& x,
-              set<Key,Compare,Allocator>& y);
+              set<Key,Compare,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}%
 \indexlibrary{\idxcode{set}!\idxcode{operator==}}%
@@ -6346,7 +6479,8 @@ where $N$ is
 \begin{itemdecl}
 template <class Key, class Compare, class Allocator>
   void swap(set<Key,Compare,Allocator>& x,
-            set<Key,Compare,Allocator>& y);
+            set<Key,Compare,Allocator>& y)
+    noexcept(noexcept(x.swap(y)));
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -6446,7 +6580,9 @@ namespace std {
       : multiset(il, Compare(), a) { }
    ~multiset();
     multiset& operator=(const multiset& x);
-    multiset& operator=(multiset&& x);
+    multiset& operator=(multiset&& x)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               is_nothrow_move_assignable<Compare>::value);
     multiset& operator=(initializer_list<value_type>);
     allocator_type get_allocator() const noexcept;
 
@@ -6485,7 +6621,9 @@ namespace std {
     iterator  erase(const_iterator position);
     size_type erase(const key_type& x);
     iterator  erase(const_iterator first, const_iterator last);
-    void swap(multiset&);
+    void swap(multiset&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               noexcept(swap(declval<Compare&>(),declval<Compare&>())));
     void clear() noexcept;
 
     // observers:
@@ -6541,7 +6679,8 @@ namespace std {
   // specialized algorithms:
   template <class Key, class Compare, class Allocator>
     void swap(multiset<Key,Compare,Allocator>& x,
-              multiset<Key,Compare,Allocator>& y);
+              multiset<Key,Compare,Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
 }
 \end{codeblock}%
 \indexlibrary{\idxcode{multiset}!\idxcode{operator==}}%
@@ -6570,7 +6709,7 @@ Constant.
 \indexlibrary{\idxcode{multiset}!\idxcode{multiset}}%
 \begin{itemdecl}
 template <class InputIterator>
-  multiset(InputIterator first, last,
+  multiset(InputIterator first, InputIterator last,
            const Compare& comp = Compare(), const Allocator& = Allocator());
 \end{itemdecl}
 
@@ -6605,7 +6744,8 @@ where $N$ is
 \begin{itemdecl}
 template <class Key, class Compare, class Allocator>
   void swap(multiset<Key,Compare,Allocator>& x,
-            multiset<Key,Compare,Allocator>& y);
+            multiset<Key,Compare,Allocator>& y)
+    noexcept(noexcept(x.swap(y)));
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -6653,11 +6793,13 @@ namespace std {
 
   template <class Key, class T, class Hash, class Pred, class Alloc>
     void swap(unordered_map<Key, T, Hash, Pred, Alloc>& x,
-              unordered_map<Key, T, Hash, Pred, Alloc>& y);
+              unordered_map<Key, T, Hash, Pred, Alloc>& y)
+      noexcept(noexcept(x.swap(y)));
 
   template <class Key, class T, class Hash, class Pred, class Alloc>
     void swap(unordered_multimap<Key, T, Hash, Pred, Alloc>& x,
-              unordered_multimap<Key, T, Hash, Pred, Alloc>& y);
+              unordered_multimap<Key, T, Hash, Pred, Alloc>& y)
+      noexcept(noexcept(x.swap(y)));
 
   template <class Key, class T, class Hash, class Pred, class Alloc>
     bool operator==(const unordered_map<Key, T, Hash, Pred, Alloc>& a,
@@ -6699,11 +6841,13 @@ namespace std {
 
   template <class Key, class Hash, class Pred, class Alloc>
     void swap(unordered_set<Key, Hash, Pred, Alloc>& x,
-              unordered_set<Key, Hash, Pred, Alloc>& y);
+              unordered_set<Key, Hash, Pred, Alloc>& y)
+      noexcept(noexcept(x.swap(y)));
 
   template <class Key, class Hash, class Pred, class Alloc>
     void swap(unordered_multiset<Key, Hash, Pred, Alloc>& x,
-              unordered_multiset<Key, Hash, Pred, Alloc>& y);
+              unordered_multiset<Key, Hash, Pred, Alloc>& y)
+      noexcept(noexcept(x.swap(y)));
 
   template <class Key, class Hash, class Pred, class Alloc>
     bool operator==(const unordered_set<Key, Hash, Pred, Alloc>& a,
@@ -6790,11 +6934,11 @@ namespace std {
     explicit unordered_map(const Allocator&);
     unordered_map(const unordered_map&, const Allocator&);
     unordered_map(unordered_map&&, const Allocator&);
-    unordered_map(initializer_list<value_type>,
-      size_type = @\seebelow@,
-      const hasher& hf = hasher(),
-      const key_equal& eql = key_equal(),
-      const allocator_type& a = allocator_type());
+    unordered_map(initializer_list<value_type> il,
+                  size_type n = @\seebelow@,
+                  const hasher& hf = hasher(),
+                  const key_equal& eql = key_equal(),
+                  const allocator_type& a = allocator_type());
     unordered_map(size_type n, const allocator_type& a)
       : unordered_map(n, hasher(), key_equal(), a) { }
     unordered_map(size_type n, const hasher& hf, const allocator_type& a)
@@ -6813,7 +6957,10 @@ namespace std {
       : unordered_map(il, n, hf, key_equal(), a) { }
     ~unordered_map();
     unordered_map& operator=(const unordered_map&);
-    unordered_map& operator=(unordered_map&&);
+    unordered_map& operator=(unordered_map&&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               is_nothrow_move_assignable<Hash>::value &&
+               is_nothrow_move_assignable<Pred>::value);
     unordered_map& operator=(initializer_list<value_type>);
     allocator_type get_allocator() const noexcept;
 
@@ -6834,18 +6981,40 @@ namespace std {
     template <class... Args> pair<iterator, bool> emplace(Args&&... args);
     template <class... Args> iterator emplace_hint(const_iterator position, Args&&... args);
     pair<iterator, bool> insert(const value_type& obj);
+    pair<iterator, bool> insert(value_type&& obj);
     template <class P> pair<iterator, bool> insert(P&& obj);
     iterator       insert(const_iterator hint, const value_type& obj);
+    iterator       insert(const_iterator hint, value_type&& obj);
     template <class P> iterator insert(const_iterator hint, P&& obj);
     template <class InputIterator> void insert(InputIterator first, InputIterator last);
     void insert(initializer_list<value_type>);
+
+    template <class... Args>
+      pair<iterator, bool> try_emplace(const key_type& k, Args&&... args);
+    template <class... Args>
+      pair<iterator, bool> try_emplace(key_type&& k, Args&&... args);
+    template <class... Args>
+      iterator try_emplace(const_iterator hint, const key_type& k, Args&&... args);
+    template <class... Args>
+      iterator try_emplace(const_iterator hint, key_type&& k, Args&&... args);
+    template <class M>
+      pair<iterator, bool> insert_or_assign(const key_type& k, M&& obj);
+    template <class M>
+      pair<iterator, bool> insert_or_assign(key_type&& k, M&& obj);
+    template <class M>
+      iterator insert_or_assign(const_iterator hint, const key_type& k, M&& obj);
+    template <class M>
+      iterator insert_or_assign(const_iterator hint, key_type&& k, M&& obj);
 
     iterator erase(const_iterator position);
     size_type erase(const key_type& k);
     iterator erase(const_iterator first, const_iterator last);
     void clear() noexcept;
 
-    void swap(unordered_map&);
+    void swap(unordered_map&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               noexcept(swap(declval<Hash&>(),declval<Hash&>())) &&
+               noexcept(swap(declval<Pred&>(),declval<Pred&>())));
 
     // observers
     hasher hash_function() const;
@@ -6885,7 +7054,8 @@ namespace std {
 
   template <class Key, class T, class Hash, class Pred, class Alloc>
     void swap(unordered_map<Key, T, Hash, Pred, Alloc>& x,
-              unordered_map<Key, T, Hash, Pred, Alloc>& y);
+              unordered_map<Key, T, Hash, Pred, Alloc>& y)
+      noexcept(noexcept(x.swap(y)));
 
   template <class Key, class T, class Hash, class Pred, class Alloc>
     bool operator==(const unordered_map<Key, T, Hash, Pred, Alloc>& a,
@@ -6911,7 +7081,7 @@ explicit unordered_map(size_type n,
 \pnum
 \effects Constructs an empty \tcode{unordered_map} using the
 specified hash function, key equality function, and allocator, and
-using at least \textit{\tcode{n}} buckets.  For the default constructor,
+using at least \tcode{n} buckets.  For the default constructor,
 the number of buckets is \impldef{default number of buckets in
 \tcode{unordered_map}}.
 \tcode{max_load_factor()} returns 1.0.
@@ -6928,16 +7098,23 @@ template <class InputIterator>
                 const hasher& hf = hasher(),
                 const key_equal& eql = key_equal(),
                 const allocator_type& a = allocator_type());
+unordered_map(initializer_list<value_type> il,
+              size_type n = @\seebelow@,
+              const hasher& hf = hasher(),
+              const key_equal& eql = key_equal(),
+              const allocator_type& a = allocator_type());
 \end{itemdecl}
 
 \begin{itemdescr}
 \pnum
 \effects Constructs an empty \tcode{unordered_map} using the
 specified hash function, key equality function, and allocator, and
-using at least \textit{\tcode{n}} buckets. If \textit{\tcode{n}} is not
+using at least \tcode{n} buckets. If \tcode{n} is not
 provided, the number of buckets is \impldef{default number of buckets in
 \tcode{unordered_map}}. Then
-inserts elements from the range \tcode{[\textit{f}, \textit{l})}.
+inserts elements from the range \range{f}{l}
+for the first form, or from the range
+\range{il.begin()}{il.end()} for the second form.
 \tcode{max_load_factor()} returns 1.0.
 
 \pnum
@@ -7028,6 +7205,73 @@ template <class P>
 unless \tcode{std::is_constructible<value_type, P\&\&>::value} is \tcode{true}.
 \end{itemdescr}
 
+\indexlibrary{\idxcode{try_emplace}!\idxcode{unordered_map}}%
+\indexlibrary{\idxcode{unordered_map}!\idxcode{try_emplace}}%
+\begin{itemdecl}
+template <class... Args> pair<iterator, bool> try_emplace(const key_type& k, Args&&... args);
+template <class... Args> pair<iterator, bool> try_emplace(key_type&& k, Args&&... args);
+template <class... Args> iterator try_emplace(const_iterator hint, const key_type& k, Args&&... args);
+template <class... Args> iterator try_emplace(const_iterator hint, key_type&& k, Args&&... args);
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\effects
+If the key \tcode{k} already exists in the map, there is no effect.
+Otherwise, inserts an element into the map.
+In the first and third forms,
+the element is constructed from the arguments as
+\tcode{value_type(k, std::forward<Args>(args)...)}.
+In the second and fourth forms,
+the element is constructed from the arguments as
+\tcode{value_type(std::move(k), std::forward<Args>(args)...)}.
+In the first two overloads,
+the \tcode{bool} component of the returned pair is \tcode{true}
+if and only if the insertion took place.
+The returned \tcode{iterator} points to the element of the map whose key
+is equivalent to \tcode{k}.
+
+\pnum
+\complexity
+The same as \tcode{emplace} and \tcode{emplace_hint},
+respectively.
+\end{itemdescr}
+
+\indexlibrary{\idxcode{insert_or_assign}!\idxcode{unordered_map}}%
+\indexlibrary{\idxcode{unordered_map}!\idxcode{insert_or_assign}}%
+\begin{itemdecl}
+template <class M> pair<iterator, bool> insert_or_assign(const key_type& k, M&& obj);
+template <class M> pair<iterator, bool> insert_or_assign(key_type&& k, M&& obj);
+template <class M> iterator insert_or_assign(const_iterator hint, const key_type& k, M&& obj);
+template <class M> iterator insert_or_assign(const_iterator hint, key_type&& k, M&& obj);
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\effects
+If the key \tcode{k} does not exist in the map,
+inserts an element into the map.
+In the first and third forms,
+the element is constructed from the arguments as
+\tcode{value_type(k, std::forward<Args>(args)...)}.
+In the second and fourth forms,
+the element is constructed from the arguments as
+\tcode{value_type(std::move(k), std::forward<Args>(args)...)}.
+If the key already exists,
+\tcode{std::forward<M>(obj)} is assigned to the
+\tcode{mapped_type} corresponding to the key.
+In the first two overloads,
+the \tcode{bool} component of the returned value is \tcode{true}
+if and only if the insertion took place.
+The returned \tcode{iterator} points to the element
+that was inserted or updated.
+
+\pnum
+\complexity
+The same as \tcode{emplace} and \tcode{emplace_hint},
+respectively.
+\end{itemdescr}
+
 \rSec3[unord.map.swap]{\tcode{unordered_map} swap}
 
 \indexlibrary{\idxcode{unordered_map}!\idxcode{swap}}%
@@ -7035,7 +7279,8 @@ unless \tcode{std::is_constructible<value_type, P\&\&>::value} is \tcode{true}.
 \begin{itemdecl}
 template <class Key, class T, class Hash, class Pred, class Alloc>
   void swap(unordered_map<Key, T, Hash, Pred, Alloc>& x,
-            unordered_map<Key, T, Hash, Pred, Alloc>& y);
+            unordered_map<Key, T, Hash, Pred, Alloc>& y)
+    noexcept(noexcept(x.swap(y)));
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -7118,11 +7363,11 @@ namespace std {
     explicit unordered_multimap(const Allocator&);
     unordered_multimap(const unordered_multimap&, const Allocator&);
     unordered_multimap(unordered_multimap&&, const Allocator&);
-    unordered_multimap(initializer_list<value_type>,
-      size_type = @\seebelow@,
-      const hasher& hf = hasher(),
-      const key_equal& eql = key_equal(),
-      const allocator_type& a = allocator_type());
+    unordered_multimap(initializer_list<value_type> il,
+                       size_type n = @\seebelow@,
+                       const hasher& hf = hasher(),
+                       const key_equal& eql = key_equal(),
+                       const allocator_type& a = allocator_type());
     unordered_multimap(size_type n, const allocator_type& a)
       : unordered_multimap(n, hasher(), key_equal(), a) { }
     unordered_multimap(size_type n, const hasher& hf, const allocator_type& a)
@@ -7141,7 +7386,10 @@ namespace std {
       : unordered_multimap(il, n, hf, key_equal(), a) { }
     ~unordered_multimap();
     unordered_multimap& operator=(const unordered_multimap&);
-    unordered_multimap& operator=(unordered_multimap&&);
+    unordered_multimap& operator=(unordered_multimap&&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               is_nothrow_move_assignable<Hash>::value &&
+               is_nothrow_move_assignable<Pred>::value);
     unordered_multimap& operator=(initializer_list<value_type>);
     allocator_type get_allocator() const noexcept;
 
@@ -7162,8 +7410,10 @@ namespace std {
     template <class... Args> iterator emplace(Args&&... args);
     template <class... Args> iterator emplace_hint(const_iterator position, Args&&... args);
     iterator insert(const value_type& obj);
+    iterator insert(value_type&& obj);
     template <class P> iterator insert(P&& obj);
     iterator insert(const_iterator hint, const value_type& obj);
+    iterator insert(const_iterator hint, value_type&& obj);
     template <class P> iterator insert(const_iterator hint, P&& obj);
     template <class InputIterator> void insert(InputIterator first, InputIterator last);
     void insert(initializer_list<value_type>);
@@ -7173,7 +7423,10 @@ namespace std {
     iterator erase(const_iterator first, const_iterator last);
     void clear() noexcept;
 
-    void swap(unordered_multimap&);
+    void swap(unordered_multimap&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               noexcept(swap(declval<Hash&>(),declval<Hash&>())) &&
+               noexcept(swap(declval<Pred&>(),declval<Pred&>())));
 
     // observers
     hasher hash_function() const;
@@ -7208,7 +7461,8 @@ namespace std {
 
   template <class Key, class T, class Hash, class Pred, class Alloc>
     void swap(unordered_multimap<Key, T, Hash, Pred, Alloc>& x,
-              unordered_multimap<Key, T, Hash, Pred, Alloc>& y);
+              unordered_multimap<Key, T, Hash, Pred, Alloc>& y)
+      noexcept(noexcept(x.swap(y)));
 
   template <class Key, class T, class Hash, class Pred, class Alloc>
     bool operator==(const unordered_multimap<Key, T, Hash, Pred, Alloc>& a,
@@ -7234,7 +7488,7 @@ explicit unordered_multimap(size_type n,
 \pnum
 \effects Constructs an empty \tcode{unordered_multimap} using the
 specified hash function, key equality function, and allocator, and
-using at least \textit{\tcode{n}} buckets.  For the default constructor,
+using at least \tcode{n} buckets.  For the default constructor,
 the number of buckets is \impldef{default number of buckets in
 \tcode{unordered_multimap}}.
 \tcode{max_load_factor()} returns 1.0.
@@ -7251,16 +7505,23 @@ template <class InputIterator>
                      const hasher& hf = hasher(),
                      const key_equal& eql = key_equal(),
                      const allocator_type& a = allocator_type());
+unordered_multimap(initializer_list<value_type> il,
+                   size_type n = @\seebelow@,
+                   const hasher& hf = hasher(),
+                   const key_equal& eql = key_equal(),
+                   const allocator_type& a = allocator_type());
 \end{itemdecl}
 
 \begin{itemdescr}
 \pnum
 \effects Constructs an empty \tcode{unordered_multimap} using the
 specified hash function, key equality function, and allocator, and
-using at least \textit{\tcode{n}} buckets. If \textit{\tcode{n}} is not
+using at least \tcode{n} buckets. If \tcode{n} is not
 provided, the number of buckets is \impldef{default number of buckets in
 \tcode{unordered_multimap}}. Then
-inserts elements from the range \tcode{[\textit{f}, \textit{l})}.
+inserts elements from the range \range{f}{l}
+for the first form, or from the range 
+\range{il.begin()}{il.end()} for the second form.
 \tcode{max_load_factor()} returns 1.0.
 
 \pnum
@@ -7309,7 +7570,8 @@ unless \tcode{std::is_constructible<value_type, P\&\&>::value} is \tcode{true}.
 \begin{itemdecl}
 template <class Key, class T, class Hash, class Pred, class Alloc>
   void swap(unordered_multimap<Key, T, Hash, Pred, Alloc>& x,
-            unordered_multimap<Key, T, Hash, Pred, Alloc>& y);
+            unordered_multimap<Key, T, Hash, Pred, Alloc>& y)
+    noexcept(noexcept(x.swap(y)));
 \end{itemdecl}
 
 
@@ -7385,11 +7647,11 @@ namespace std {
     explicit unordered_set(const Allocator&);
     unordered_set(const unordered_set&, const Allocator&);
     unordered_set(unordered_set&&, const Allocator&);
-    unordered_set(initializer_list<value_type>,
-      size_type = @\seebelow@,
-      const hasher& hf = hasher(),
-      const key_equal& eql = key_equal(),
-      const allocator_type& a = allocator_type());
+    unordered_set(initializer_list<value_type> il,
+                  size_type n = @\seebelow@,
+                  const hasher& hf = hasher(),
+                  const key_equal& eql = key_equal(),
+                  const allocator_type& a = allocator_type());
     unordered_set(size_type n, const allocator_type& a)
       : unordered_set(n, hasher(), key_equal(), a) { }
     unordered_set(size_type n, const hasher& hf, const allocator_type& a)
@@ -7408,7 +7670,10 @@ namespace std {
       : unordered_set(il, n, hf, key_equal(), a) { }
     ~unordered_set();
     unordered_set& operator=(const unordered_set&);
-    unordered_set& operator=(unordered_set&&);
+    unordered_set& operator=(unordered_set&&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               is_nothrow_move_assignable<Hash>::value &&
+               is_nothrow_move_assignable<Pred>::value);
     unordered_set& operator=(initializer_list<value_type>);
     allocator_type get_allocator() const noexcept;
 
@@ -7440,7 +7705,10 @@ namespace std {
     iterator erase(const_iterator first, const_iterator last);
     void clear() noexcept;
 
-    void swap(unordered_set&);
+    void swap(unordered_set&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               noexcept(swap(declval<Hash&>(),declval<Hash&>())) &&
+               noexcept(swap(declval<Pred&>(),declval<Pred&>())));
 
     // observers
     hasher hash_function() const;
@@ -7475,7 +7743,8 @@ namespace std {
 
   template <class Key, class Hash, class Pred, class Alloc>
     void swap(unordered_set<Key, Hash, Pred, Alloc>& x,
-              unordered_set<Key, Hash, Pred, Alloc>& y);
+              unordered_set<Key, Hash, Pred, Alloc>& y)
+      noexcept(noexcept(x.swap(y)));
 
   template <class Key, class Hash, class Pred, class Alloc>
     bool operator==(const unordered_set<Key, Hash, Pred, Alloc>& a,
@@ -7501,7 +7770,7 @@ explicit unordered_set(size_type n,
 \pnum
 \effects Constructs an empty \tcode{unordered_set} using the
 specified hash function, key equality function, and allocator, and
-using at least \textit{\tcode{n}} buckets.  For the default constructor,
+using at least \tcode{n} buckets.  For the default constructor,
 the number of buckets is \impldef{default number of buckets in
 \tcode{unordered_set}}.  \tcode{max_load_factor()} returns 1.0.
 
@@ -7517,16 +7786,23 @@ template <class InputIterator>
                 const hasher& hf = hasher(),
                 const key_equal& eql = key_equal(),
                 const allocator_type& a = allocator_type());
+unordered_set(initializer_list<value_type> il,
+              size_type n = @\seebelow@,
+              const hasher& hf = hasher(),
+              const key_equal& eql = key_equal(),
+              const allocator_type& a = allocator_type());
 \end{itemdecl}
 
 \begin{itemdescr}
 \pnum
 \effects Constructs an empty \tcode{unordered_set} using the
 specified hash function, key equality function, and allocator, and
-using at least \textit{\tcode{n}} buckets. If \textit{\tcode{n}} is not
+using at least \tcode{n} buckets. If \tcode{n} is not
 provided, the number of buckets is \impldef{default number of buckets in
 \tcode{unordered_set}}. Then
-inserts elements from the range \tcode{[\textit{f}, \textit{l})}.
+inserts elements from the range \range{f}{l}
+for the first form, or from the range 
+\range{il.begin()}{il.end()} for the second form.
 \tcode{max_load_factor()} returns 1.0.
 
 \pnum
@@ -7540,7 +7816,8 @@ inserts elements from the range \tcode{[\textit{f}, \textit{l})}.
 \begin{itemdecl}
 template <class Key, class Hash, class Pred, class Alloc>
   void swap(unordered_set<Key, Hash, Pred, Alloc>& x,
-            unordered_set<Key, Hash, Pred, Alloc>& y);
+            unordered_set<Key, Hash, Pred, Alloc>& y)
+    noexcept(noexcept(x.swap(y)));
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -7622,11 +7899,11 @@ namespace std {
     explicit unordered_multiset(const Allocator&);
     unordered_multiset(const unordered_multiset&, const Allocator&);
     unordered_multiset(unordered_multiset&&, const Allocator&);
-    unordered_multiset(initializer_list<value_type>,
-      size_type = @\seebelow@,
-      const hasher& hf = hasher(),
-      const key_equal& eql = key_equal(),
-      const allocator_type& a = allocator_type());
+    unordered_multiset(initializer_list<value_type> il,
+                       size_type n = @\seebelow@,
+                       const hasher& hf = hasher(),
+                       const key_equal& eql = key_equal(),
+                       const allocator_type& a = allocator_type());
     unordered_multiset(size_type n, const allocator_type& a)
       : unordered_multiset(n, hasher(), key_equal(), a) { }
     unordered_multiset(size_type n, const hasher& hf, const allocator_type& a)
@@ -7645,7 +7922,10 @@ namespace std {
       : unordered_multiset(il, n, hf, key_equal(), a) { }
     ~unordered_multiset();
     unordered_multiset& operator=(const unordered_multiset&);
-    unordered_multiset& operator=(unordered_multiset&&);
+    unordered_multiset& operator=(unordered_multiset&&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               is_nothrow_move_assignable<Hash>::value &&
+               is_nothrow_move_assignable<Pred>::value);
     unordered_multiset& operator=(initializer_list<value_type>);
     allocator_type get_allocator() const noexcept;
 
@@ -7677,7 +7957,10 @@ namespace std {
     iterator erase(const_iterator first, const_iterator last);
     void clear() noexcept;
 
-    void swap(unordered_multiset&);
+    void swap(unordered_multiset&)
+      noexcept(allocator_traits<Allocator>::is_always_equal::value &&
+               noexcept(swap(declval<Hash&>(),declval<Hash&>())) &&
+               noexcept(swap(declval<Pred&>(),declval<Pred&>())));
 
     // observers
     hasher hash_function() const;
@@ -7712,13 +7995,15 @@ namespace std {
 
   template <class Key, class Hash, class Pred, class Alloc>
     void swap(unordered_multiset<Key, Hash, Pred, Alloc>& x,
-              unordered_multiset<Key, Hash, Pred, Alloc>& y);
-    template <class Key, class Hash, class Pred, class Alloc>
-      bool operator==(const unordered_multiset<Key, Hash, Pred, Alloc>& a,
-                      const unordered_multiset<Key, Hash, Pred, Alloc>& b);
-    template <class Key, class Hash, class Pred, class Alloc>
-      bool operator!=(const unordered_multiset<Key, Hash, Pred, Alloc>& a,
-                      const unordered_multiset<Key, Hash, Pred, Alloc>& b);
+              unordered_multiset<Key, Hash, Pred, Alloc>& y)
+      noexcept(noexcept(x.swap(y)));
+
+  template <class Key, class Hash, class Pred, class Alloc>
+    bool operator==(const unordered_multiset<Key, Hash, Pred, Alloc>& a,
+                    const unordered_multiset<Key, Hash, Pred, Alloc>& b);
+  template <class Key, class Hash, class Pred, class Alloc>
+    bool operator!=(const unordered_multiset<Key, Hash, Pred, Alloc>& a,
+                    const unordered_multiset<Key, Hash, Pred, Alloc>& b);
 }
 \end{codeblock}
 
@@ -7737,7 +8022,7 @@ explicit unordered_multiset(size_type n,
 \pnum
 \effects Constructs an empty \tcode{unordered_multiset} using the
 specified hash function, key equality function, and allocator, and
-using at least \textit{\tcode{n}} buckets.  For the default constructor,
+using at least \tcode{n} buckets.  For the default constructor,
 the number of buckets is \impldef{default number of buckets in
 \tcode{unordered_multiset}}.
 \tcode{max_load_factor()} returns 1.0.
@@ -7754,16 +8039,23 @@ template <class InputIterator>
                      const hasher& hf = hasher(),
                      const key_equal& eql = key_equal(),
                      const allocator_type& a = allocator_type());
+unordered_multiset(initializer_list<value_type> il,
+                   size_type n = @\seebelow@,
+                   const hasher& hf = hasher(),
+                   const key_equal& eql = key_equal(),
+                   const allocator_type& a = allocator_type());
 \end{itemdecl}
 
 \begin{itemdescr}
 \pnum\effects
 Constructs an empty \tcode{unordered_multiset} using the
 specified hash function, key equality function, and allocator, and
-using at least \textit{\tcode{n}} buckets. If \textit{\tcode{n}} is not
+using at least \tcode{n} buckets. If \tcode{n} is not
 provided, the number of buckets is \impldef{default number of buckets in
 \tcode{unordered_multiset}}. Then
-inserts elements from the range \tcode{[\textit{f}, \textit{l})}.
+inserts elements from the range \range{f}{l}
+for the first form, or from the range
+\range{il.begin()}{il.end()} for the second form.
 \tcode{max_load_factor()} returns 1.0.
 
 \pnum\complexity Average case linear, worst case quadratic.
@@ -7776,7 +8068,8 @@ inserts elements from the range \tcode{[\textit{f}, \textit{l})}.
 \begin{itemdecl}
 template <class Key, class Hash, class Pred, class Alloc>
   void swap(unordered_multiset<Key, Hash, Pred, Alloc>& x,
-            unordered_multiset<Key, Hash, Pred, Alloc>& y);
+            unordered_multiset<Key, Hash, Pred, Alloc>& y)
+    noexcept(noexcept(x.swap(y)));
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -8463,8 +8756,8 @@ namespace std {
     bool operator>=(const stack<T, Container>& x, const stack<T, Container>& y);
   template <class T, class Container>
     bool operator<=(const stack<T, Container>& x, const stack<T, Container>& y);
-  template <class T, class Allocator>
-    void swap(stack<T,Allocator>& x, stack<T,Allocator>& y);
+  template <class T, class Container>
+    void swap(stack<T, Container>& x, stack<T, Container>& y) noexcept(noexcept(x.swap(y)));
 
   template <class T, class Container, class Alloc>
     struct uses_allocator<stack<T, Container>, Alloc>

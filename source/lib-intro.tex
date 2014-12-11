@@ -456,7 +456,7 @@ The detailed specifications each contain the following elements:%
 
 \begin{itemize}
 \item name and brief description
-\item synopsis (class definition or function prototype, as appropriate)
+\item synopsis (class definition or function declaration, as appropriate)
 \item restrictions on template arguments, if any
 \item description of class invariants
 \item description of function semantics
@@ -692,17 +692,17 @@ bitmask types:
 To
 \term{set}
 a value \textit{Y} in an object \textit{X}
-is to evaluate the expression \textit{X} $|$= \textit{Y}.
+is to evaluate the expression \textit{X} \tcode{|=} \textit{Y}.
 \item
 To
 \term{clear}
 a value \textit{Y} in an object
-\textit{X} is to evaluate the expression \textit{X} \&= $\sim$\textit{Y}.
+\textit{X} is to evaluate the expression \textit{X} \tcode{\&= \~}\textit{Y}.
 \item
 The value \textit{Y}
 \term{is set}
 in the object
-\textit{X} if the expression \textit{X} \& \textit{Y} is nonzero.
+\textit{X} if the expression \textit{X} \tcode{\&} \textit{Y} is nonzero.
 \end{itemize}
 
 \rSec4[character.seq]{Character sequences}
@@ -1095,7 +1095,7 @@ standard library, even if C grants license for implementation as functions.
 
 \pnum
 Names that are defined as functions in C shall be defined as functions in the
-\Cpp standard library.\footnote{ This disallows the practice, allowed in C, of
+\Cpp standard library.\footnote{This disallows the practice, allowed in C, of
 providing a masking macro in addition to the function prototype. The only way to
 achieve equivalent inline behavior in \Cpp is to provide a definition as an
 extern inline function.}
@@ -1317,9 +1317,9 @@ convertible to \tcode{bool} &
 \topline
 Expression        &     Post-condition  \\ \capsep
 \tcode{T t;}      &     object \tcode{t} is default-initialized   \\ \rowsep
-\tcode{T u\{\};}    &     object \tcode{u} is value-initialized     \\ \rowsep
-\tcode{T()}       &     a temporary object of type \tcode{T} is value-initialized \\
-\tcode{T\{\}}       &     \\
+\tcode{T u\{\};}    &     object \tcode{u} is value-initialized or aggregate-initialized \\ \rowsep
+\tcode{T()}\br\tcode{T\{\}}  &  a temporary object of type \tcode{T} is value-initialized
+                                or aggregate-initialized \\
 \end{concepttable}
 
 \indextext{requirements!\idxcode{MoveConstructible}}%
@@ -1374,7 +1374,7 @@ Expression  &   Return type &   Return value    &   Post-condition  \\ \capsep
 {p{1in}p{4.15in}}
 \topline
 Expression      &   Post-condition  \\ \capsep
-\tcode{u.$\sim$T()} &   All resources owned by \tcode{u} are reclaimed, no exception is propagated. \\
+\tcode{u.\~T()} &   All resources owned by \tcode{u} are reclaimed, no exception is propagated. \\
 \end{concepttable}
 
 \rSec3[swappable.requirements]{\tcode{Swappable} requirements}
@@ -1826,20 +1826,30 @@ If \tcode{n == 0}, the return value is unspecified.
 \tcode{X::propagate_on_container_copy_assignment} &
   Identical to or derived from \tcode{true_type} or \tcode{false_type}  &
   \tcode{true_type} only if an allocator of type \tcode{X} should be copied
-    when the client container is copy-assigned.   &
+    when the client container is copy-assigned.
+    See Note B, below.   &
   \tcode{false_type}        \\ \rowsep
 
 \tcode{X::propagate_on_container_move_assignment} &
   Identical to or derived from \tcode{true_type} or \tcode{false_type}  &
   \tcode{true_type} only if an allocator of type \tcode{X} should be moved
-    when the client container is move-assigned.   &
+    when the client container is move-assigned.
+    See Note B, below.   &
   \tcode{false_type}        \\ \rowsep
 
 \tcode{X::propagate_on_-} \tcode{container_swap} &
   Identical to or derived from \tcode{true_type} or \tcode{false_type}  &
   \tcode{true_type} only if an allocator of type \tcode{X} should be swapped
-    when the client container is swapped.   &
-  \tcode{false_type}        \\
+    when the client container is swapped.
+    See Note B, below.   &
+  \tcode{false_type}        \\ \rowsep
+
+\tcode{X::is_always_equal} &
+  Identical to or derived from \tcode{true_type} or \tcode{false_type}  &
+  \tcode{true_type} only if the expression \tcode{a1 == a2} is guaranteed
+    to be true for any two (possibly \tcode{const}) values
+    \tcode{a1}, \tcode{a2} of type \tcode{X}.   &
+  \tcode{is_empty<X>}       \\
 
 \end{libreqtab4d}
 
@@ -1863,6 +1873,20 @@ template, the standard \tcode{allocator_traits} template uses
 \tcode{SomeAllocator<U, Args>} in place of \tcode{Allocator::\brk{}rebind<U>::other}
 by default. For allocator types that are not template instantiations of the
 above form, no default is provided.
+
+\pnum
+Note B:
+If \tcode{X::propagate_on_container_copy_assignment::value} is \tcode{true},
+\tcode{X} shall satisfy the
+\tcode{CopyAssignable} requirements (Table~\ref{tab:copyassignable})
+and the copy operation shall not throw exceptions.
+If \tcode{X::propagate_on_container_move_assignment::value} is \tcode{true},
+\tcode{X} shall satisfy the
+\tcode{MoveAssignable} requirements (Table~\ref{tab:moveassignable})
+and the move operation shall not throw exceptions.
+If \tcode{X::propagate_on_container_swap::value} is \tcode{true},
+lvalues of type \tcode{X} shall be swappable~(\ref{swappable.requirements})
+and the \tcode{swap} operation shall not throw exceptions.
 
 \pnum
 An allocator type \tcode{X} shall satisfy the requirements of
@@ -2044,27 +2068,6 @@ names lexically identical to keywords, to the identifiers listed in
 Table~\ref{tab:identifiers.special}, or to the \grammarterm{attribute-token}{s} described
 in~\ref{dcl.attr}.
 
-\rSec4[global.names]{Global names}
-
-\pnum
-Certain sets of names and function signatures are always reserved to the implementation:
-
-\begin{itemize}
-\item
-Each name that contains a double underscore
-\tcode{\unun}
-\indextext{character!underscore}%
-or begins with an underscore followed by
-an uppercase letter
-\indextext{uppercase}%
-(\ref{lex.key}) is reserved to the implementation for any use.
-\item
-Each name that begins with an underscore is
-\indextext{character!underscore}%
-reserved to the implementation for use as a name in the global namespace.%
-\indextext{namespace!global}
-\end{itemize}
-
 \rSec4[extern.names]{External linkage}
 
 \pnum
@@ -2178,7 +2181,7 @@ shall be identical to
 \rSec4[usrlit.suffix]{User-defined literal suffixes}
 
 \pnum
-Literal suffix identifiers that do not start with an underscore are reserved for future standardization.
+Literal suffix identifiers ~(\ref{over.literal}) that do not start with an underscore are reserved for future standardization.
 
 \rSec3[alt.headers]{Headers}
 
@@ -2259,7 +2262,7 @@ The program's definitions are used instead of the default versions supplied by
 the implementation~(\ref{support.dynamic}).
 Such replacement occurs prior to program startup~(\ref{basic.def.odr}, \ref{basic.start}).
 \indextext{startup!program}%
-The program's definitions shall not be specified as
+The program's declarations shall not be specified as
 \tcode{inline}.
 No diagnostic is required.
 
@@ -2511,13 +2514,14 @@ library shall not use functions from another namespace which are found through
 The phrase ``unless otherwise specified'' is intended to allow
 argument-dependent lookup
 in cases like that of
-\tcode{ostream_iterator}s:
+\tcode{ostream_iterator::operator=}~(\ref{ostream.iterator.ops}):
+
 \effects
 \begin{codeblock}
-*out_stream << value;
-if (delim != 0)
-  *out_stream << delim;
-return (*this);
+*@\textit{out_stream}@ << value;
+if (@\textit{delim}@ != 0)
+  *@\textit{out_stream}@ << @\textit{delim}@;
+return *this;
 \end{codeblock}
 \exitnote
 
@@ -2704,7 +2708,7 @@ can report a failure by throwing an exception of a type described in its
 \synopsis{Throws:}
 paragraph.
 An implementation may strengthen the
-\grammarterm{exception-specification}
+exception specification
 for a
 non-virtual
 function by adding a non-throwing \grammarterm{noexcept-specification}.

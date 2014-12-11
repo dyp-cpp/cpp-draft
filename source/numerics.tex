@@ -404,8 +404,8 @@ namespace std {
     typedef float value_type;
 
     constexpr complex(float re = 0.0f, float im = 0.0f);
-    explicit constexpr complex(const complex<double>&);
-    explicit constexpr complex(const complex<long double>&);
+    constexpr explicit complex(const complex<double>&);
+    constexpr explicit complex(const complex<long double>&);
 
     constexpr float real() const;
     void real(float);
@@ -432,7 +432,7 @@ namespace std {
 
     constexpr complex(double re = 0.0, double im = 0.0);
     constexpr complex(const complex<float>&);
-    explicit constexpr complex(const complex<long double>&);
+    constexpr explicit complex(const complex<long double>&);
 
     constexpr double real() const;
     void real(double);
@@ -779,7 +779,7 @@ template<class T> complex<T> operator/(const T& lhs, const complex<T>& rhs);
 \indexlibrary{\idxcode{operator==}!\idxcode{complex}}%
 \begin{itemdecl}
 template<class T>
-  bool constexpr operator==(const complex<T>& lhs, const complex<T>& rhs);
+  constexpr bool operator==(const complex<T>& lhs, const complex<T>& rhs);
 template<class T> constexpr bool operator==(const complex<T>& lhs, const T& rhs);
 template<class T> constexpr bool operator==(const T& lhs, const complex<T>& rhs);
 \end{itemdecl}
@@ -8534,10 +8534,14 @@ object refers.
 \pnum
 In the \tcode{begin} and \tcode{end} function templates that follow, \unspec{1}
 is a type that meets the requirements of a mutable random access
-iterator~(\ref{random.access.iterators}) whose \tcode{value_type} is the template
+iterator~(\ref{random.access.iterators})
+and of a contiguous iterator~(\ref{iterator.requirements.general})
+whose \tcode{value_type} is the template
 parameter \tcode{T} and whose \tcode{reference} type is \tcode{T\&}. \unspec{2} is a
 type that meets the requirements of a constant random access
-iterator~(\ref{random.access.iterators}) whose \tcode{value_type} is the template
+iterator~(\ref{random.access.iterators})
+and of a contiguous iterator~(\ref{iterator.requirements.general})
+whose \tcode{value_type} is the template
 parameter \tcode{T} and whose \tcode{reference} type is \tcode{const T\&}.
 
 \pnum
@@ -8797,7 +8801,7 @@ the function creates an accumulator \tcode{acc} whose type is \tcode{InputIterat
 value type, initializes it with \tcode{*first},
 and assigns the result to \tcode{*result}. For every iterator \tcode{i} in \range{first + 1}{last}
 in order, creates an object \tcode{val} whose type is \tcode{InputIterator}'s value type, initializes it
-with *i, computes \tcode{val - acc} or \tcode{binary_op(val, acc)}, assigns the result
+with \tcode{*i}, computes \tcode{val - acc} or \tcode{binary_op(val, acc)}, assigns the result
 to \tcode{*(result + (i - first))}, and move assigns from \tcode{val} to \tcode{acc}.
 
 \pnum

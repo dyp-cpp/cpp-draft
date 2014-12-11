@@ -63,7 +63,7 @@ variable is a \term{variable template}. A variable template at class scope is a
 \enterexample
 \begin{codeblock}
 template<class T>
-  constexpr T pi = T(3.1415926535897932385);
+  constexpr T pi = T(3.1415926535897932385L);
 template<class T>
 T circular_area(T r) {
   return pi<T> * r * r;
@@ -111,9 +111,6 @@ no declarator is permitted.
 \pnum
 \indextext{template~name!linkage~of}%
 A template name has linkage~(\ref{basic.link}).
-A non-member
-function template can have internal linkage; any other
-template name shall have external linkage.
 Specializations (explicit or implicit) of
 a template that has internal linkage are
 distinct from all specializations in other translation
@@ -162,12 +159,16 @@ is:
 
 \begin{bnf}
 \nontermdef{type-parameter}\br
-  \terminal{class} \terminal{...}\opt identifier\opt\br
-  \terminal{class} identifier\opt \terminal{=} type-id\br
-  \terminal{typename} \terminal{...}\opt identifier\opt\br
-  \terminal{typename} identifier\opt \terminal{=} type-id\br
-  \terminal{template <} template-parameter-list \terminal{> class} \terminal{...}\opt identifier\opt\br
-  \terminal{template <} template-parameter-list \terminal{> class} identifier\opt \terminal{=} id-expression
+  type-parameter-key \terminal{...}\opt identifier\opt\br
+  type-parameter-key identifier\opt \terminal{=} type-id\br
+  \terminal{template <} template-parameter-list \terminal{>} type-parameter-key \terminal{...}\opt identifier\opt\br
+  \terminal{template <} template-parameter-list \terminal{>} type-parameter-key identifier\opt \terminal{=} id-expression
+\end{bnf}
+
+\begin{bnf}
+\nontermdef{type-parameter-key}\br
+  \terminal{class}\br
+  \terminal{typename}
 \end{bnf}
 
 \enternote The \tcode{>} token following the
@@ -183,7 +184,7 @@ There is no semantic difference between
 and
 \tcode{typename}
 in a
-\grammarterm{template-parameter}.
+\grammarterm{type-parameter-key}.
 \tcode{typename}
 followed by an
 \grammarterm{unqualified-id}
@@ -191,7 +192,8 @@ names a template type parameter.
 \tcode{typename}
 followed by a
 \grammarterm{qualified-id}
-denotes the type in a non-type \footnote{Since template
+denotes the type in a non-type%
+\footnote{Since template
 \grammarterm{template-parameter}{s}
 and template
 \grammarterm{template-argument}{s}
@@ -201,13 +203,46 @@ and
 \grammarterm{non-type argument}
 are used to refer to non-type, non-template parameters and arguments.}
 \grammarterm{parameter-declaration}.
+A \grammarterm{template-parameter} of the form
+\tcode{class} \grammarterm{identifier} is a \grammarterm{type-parameter}.
+\enterexample
+\begin{codeblock}
+  class T { /* ... */ };
+  int i;
+
+  template<class T, T i> void f(T t) {
+    T t1 = i;      // template-parameters \tcode{T} and \tcode{i}
+    ::T t2 = ::i;  // global namespace members \tcode{T} and \tcode{i}
+  }
+\end{codeblock}
+
+Here, the template \tcode{f} has a \grammarterm{type-parameter}
+called \tcode{T}, rather than an unnamed non-type
+\grammarterm{template-parameter} of class \tcode{T}.
+\exitexample
 A storage class shall not be specified in a
 \grammarterm{template-parameter}
 declaration.
 Types shall not be defined in a \grammarterm{template-parameter}
 declaration.
+
+\pnum
+A
+\grammarterm{type-parameter}
+whose identifier does not follow an ellipsis
+defines its
+\grammarterm{identifier}
+to be a
+\grammarterm{typedef-name}
+(if declared without
+\tcode{template})
+or
+\grammarterm{template-name}
+(if declared with
+\tcode{template})
+in the scope of the template declaration.
 \enternote
-A template parameter may be a class template.
+A template argument may be a class template or alias template.
 For example,
 
 \begin{codeblock}
@@ -219,58 +254,6 @@ class Map {
   C<V> value;
 };
 \end{codeblock}
-\exitnote
-
-\pnum
-A
-\grammarterm{type-parameter}
-whose identifier does not follow an ellipsis
-defines its
-\grammarterm{identifier}
-to be a
-\grammarterm{typedef-name}
-(if declared with
-\tcode{class}
-or
-\tcode{typename})
-or
-\grammarterm{template-name}
-(if declared with
-\tcode{template})
-in the scope of the template declaration.
-\enternote
-Because of the name lookup rules, a
-\grammarterm{template-parameter}
-that could be interpreted as either a non-type
-\grammarterm{template-parameter}
-or a
-\grammarterm{type-parameter}
-(because its
-\grammarterm{identifier}
-is the name of an already existing class) is taken as a
-\grammarterm{type-parameter}.
-For example,
-
-\begin{codeblock}
-class T { /* ... */ };
-int i;
-
-template<class T, T i> void f(T t) {
-  T t1 = i;         // template-parameters \tcode{T} and \tcode{i}
-  ::T t2 = ::i;     // global namespace members \tcode{T} and \tcode{i}
-}
-\end{codeblock}
-
-Here, the template
-\tcode{f}
-has a
-\grammarterm{type-parameter}
-called
-\tcode{T},
-rather than an unnamed non-type
-\grammarterm{template-parameter}
-of class
-\tcode{T}.
 \exitnote
 
 \pnum
@@ -982,210 +965,32 @@ A<function> a;                  // ill-formed: would declare \tcode{A<function>:
 \pnum
 A
 \grammarterm{template-argument}
-for a non-type, non-template
+for a non-type
 \grammarterm{template-parameter}
-shall be one of:
-\begin{itemize}
-\item
-for a non-type \grammarterm{template-parameter} of integral or enumeration type,
+shall be
 a converted
 constant expression~(\ref{expr.const})
-of the type of the \grammarterm{template-parameter}{}; or
-\item
-the name of a non-type
-\grammarterm{template-parameter};
-or
-\item
-a constant expression~(\ref{expr.const}) that designates
-the address of a complete object
-with static storage duration and external or internal linkage
-or a function with external or internal linkage,
-including function templates and function
-\grammarterm{template-id}{s}
-but
-excluding non-static class members, expressed (ignoring parentheses) as
-\tcode{\&}
-\grammarterm{id-expression}{},
-where the \grammarterm{id-expression} is the name of an object or function,
-except that the \tcode{\&}
-may be omitted if the name refers to a function or
-array and shall be omitted if the corresponding
-\grammarterm{template-parameter}
-is a reference;
-or
-\item
-a constant expression that evaluates to a null pointer
-value~(\ref{conv.ptr});
-or
-\item
-a constant expression that evaluates to a null member pointer
-value~(\ref{conv.mem});
-or
-\item
-a pointer to member expressed as described in~\ref{expr.unary.op};
-or
-\item
-a constant expression of type \tcode{std::nullptr_t}.
-\end{itemize}
-
-\pnum
-\enternote
-A string literal~(\ref{lex.string})
-does not satisfy the requirements of any of these
-categories and thus is not an acceptable
-\grammarterm{template-argument}.
-\enterexample
-
-\begin{codeblock}
-template<class T, const char* p> class X {
-  /* ... */
-};
-
-X<int, "Studebaker"> x1;        // error: string literal as template-argument
-
-const char p[] = "Vivisectionist";
-X<int,p> x2;                    // OK
-\end{codeblock}
-\exitexample
-\exitnote
-
-\pnum
-\enternote
-Addresses of array elements and names or addresses of non-static class
-members are not acceptable
-\grammarterm{template-argument}{s}.
-\enterexample
-
-\begin{codeblock}
-template<int* p> class X { };
-
-int a[10];
-struct S { int m; static int s; } s;
-
-X<&a[2]> x3;                    // error: address of array element
-X<&s.m> x4;                     // error: address of non-static member
-X<&s.s> x5;                     // error: \tcode{\&S::s} must be used
-X<&S::s> x6;                    // OK: address of static member
-\end{codeblock}
-\exitexample
-\exitnote
-
-\pnum
-\enternote
-Temporaries, unnamed lvalues, and named lvalues
-with no linkage
-are not acceptable
-\grammarterm{template-argument}{s}
-when the corresponding
-\grammarterm{template-parameter}
-has reference type.
-\enterexample
-
-\begin{codeblock}
-template<const int& CRI> struct B { /* ... */ };
-
-B<1> b2;                        // error: temporary would be required for template argument
-
-int c = 1;
-B<c> b1;                        // OK
-\end{codeblock}
-\exitexample
-\exitnote
-
-\pnum
-The following conversions are performed on each expression used as a non-type
-\grammarterm{template-argument}.
-If a non-type
-\grammarterm{template-argument}
-cannot be converted to the type of the corresponding
-\grammarterm{template-parameter}
-then the program is ill-formed.
+of the type of the \grammarterm{template-parameter}.
+For a non-type \grammarterm{template-parameter} of reference or pointer type,
+the value of the constant expression shall not refer to
+(or for a pointer type, shall not be the address of):
 
 \begin{itemize}
-\item
-For a non-type
-\grammarterm{template-parameter}
-of integral or enumeration type,
-conversions permitted in a converted constant expression~(\ref{expr.const})
-are applied.
-\item
-for a non-type
-\grammarterm{template-parameter}
-of type pointer to object,
-qualification conversions~(\ref{conv.qual}) and
-the array-to-pointer conversion~(\ref{conv.array}) are applied; if the
-\grammarterm{template-argument} is of type \tcode{std::nullptr_t}, the null
-pointer conversion~(\ref{conv.ptr}) is applied.
-\enternote
-In particular, neither the null pointer conversion for a zero-valued integer
-literal~(\ref{conv.ptr}) nor the
-derived-to-base conversion~(\ref{conv.ptr}) are applied.
-Although
-\tcode{0}
-is a valid
-\grammarterm{template-argument}
-for a non-type
-\grammarterm{template-parameter}
-of integral type, it is not a valid
-\grammarterm{template-argument}
-for a non-type
-\grammarterm{template-parameter}
-of pointer type.
-However, both \tcode{(int*)0} and \tcode{nullptr} are valid \grammarterm{template-argument}{s}
-for a non-type \grammarterm{template-parameter} of type ``pointer to int.''
-\exitnote
-\item
-For a non-type
-\grammarterm{template-parameter}
-of type reference to object,
-no conversions apply.
-The type referred to by the reference may be more cv-qualified than the
-(otherwise identical) type of the
-\grammarterm{template-argument}.
-The
-\grammarterm{template-parameter}
-is bound directly to the
-\grammarterm{template-argument},
-which shall be an lvalue.
-\item
-For a non-type
-\grammarterm{template-parameter}
-of type pointer to function, the function-to-pointer conversion~(\ref{conv.func})
-is applied; if the \grammarterm{template-argument} is of type
-\tcode{std::nullptr_t}, the null pointer conversion~(\ref{conv.ptr}) is applied.
-If the
-\grammarterm{template-argument}
-represents a set of overloaded functions (or a pointer to such), the matching
-function is selected from the set~(\ref{over.over}).
-\item
-For a non-type
-\grammarterm{template-parameter}
-of type reference to function, no conversions apply.
-If the
-\grammarterm{template-argument}
-represents a set of overloaded functions, the matching function is selected
-from the set~(\ref{over.over}).
-\item
-For a non-type
-\grammarterm{template-parameter}
-of type pointer to member function,
-if the \grammarterm{template-argument} is of type \tcode{std::nullptr_t}, the
-null member pointer conversion~(\ref{conv.mem}) is applied; otherwise,
-no conversions apply.
-If the
-\grammarterm{template-argument}
-represents a set of overloaded member functions, the matching
-member function is selected from the set~(\ref{over.over}).
-\item
-For a non-type
-\grammarterm{template-parameter}
-of type pointer to data member,
-qualification conversions~(\ref{conv.qual})
-are applied; if the \grammarterm{template-argument} is of type
-\tcode{std::nullptr_t}, the null member pointer conversion~(\ref{conv.mem}) is
-applied.
+\item a subobject~(\ref{intro.object}),
+\item a temporary object~(\ref{class.temporary}),
+\item a string literal~(\ref{lex.string}),
+\item the result of a \tcode{typeid} expression~(\ref{expr.typeid}), or
+\item a predefined \tcode{__func__} variable~(\ref{dcl.fct.def.general}).
 \end{itemize}
 
+\enternote
+If the \grammarterm{template-argument}
+represents a set of overloaded functions
+(or a pointer or member pointer to such),
+the matching function is selected from the set~(\ref{over.over}).
+\exitnote
+
+\pnum
 \enterexample
 \begin{codeblock}
 template<const int* pci> struct X { /* ... */ };
@@ -1209,6 +1014,67 @@ template<void (*pf)(int)> struct A { /* ... */ };
 A<&f> a;                        // selects \tcode{f(int)}
 \end{codeblock}
 \exitexample
+
+\pnum
+\enternote
+A string literal~(\ref{lex.string})
+is not an acceptable
+\grammarterm{template-argument}.
+\enterexample
+
+\begin{codeblock}
+template<class T, const char* p> class X {
+  /* ... */
+};
+
+X<int, "Studebaker"> x1;        // error: string literal as template-argument
+
+const char p[] = "Vivisectionist";
+X<int,p> x2;                    // OK
+\end{codeblock}
+\exitexample
+\exitnote
+
+\pnum
+\enternote
+The address of an array element or non-static data member is not an acceptable
+\grammarterm{template-argument}.
+\enterexample
+
+\begin{codeblock}
+template<int* p> class X { };
+
+int a[10];
+struct S { int m; static int s; } s;
+
+X<&a[2]> x3;                    // error: address of array element
+X<&s.m> x4;                     // error: address of non-static member
+X<&s.s> x5;                     // OK: address of static member
+X<&S::s> x6;                    // OK: address of static member
+\end{codeblock}
+\exitexample
+\exitnote
+
+\pnum
+\enternote
+A temporary object
+is not an acceptable
+\grammarterm{template-argument}
+when the corresponding
+\grammarterm{template-parameter}
+has reference type.
+\enterexample
+
+\begin{codeblock}
+template<const int& CRI> struct B { /* ... */ };
+
+B<1> b2;                        // error: temporary would be required for template argument
+
+int c = 1;
+B<c> b1;                        // OK
+\end{codeblock}
+\exitexample
+\exitnote
 
 \rSec2[temp.arg.template]{Template template arguments}
 
@@ -1255,10 +1121,10 @@ C<A> c;                         // \tcode{V<int>} within \tcode{C<A>} uses the p
 \exitexample
 
 \pnum A \grammarterm{template-argument} matches a template
-\grammarterm{template-parameter} (call it \tcode{P}) when each of the template
+\grammarterm{template-parameter} \tcode{P} when each of the template
 parameters in the \grammarterm{template-parameter-list} of the
-\grammarterm{template-argument}'s corresponding class template or alias template (call
-it \tcode{A}) matches the corresponding template parameter in the
+\grammarterm{template-argument}'s corresponding class template or alias template
+\tcode{A} matches the corresponding template parameter in the
 \grammarterm{template-parameter-list} of \tcode{P}. 
 Two template parameters match if they are of the same kind (type, non-type, template),
 for non-type \grammarterm{template-parameter}{s}, their types are
@@ -1326,13 +1192,13 @@ same type and}
 template arguments of
 integral or enumeration type have identical values and}
 \item {their corresponding non-type \grammarterm{template-argument}{s} of
-pointer type refer to the same external object or function or are both the null
+pointer type refer to the same object or function or are both the null
 pointer value and}
 \item {their corresponding non-type \grammarterm{template-argument}{s} of
 pointer-to-member type refer to the same class member or are both the null member
 pointer value and}
 \item {their corresponding non-type \grammarterm{template-argument}{s} of
-reference type refer to the same external object or function and}
+reference type refer to the same object or function and}
 \item {their corresponding template \grammarterm{template-argument}{s} refer
 to the same template.}
 \end{itemize}
@@ -1881,6 +1747,10 @@ a \grammarterm{capture}.
 
 \item In a \tcode{sizeof...} expression~(\ref{expr.sizeof}); the pattern is an
 \grammarterm{identifier}.
+
+\item In a \grammarterm{fold-expression} (\ref{expr.prim.fold});
+the pattern is the \grammarterm{cast-expression}
+that contains an unexpanded parameter pack.
 \end{itemize}
 
 \pnum
@@ -1940,7 +1810,8 @@ template<class ... Args>
 
 \pnum
 The instantiation of a pack expansion
-that is not a \tcode{sizeof...} expression
+that is neither a \tcode{sizeof...} expression
+nor a \grammarterm{fold-expression}
 produces a
 list
 $\mathtt{E}_1, \mathtt{E}_2, ..., \mathtt{E}_N$,
@@ -1990,6 +1861,78 @@ template void f<>();  // OK: \tcode{X<>} has no base classes
 The instantiation of a \tcode{sizeof...} expression~(\ref{expr.sizeof}) produces
 an integral constant containing the number of elements in the parameter pack
 it expands.
+
+\pnum
+The instantiation of a \grammarterm{fold-expression} produces:
+
+\begin{itemize}
+\item
+\tcode{((}$\mathtt{E}_1$
+           \placeholder{op} $\mathtt{E}_2$\tcode{)}
+           \placeholder{op} $\cdots$\tcode{)}
+           \placeholder{op} $\mathtt{E}_N$
+for a unary left fold,
+\item
+         $\mathtt{E}_1$     \placeholder{op}
+\tcode{(}$\cdots$           \placeholder{op}
+\tcode{(}$\mathtt{E}_{N-1}$ \placeholder{op}
+         $\mathtt{E}_N$\tcode{))}
+for a unary right fold,
+\item
+\tcode{(((}$\mathtt{E}$
+            \placeholder{op} $\mathtt{E}_1$\tcode{)}
+            \placeholder{op} $\mathtt{E}_2$\tcode{)}
+            \placeholder{op} $\cdots$\tcode{)}
+            \placeholder{op} $\mathtt{E}_N$
+for a binary left fold, and
+\item
+         $\mathtt{E}_1$     \placeholder{op}
+\tcode{(}$\cdots$           \placeholder{op}
+\tcode{(}$\mathtt{E}_{N-1}$ \placeholder{op}
+\tcode{(}$\mathtt{E}_{N}$   \placeholder{op}
+         $\mathtt{E}$\tcode{)))}
+for a binary right fold.
+\end{itemize}
+
+In each case,
+\placeholder{op} is the \grammarterm{fold-operator},
+$N$ is the number of elements in the pack expansion parameters,
+and each $\mathtt{E}_i$ is generated by instantiating the pattern
+and replacing each pack expansion parameter with its $i$th element.
+For a binary fold-expression,
+$\mathtt{E}$ is generated
+by instantiating the \grammarterm{cast-expression}
+that did not contain an unexpanded parameter pack.
+\enterexample
+\begin{codeblock}
+template<typename ...Args>
+  bool all(Args ...args) { return (... && args); }
+
+bool b = all(true, true, true, false);
+\end{codeblock}
+Within the instantiation of \tcode{all},
+the returned expression expands to
+\tcode{((true \&\& true) \&\& true) \&\& false},
+which evalutes to \tcode{false}.
+\exitexample
+If $N$ is zero for a unary fold-expression,
+the value of the expression is shown in Table~\ref{tab:fold.empty};
+if the operator is not listed in Table~\ref{tab:fold.empty},
+the instantiation is ill-formed.
+
+\begin{floattable}{Value of folding empty sequences}{tab:fold.empty}
+{ll}
+\topline
+\lhdr{Operator} & \rhdr{Value when parameter pack is empty} \\
+\capsep
+\tcode{*}       & \tcode{1}      \\
+\tcode{+}       & \tcode{int()}  \\
+\tcode{\&}      & \tcode{-1}     \\
+\tcode{|}       & \tcode{int()}  \\
+\tcode{\&\&}    & \tcode{true}   \\
+\tcode{||}      & \tcode{false}  \\
+\tcode{,}       & \tcode{void()} \\
+\end{floattable}
 
 \rSec2[temp.friend]{Friends}
 
@@ -2123,9 +2066,15 @@ these implicit definitions.
 \pnum
 A member of a class template may be declared to be a friend of a
 non-template class.
-In this case, the corresponding member of every specialization of
-the class template is a friend of the class granting friendship.
-For explicit specializations the corresponding member is the member (if any)
+In this case,
+the corresponding member of every specialization of
+the primary class template and
+class template partial specializations thereof
+is a friend of the class granting friendship.
+For
+explicit specializations and
+specializations of partial specializations,
+the corresponding member is the member (if any)
 that has the same name, kind (type, function, class template, or function
 template), template parameters, and signature as the member of the class
 template instantiation that would otherwise have been generated.
@@ -2259,7 +2208,8 @@ template<class T1, class T2, int I> class A<T1, T2, I>  { };    // error
 
 \pnum
 A class template partial specialization may be declared or redeclared in any
-namespace scope in which its definition may be defined~(\ref{temp.class} and~\ref{temp.mem}).
+namespace scope in which the corresponding primary template
+may be defined~(\ref{namespace.memdef} and~\ref{temp.mem}).
 \enterexample
 
 \begin{codeblock}
@@ -2424,10 +2374,11 @@ of the primary template.
 \rSec3[temp.class.order]{Partial ordering of class template specializations}
 
 \pnum
+%{more specialized!class template partial specialization}%
 For two class template partial specializations,
-the first is at least as specialized as the second if, given the following
-rewrite to two function templates, the first function template is at least
-as specialized as the second according to the ordering rules for function
+the first is \term{more specialized} than the second if, given the following
+rewrite to two function templates, the first function template is more
+specialized than the second according to the ordering rules for function
 templates~(\ref{temp.func.order}):
 
 \begin{itemize}
@@ -2783,14 +2734,17 @@ template parameter (including template parameter packs~(\ref{temp.variadic})
 thereof) synthesize a unique type, value, or class template
 respectively and substitute it for each occurrence of that parameter
 in the function type of the template.
-If only one of the function templates is a non-static member of some
-class \tcode{A}, that function
-template is considered to have a new first parameter inserted in its function
-parameter list. Given \cv{} as the cv-qualifiers of the function
-template (if any), the new parameter is of type ``rvalue reference to
-\cv{} \tcode{A}'' if the optional \grammarterm{ref-qualifier} of the
-function template is \tcode{\&\&}, or of type ``lvalue reference to
-\cv{} \tcode{A}'' otherwise. \enternote This allows a non-static
+If only one of the function templates \placeholder{M} is a non-static
+member of some class \placeholder{A}, \placeholder{M} is considered to have
+a new first parameter inserted in its function
+parameter list. Given \cv{} as the cv-qualifiers of \placeholder{M}
+(if any), the new parameter is of type ``rvalue reference to
+\cv{} \placeholder{A}'' if the optional \grammarterm{ref-qualifier} of
+\placeholder{M} is \tcode{\&\&} or if \placeholder{M} has no
+\grammarterm{ref-qualifier} and the first parameter of the other
+template has rvalue reference type. Otherwise, the new parameter is
+of type ``lvalue reference to \cv{} \placeholder{A}''.
+\enternote This allows a non-static
 member to be ordered with respect to a nonmember function and for the results
 to be equivalent to the ordering of two equivalent nonmembers. \exitnote
 \enterexample
@@ -2936,6 +2890,17 @@ template<template<class,class> class TT>
 g(v);               // OK: \tcode{TT} = \tcode{vector}
 \end{codeblock}
 
+\exitexample
+
+\pnum
+However, if the \grammarterm{template-id} is dependent, subsequent template
+argument substitution still applies to the \grammarterm{template-id}.
+\enterexample
+\begin{codeblock}
+template<typename...> using void_t = void;
+template<typename T> void_t<typename T::foo> f();
+f<int>(); // error, \tcode{int} does not have a nested type \tcode{foo}
+\end{codeblock}
 \exitexample
 
 \pnum
@@ -3142,13 +3107,44 @@ and that template is not instantiated, the template is ill-formed,
 no diagnostic required.
 If every valid specialization of a variadic template requires an empty template
 parameter pack, the template is ill-formed, no diagnostic required.
-If a type used in a non-dependent name is incomplete
-at the point at which a template is defined but is
-complete at the point at which an instantiation is done,
-and if the completeness of that type affects whether or
-not the program is well-formed or affects the semantics
-of the program, the program is ill-formed; no diagnostic
-is required.
+If a hypothetical instantiation of a template
+immediately following its definition
+would be ill-formed
+due to a construct that does not depend on a template parameter,
+the program is ill-formed; no diagnostic is required.
+If the interpretation of such a construct
+in the hypothetical instantiation
+is different from
+the interpretation of the corresponding construct
+in any actual instantiation of the template,
+the program is ill-formed; no diagnostic is required.
+\enternote
+This can happen in situations including the following:
+\begin{itemize}
+\item a type used in a non-dependent name is incomplete at the point at which a
+template is defined but is complete at the point at which an instantiation is
+performed, or
+
+\item an instantiation uses a default argument or default template argument
+that had not been defined at the point at which the template was defined, or
+
+\item constant expression evaluation~(\ref{expr.const}) within the template
+instantiation uses
+  \begin{itemize}
+  \item the value of a \tcode{const} object of integral or unscoped enumeration type or
+  \item the value of a \tcode{constexpr} object or
+  \item the value of a reference or
+  \item the definition of a \tcode{constexpr} function,
+  \end{itemize}
+and that entity was not defined when the template was defined, or
+
+\item a class template specialization or variable template specialization that
+is specified by a non-dependent \grammarterm{simple-template-id} is used by
+the template, and either it is instantiated from a partial specialization that
+was not defined when the template was defined or it names an explicit
+specialization that was not declared when the template was defined.
+\end{itemize}
+\exitnote
 \enternote
 If a template is instantiated, errors will be diagnosed according
 to the other rules in this Standard.
@@ -3458,8 +3454,8 @@ template<class C> void N::B<C>::f(C) {
 \pnum
 In the definition of a class template or in the definition of a member of such
 a template that appears outside of the template definition,
-for each base class which does not depend on a
-\grammarterm{template-parameter}~(\ref{temp.dep}), if the name of the base class
+for each non-dependent base class~(\ref{temp.dep.type}),
+if the name of the base class
 or the name of a member of the
 base class is the same as the name of a
 \grammarterm{template-parameter},
@@ -3524,9 +3520,11 @@ any of the expressions in the \grammarterm{expression-list} is a pack
 expansion~(\ref{temp.variadic}),
 
 \item
-any of the expressions in the
+any of the expressions
+or \grammarterm{braced-init-list}{s}
+in the
 \grammarterm{expression-list}
-is a type-dependent expression~(\ref{temp.dep.expr}), or
+is type-dependent~(\ref{temp.dep.expr}), or
 
 \item
 if the \grammarterm{unqualified-id}
@@ -3566,10 +3564,9 @@ explicitly depend on the
 \exitexample
 
 \pnum
-In the definition of a class or class template, if a base class
-depends on a
-\grammarterm{template-parameter},
-the base class scope is not examined during unqualified
+In the definition of a class or class template,
+the scope of a dependent base class~(\ref{temp.dep.type})
+is not examined during unqualified
 name lookup either at the point of definition of the
 class template or member or during an instantiation of
 the class template or member.
@@ -3714,6 +3711,30 @@ template <class T1, class T2, int I> struct B {
 };
 \end{codeblock}
 \exitexample
+
+\pnum
+\indextext{base class!dependent}%
+A \term{dependent base class} is a base class that is a dependent type and is
+not the current instantiation.
+\enternote
+a base class can be the current instantiation in the case of a nested class
+naming an enclosing class as a base.
+\enterexample
+\begin{codeblock}
+template<class T> struct A {
+  typedef int M;
+  struct B {
+    typedef void M;
+    struct C;
+  };
+};
+
+template<class T> struct A<T>::B::C : A<T> {
+  M m; // OK, \tcode{A<T>::M}
+};
+\end{codeblock}
+\exitexample
+\exitnote
 
 \pnum
 \indextext{instantiation!member of the current}%
@@ -3907,6 +3928,12 @@ declarations of member functions of the current instantiation declared
 with a return type that contains a placeholder type~(\ref{dcl.spec.auto}),
 
 \item
+the
+\grammarterm{identifier}
+\tcode{__func__}~(\ref{dcl.fct.def.general}), where any enclosing function is a
+template, a member of a class template, or a generic lambda,
+
+\item
 a
 \grammarterm{template-id}
 that is dependent,
@@ -4002,6 +4029,13 @@ type of
 is the type of the class member access expression.
 \exitnote
 
+\pnum
+A \grammarterm{braced-init-list} is type-dependent if any element is
+type-dependent or is a pack expansion.
+
+\pnum
+A \grammarterm{fold-expression} is type-dependent.
+
 \rSec3[temp.dep.constexpr]{Value-dependent expressions}
 
 \pnum
@@ -4072,7 +4106,8 @@ simple-type-specifier \terminal{(} expression-list\opt \terminal{)}\br
 Expressions of the following form are value-dependent:
 
 \begin{ncsimplebnf}
-\terminal{sizeof} \terminal{...} \terminal{(} identifier \terminal{)}
+\terminal{sizeof} \terminal{...} \terminal{(} identifier \terminal{)}\br
+fold-expression
 \end{ncsimplebnf}
 
 \pnum
@@ -4413,6 +4448,16 @@ the class template specialization is implicitly instantiated when the
 specialization is referenced in a context that requires a completely-defined
 object type or when the completeness of the class type affects the semantics
 of the program.
+\enternote
+Within a template declaration, a local class or enumeration and the members of
+a local class are never considered to be entities that can be separately
+instantiated (this includes their default arguments,
+\grammarterm{exception-specification}{s}, and non-static data member
+initializers, if any). As a result, the dependent names are looked up, the
+semantic constraints are checked, and any templates used are instantiated as
+part of the instantiation of the entity within which the local class or
+enumeration is declared.
+\exitnote
 The implicit instantiation of a class template specialization causes
 the implicit instantiation of the declarations, but not of the definitions,
 default arguments, or \grammarterm{exception-specification}{s} of the class member functions,
@@ -5948,20 +5993,22 @@ abstract class type~(\ref{class.abstract}).
 \exitnote
 
 \pnum
-Except as described above, the use of an invalid value shall not cause
-type deduction to fail.
 \enterexample
-In the following example 1000 is converted to \tcode{signed char} and results
-in an implementation-defined value as specified in~(\ref{conv.integral}).
-In other words, both templates are considered even though 1000,
-when converted to \tcode{signed char}, results in an implementation-defined
-value.
+In the following example,
+assuming a \tcode{signed char}
+cannot represent the value 1000,
+a narrowing conversion~(\ref{dcl.init.list})
+would be required
+to convert the \grammarterm{template-argument}
+of type \tcode{int} to \tcode{signed char},
+therefore substitution fails for the
+second template~(\ref{temp.arg.nontype}).
 
 \begin{codeblock}
 template <int> int f(int);
 template <signed char> int f(int);
-int i1 = f<1>(0);               // ambiguous
-int i2 = f<1000>(0);            // ambiguous
+int i1 = f<1000>(0);         // OK
+int i2 = f<1>(0);            // ambiguous; not narrowing
 \end{codeblock}
 \exitexample
 
@@ -5974,12 +6021,18 @@ template parameter type (call it
 with the type of the corresponding argument of the call (call it
 \tcode{A})
 as described below.
-If removing references and cv-qualifiers from \tcode{P} gives
-\tcode{std::initializer_list<$P^\prime$>} for some \tcode{$P^\prime$} and the
-argument is an initializer list~(\ref{dcl.init.list}), then deduction is
+If \tcode{P} is a dependent type,
+removing references and cv-qualifiers from \tcode{P} gives
+\tcode{std::initializer_list<P$'$>}
+or \tcode{P$'$[N]}
+for some \tcode{P$'$} and \tcode{N} and the
+argument is a non-empty initializer list~(\ref{dcl.init.list}), then deduction is
 performed instead for each element of the initializer list, taking
-\tcode{$P^\prime$} as a function template parameter type and the initializer
-element as its argument. Otherwise, an initializer list argument causes the
+\tcode{P$'$} as a function template parameter type and the initializer
+element as its argument,
+and in the \tcode{P$'$[N]} case, if \tcode{N} is a non-type template parameter,
+\tcode{N} is deduced from the length of the initializer list.
+Otherwise, an initializer list argument causes the
 parameter to be considered a non-deduced context~(\ref{temp.deduct.type}).
 \enterexample
 \begin{codeblock}
@@ -5989,6 +6042,23 @@ f({1,"asdf"});              // error: \tcode{T} deduced to both \tcode{int} and 
 
 template<class T> void g(T);
 g({1,2,3});                 // error: no argument deduced for \tcode{T}
+
+template<class T, int N> void h(T const(&)[N]);
+h({1,2,3});                 // \tcode{T} deduced to \tcode{int}, \tcode{N} deduced to \tcode{3}
+
+template<class T> void j(T const(&)[3]);
+j({42});                    // \tcode{T} deduced to \tcode{int}, array bound not considered
+
+struct Aggr { int i; int j; };
+template<int N> void k(Aggr const(&)[N]);
+k({1,2,3});                 // error: deduction fails, no conversion from \tcode{int} to \tcode{Aggr}
+k({{1},{2},{3}});           // OK, \tcode{N} deduced to \tcode{3}
+
+template<int M, int N> void m(int const(&)[M][N]);
+m({{1,2},{3,4}});           // \tcode{M} and \tcode{N} both deduced to \tcode{2}
+
+template<class T, int N> void n(T const(&)[N], T);
+n({{1},{2},{3}},Aggr());    // OK, \tcode{T} is \tcode{Aggr}, \tcode{N} is \tcode{3}
 \end{codeblock}
 \exitexample
 For a function parameter pack that occurs at the end of the \grammarterm{parameter-declaration-list},
@@ -6051,6 +6121,7 @@ type are ignored for type deduction.
 \end{itemize}
 
 \pnum
+\indextext{reference!forwarding}%
 If
 \tcode{P}
 is a cv-qualified type, the top level cv-qualifiers of
@@ -6062,11 +6133,13 @@ is a reference type, the type
 referred to by
 \tcode{P}
 is used for type deduction.
-If \tcode{P} is an rvalue reference to a cv-unqualified template parameter and the argument is an
+A \defn{forwarding reference}
+is an rvalue reference to a cv-unqualified template parameter.
+If \tcode{P} is a forwarding reference and the argument is an
 lvalue, the type ``lvalue reference to \tcode{A}'' is used in place of \tcode{A} for type
 deduction. \enterexample
 \begin{codeblock}
-template <class T> int f(T&&);
+template <class T> int f(T&& heisenreference);
 template <class T> int g(const T&&);
 int i;
 int n1 = f(i);                  // calls \tcode{f<int\&>(int\&)}
@@ -6486,24 +6559,35 @@ type referred to above):
 
 \begin{itemize}
 \item if the type from the argument template was an lvalue reference and the type
-from the parameter template was not, the argument type is considered to be
-more specialized than the other; otherwise,
+from the parameter template was not,
+the parameter type is not considered to be
+at least as specialized as the argument type; otherwise,
 
 \item if the type from
 the argument template is more cv-qualified than the type from the
-parameter template (as described above), the argument type is considered to be
-more specialized than the other; otherwise,
-
-\item neither type is more specialized than the other.
+parameter template (as described above),
+the parameter type is not considered to be
+at least as specialized as the argument type.
 \end{itemize}
 
 \pnum
-If for each type being considered a given template is at least as specialized
-for all types and more specialized for some set of types and the
-other template is not more specialized for any types or is not
-at least as specialized for any types, then
-the given template is more specialized than the other template.
-Otherwise, neither template is more specialized than the other.
+\indextext{more specialized!function template}%
+Function template \tcode{F}
+is at least as specialized as
+function template \tcode{G} if,
+for each pair of types used to determine the ordering,
+the type from \tcode{F}
+is at least as specialized as
+the type from \tcode{G}.
+\tcode{F}
+is \term{more specialized than}
+\tcode{G} if
+\tcode{F}
+is at least as specialized as
+\tcode{G} and
+\tcode{G}
+is not at least as specialized as
+\tcode{F}.
 
 \pnum
 In most cases, all template parameters must have values in order for
@@ -6654,8 +6738,8 @@ the set of functions supplied as an argument contains one or more function templ
 \end{itemize}
 \item A function parameter for which the associated argument is an initializer
 list~(\ref{dcl.init.list}) but the parameter does not have
-\tcode{std::initializer_list} or reference to possibly cv-qualified
-\tcode{std::initializer_list} type. \enterexample
+a type for which deduction from an initializer list is specified~(\ref{temp.deduct.call}).
+\enterexample
 \begin{codeblock}
 template<class T> void g(T);
 g({1,2,3});                 // error: no argument deduced for \tcode{T}
@@ -6882,8 +6966,8 @@ taking the address of a function template~(\ref{temp.deduct.funcaddr}) or when
 deducing template arguments from a function declaration~(\ref{temp.deduct.decl})
 and $\texttt{P}_i$ and $\texttt{A}_i$ are parameters of the top-level
 \grammarterm{parameter-type-list} of \tcode{P} and \tcode{A}, respectively,
-$\texttt{P}_i$ is adjusted if it is an rvalue reference to a cv-unqualified template
-parameter and $\texttt{A}_i$ is an lvalue reference, in which case the type of
+$\texttt{P}_i$ is adjusted if it is a forwarding reference~(\ref{temp.deduct.call})
+and $\texttt{A}_i$ is an lvalue reference, in which case the type of
 $\texttt{P}_i$ is changed to be the template parameter type (i.e., \tcode{T\&\&} is
 changed to simply \tcode{T}). \enternote As a result, when $\texttt{P}_i$ is \tcode{T\&\&}
 and $\texttt{A}_i$ is \tcode{X\&}, the adjusted $\texttt{P}_i$ will be \tcode{T},

@@ -652,20 +652,18 @@ constants of these types.
 \indexlibrary{\idxcode{syntax_option_type}}%
 \indexlibrary{\idxcode{regex_constants}!\idxcode{syntax_option_type}}%
 \begin{codeblock}
-namespace std {
-  namespace regex_constants {
-    typedef @\textit{T1}@ syntax_option_type;
-    constexpr syntax_option_type icase = @\unspec@;
-    constexpr syntax_option_type nosubs = @\unspec@;
-    constexpr syntax_option_type optimize = @\unspec@;
-    constexpr syntax_option_type collate = @\unspec@;
-    constexpr syntax_option_type ECMAScript = @\unspec@;
-    constexpr syntax_option_type basic = @\unspec@;
-    constexpr syntax_option_type extended = @\unspec@;
-    constexpr syntax_option_type awk = @\unspec@;
-    constexpr syntax_option_type grep = @\unspec@;
-    constexpr syntax_option_type egrep = @\unspec@;
-  }
+namespace std::regex_constants {
+  typedef @\textit{T1}@ syntax_option_type;
+  constexpr syntax_option_type icase = @\unspec@;
+  constexpr syntax_option_type nosubs = @\unspec@;
+  constexpr syntax_option_type optimize = @\unspec@;
+  constexpr syntax_option_type collate = @\unspec@;
+  constexpr syntax_option_type ECMAScript = @\unspec@;
+  constexpr syntax_option_type basic = @\unspec@;
+  constexpr syntax_option_type extended = @\unspec@;
+  constexpr syntax_option_type awk = @\unspec@;
+  constexpr syntax_option_type grep = @\unspec@;
+  constexpr syntax_option_type egrep = @\unspec@;
 }
 \end{codeblock}
 
@@ -692,13 +690,13 @@ If no grammar element is set, the default grammar is \tcode{ECMAScript}.
   {\tcode{syntax_option_type} effects}
   {tab:re:syntaxoption}
 %
-icase &
+\tcode{icase} &
 Specifies that matching of regular expressions against a character
 container sequence shall be performed without regard to case. 
 \indexlibrary{\idxcode{syntax_option_type}!\idxcode{icase}}%
 \\ \rowsep
 %
-nosubs &
+\tcode{nosubs} &
 Specifies that no sub-expressions shall be considered to be marked, so that
 when a regular expression is matched against a
 character container sequence, no sub-expression matches shall be
@@ -706,7 +704,7 @@ stored in the supplied \tcode{match_results} structure.
 \indexlibrary{\idxcode{syntax_option_type}!\idxcode{nosubs}}%
 \\ \rowsep
 %
-optimize &
+\tcode{optimize} &
 Specifies that the regular expression engine should pay more attention
 to the speed with which regular expressions are matched, and less to
 the speed with which regular expression objects are
@@ -715,21 +713,21 @@ output.
 \indexlibrary{\idxcode{syntax_option_type}!\idxcode{optimize}}%
 \\ \rowsep
 %
-collate &
+\tcode{collate} &
 Specifies that character ranges of the form \tcode{"[a-b]"} shall be locale
 sensitive. 
 \indexlibrary{\idxcode{syntax_option_type}!\idxcode{collate}}%
 \indextext{locale}%
 \\ \rowsep
 %
-ECMAScript &
+\tcode{ECMAScript} &
 Specifies that the grammar recognized by the regular expression engine
 shall be that used by ECMAScript in ECMA-262, as modified in~\ref{re.grammar}.
 \indextext{ECMAScript}%
 \indexlibrary{\idxcode{syntax_option_type}!\idxcode{ECMAScript}}%
 \\ \rowsep
 %
-basic &
+\tcode{basic} &
 Specifies that the grammar recognized by the regular expression engine
 shall be that used by basic regular expressions in POSIX, Base Definitions and
 Headers, Section 9, Regular Expressions.
@@ -737,7 +735,7 @@ Headers, Section 9, Regular Expressions.
 \indexlibrary{\idxcode{syntax_option_type}!\idxcode{basic}}%
 \\ \rowsep
 %
-extended &
+\tcode{extended} &
 Specifies that the grammar recognized by the regular expression engine
 shall be that used by extended regular expressions in POSIX, Base Definitions and
 Headers, Section 9, Regular Expressions.
@@ -745,21 +743,21 @@ Headers, Section 9, Regular Expressions.
 \indexlibrary{\idxcode{syntax_option_type}!\idxcode{extended}}%
 \\ \rowsep
 %
-awk &
+\tcode{awk} &
 Specifies that the grammar recognized by the regular expression engine
 shall be that used by the utility awk in POSIX.
 \indextext{\idxcode{awk}}%
 \indexlibrary{\idxcode{syntax_option_type}!\idxcode{awk}}%
 \\ \rowsep
 %
-grep &
+\tcode{grep} &
 Specifies that the grammar recognized by the regular expression engine
 shall be that used by the utility grep in POSIX.
 \indextext{\idxcode{grep}}%
 \indexlibrary{\idxcode{syntax_option_type}!\idxcode{grep}}%
 \\ \rowsep
 %
-egrep &
+\tcode{egrep} &
 Specifies that the grammar recognized by the regular expression engine
 shall be that used by the utility grep when given the -E
 option in POSIX.
@@ -787,23 +785,21 @@ option in POSIX.
 \indexlibrary{\idxcode{format_no_copy}}%
 \indexlibrary{\idxcode{format_first_only}}%
 \begin{codeblock}
-namespace std {
-  namespace regex_constants{
-    typedef @\textit{T2}@ match_flag_type;
-    constexpr match_flag_type match_default = {};
-    constexpr match_flag_type match_not_bol = @\unspec@;
-    constexpr match_flag_type match_not_eol = @\unspec@;
-    constexpr match_flag_type match_not_bow = @\unspec@;
-    constexpr match_flag_type match_not_eow = @\unspec@;
-    constexpr match_flag_type match_any = @\unspec@;
-    constexpr match_flag_type match_not_null = @\unspec@;
-    constexpr match_flag_type match_continuous = @\unspec@;
-    constexpr match_flag_type match_prev_avail = @\unspec@;
-    constexpr match_flag_type format_default = {};
-    constexpr match_flag_type format_sed = @\unspec@;
-    constexpr match_flag_type format_no_copy = @\unspec@;
-    constexpr match_flag_type format_first_only = @\unspec@;
-  }
+namespace std::regex_constants {
+  typedef @\textit{T2}@ match_flag_type;
+  constexpr match_flag_type match_default = {};
+  constexpr match_flag_type match_not_bol = @\unspec@;
+  constexpr match_flag_type match_not_eol = @\unspec@;
+  constexpr match_flag_type match_not_bow = @\unspec@;
+  constexpr match_flag_type match_not_eow = @\unspec@;
+  constexpr match_flag_type match_any = @\unspec@;
+  constexpr match_flag_type match_not_null = @\unspec@;
+  constexpr match_flag_type match_continuous = @\unspec@;
+  constexpr match_flag_type match_prev_avail = @\unspec@;
+  constexpr match_flag_type format_default = {};
+  constexpr match_flag_type format_sed = @\unspec@;
+  constexpr match_flag_type format_no_copy = @\unspec@;
+  constexpr match_flag_type format_first_only = @\unspec@;
 }
 \end{codeblock}
 
@@ -825,58 +821,58 @@ any bitmask elements set.
   {tab:re:matchflag}
 %
 \indexlibrary{\idxcode{match_not_bol}}%
-match_not_bol &
+\tcode{match_not_bol} &
 The first character in the sequence \range{first}{last} shall be treated
 as though it is not at the beginning of a line, so the character
 \verb|^| in the regular expression shall not match \range{first}{first}.
 \\ \rowsep
 %
 \indexlibrary{\idxcode{match_not_eol}}%
-match_not_eol &
+\tcode{match_not_eol} &
 The last character in the sequence \range{first}{last} shall be treated
 as though it is not at the end of a line, so the character
 \verb|"$"| in the regular expression shall not match \range{last}{last}. 
 \\ \rowsep
 %
 \indexlibrary{\idxcode{match_not_bow}}%
-match_not_bow &
+\tcode{match_not_bow} &
 The expression \verb|"\\b"| shall not match the
 sub-sequence \range{first}{first}. 
 \\ \rowsep
 %
 \indexlibrary{\idxcode{match_not_eow}}%
-match_not_eow &
+\tcode{match_not_eow} &
 The expression \verb|"\\b"| shall not match the
 sub-sequence \range{last}{last}.
 \\ \rowsep
 %
 \indexlibrary{\idxcode{match_any}}%
-match_any &
+\tcode{match_any} &
 If more than one match is possible then any match is an
 acceptable result. 
 \\ \rowsep
 %
 \indexlibrary{\idxcode{match_not_null}}%
-match_not_null &
+\tcode{match_not_null} &
 The expression shall not match an empty
 sequence. 
 \\ \rowsep
 %
 \indexlibrary{\idxcode{match_continuous}}%
-match_continuous &
+\tcode{match_continuous} &
 The expression shall only match a sub-sequence that begins at
 \tcode{first}.
 \\ \rowsep
 %
 \indexlibrary{\idxcode{match_prev_avail}}%
-match_prev_avail &
+\tcode{match_prev_avail} &
 \verb!--first! is a valid iterator position. When this flag is
 set the flags match_not_bol and match_not_bow shall be ignored by the
 regular expression algorithms~\ref{re.alg} and iterators~\ref{re.iter}. 
 \\ \rowsep
 %
 \indexlibrary{\idxcode{format_default}}%
-format_default &
+\tcode{format_default} &
 When a regular expression match is to be replaced by a
 new string, the new string shall be constructed using the rules used by
 the ECMAScript replace function in ECMA-262,
@@ -888,20 +884,20 @@ unchanged to the output string.
 \\ \rowsep
 %
 \indexlibrary{\idxcode{format_sed}}%
-format_sed &
+\tcode{format_sed} &
 When a regular expression match is to be replaced by a
 new string, the new string shall be constructed using the rules used by
 the sed utility in POSIX.
 \\ \rowsep
 %
 \indexlibrary{\idxcode{format_no_copy}}%
-format_no_copy &
+\tcode{format_no_copy} &
 During a search and replace operation, sections of
 the character container sequence being searched that do not match the
 regular expression shall not be copied to the output string. \\ \rowsep
 %
 \indexlibrary{\idxcode{format_first_only}}%
-format_first_only &
+\tcode{format_first_only} &
 When specified during a search and replace operation, only the
 first occurrence of the regular expression shall be replaced. 
 \\
@@ -911,23 +907,21 @@ first occurrence of the regular expression shall be replaced.
 \indexlibrary{\idxcode{error_type}}%
 \indexlibrary{\idxcode{regex_constants}!\idxcode{error_type}}%
 \begin{codeblock}
-namespace std {
-  namespace regex_constants {
-    typedef @\textit{T3}@ error_type;
-    constexpr error_type error_collate = @\unspec@;
-    constexpr error_type error_ctype = @\unspec@;
-    constexpr error_type error_escape = @\unspec@;
-    constexpr error_type error_backref = @\unspec@;
-    constexpr error_type error_brack = @\unspec@;
-    constexpr error_type error_paren = @\unspec@;
-    constexpr error_type error_brace = @\unspec@;
-    constexpr error_type error_badbrace = @\unspec@;
-    constexpr error_type error_range = @\unspec@;
-    constexpr error_type error_space = @\unspec@;
-    constexpr error_type error_badrepeat = @\unspec@;
-    constexpr error_type error_complexity = @\unspec@;
-    constexpr error_type error_stack = @\unspec@;
-  }
+namespace std::regex_constants {
+  typedef @\textit{T3}@ error_type;
+  constexpr error_type error_collate = @\unspec@;
+  constexpr error_type error_ctype = @\unspec@;
+  constexpr error_type error_escape = @\unspec@;
+  constexpr error_type error_backref = @\unspec@;
+  constexpr error_type error_brack = @\unspec@;
+  constexpr error_type error_paren = @\unspec@;
+  constexpr error_type error_brace = @\unspec@;
+  constexpr error_type error_badbrace = @\unspec@;
+  constexpr error_type error_range = @\unspec@;
+  constexpr error_type error_space = @\unspec@;
+  constexpr error_type error_badrepeat = @\unspec@;
+  constexpr error_type error_complexity = @\unspec@;
+  constexpr error_type error_stack = @\unspec@;
 }
 \end{codeblock}
 
@@ -1211,7 +1205,7 @@ bool isctype(charT c, char_class_type f) const;
 classification represented by \tcode{f}.
 
 \pnum
-\returns Given the following function prototype:
+\returns Given the following function declaration:
 \begin{codeblock}
 // for exposition only
 template<class C>
@@ -2080,7 +2074,7 @@ template <class BiIter, class ST, class SA>
 \end{itemdecl}
 
 \begin{itemdescr}
-\pnum\returns  \tcode{rhs.compare(lhs.c_str()) == 0}.
+\pnum\returns  \tcode{rhs.compare(typename sub_match<BiIter>::string_type(lhs.data(), lhs.size())) == 0}.
 \end{itemdescr}
 
 \indexlibrary{\idxcode{sub_match}!\idxcode{operator"!=}}%
@@ -2108,7 +2102,7 @@ template <class BiIter, class ST, class SA>
 \end{itemdecl}
 
 \begin{itemdescr}
-\pnum\returns  \tcode{rhs.compare(lhs.c_str()) > 0}.
+\pnum\returns  \tcode{rhs.compare(typename sub_match<BiIter>::string_type(lhs.data(), lhs.size())) > 0}.
 \end{itemdescr}
 
 \indexlibrary{\idxcode{sub_match}!\idxcode{operator>}}%
@@ -2163,7 +2157,7 @@ template <class BiIter, class ST, class SA>
 \end{itemdecl}
 
 \begin{itemdescr}
-\pnum\returns  \tcode{lhs.compare(rhs.c_str()) == 0}.
+\pnum\returns  \tcode{lhs.compare(typename sub_match<BiIter>::string_type(rhs.data(), rhs.size())) == 0}.
 \end{itemdescr}
 
 \indexlibrary{\idxcode{operator"!=}!\idxcode{sub_match}}%
@@ -2189,7 +2183,7 @@ template <class BiIter, class ST, class SA>
 \end{itemdecl}
 
 \begin{itemdescr}
-\pnum\returns  \tcode{lhs.compare(rhs.c_str()) < 0}.
+\pnum\returns  \tcode{lhs.compare(typename sub_match<BiIter>::string_type(rhs.data(), rhs.size())) < 0}.
 \end{itemdescr}
 
 \indexlibrary{\idxcode{operator>}!\idxcode{sub_match}}%
@@ -3494,22 +3488,46 @@ template <class OutputIterator, class BidirectionalIterator,
 \pnum
 \indexlibrary{\idxcode{format_no_copy}}%
 \indexlibrary{\idxcode{format_first_only}}%
-\effects  Constructs a \tcode{regex_iterator} object \tcode{i}
-as if by \tcode{regex_iterator<BidirectionalIterator, charT, traits>
-i(first, last, e, flags)}, and uses \tcode{i} to enumerate through all
+\effects
+Constructs a \tcode{regex_iterator} object \tcode{i}
+as if by
+\begin{codeblock}
+regex_iterator<BidirectionalIterator, charT, traits> i(first, last, e, flags)
+\end{codeblock}
+and uses \tcode{i} to enumerate through all
 of the matches \tcode{m} of type \tcode{match_results<BidirectionalIterator>} 
-that occur within the sequence \range{first}{last}. If no such
+that occur within the sequence \range{first}{last}.
+If no such
 matches are found and \tcode{!(flags \&
-regex_constants \colcol format_no_copy)} then calls \tcode{out = std::copy(first,
-last, out)}.  If any matches are found then, for each such match,
-if \tcode{!(flags \& regex_constants::format_no_copy)}, calls 
-\tcode{out = std\colcol{}copy(m.prefix().first, m.prefix().second, \brk{}out)}, and
-then calls \tcode{out = m.format(out, fmt, flags)}
+regex_constants::format_no_copy)} then calls
+\begin{codeblock}
+out = std::copy(first, last, out)
+\end{codeblock}
+If any matches are found then, for each such match:
+\begin{itemize}
+\item
+If \tcode{!(flags \& regex_constants::format_no_copy)}, calls 
+\begin{codeblock}
+out = std::copy(m.prefix().first, m.prefix().second, out)
+\end{codeblock}
+\item
+Then calls
+\begin{codeblock}
+out = m.format(out, fmt, flags)
+\end{codeblock}
 for the first form of the function and
-\tcode{out = m.format(out,} \tcode{fmt, fmt + char_traits<charT>::length(fmt), flags)} for the second. Finally, if such a match
-is found and \tcode{!(flags \& regex_constants \colcol format_no_copy)},
-calls \tcode{out = std::\brk{}copy(last_m.suffix().first, last_m.suffix().second,
-out)} where \tcode{last_m} is a copy of the last match
+\begin{codeblock}
+out = m.format(out, fmt, fmt + char_traits<charT>::length(fmt), flags)
+\end{codeblock}
+for the second.
+\end{itemize}
+Finally, if such a match
+is found and \tcode{!(flags \& regex_constants::format_no_copy)},
+calls
+\begin{codeblock}
+out = std::copy(last_m.suffix().first, last_m.suffix().second, out)
+\end{codeblock}
+where \tcode{last_m} is a copy of the last match
 found. If \tcode{flags \& regex_constants::format_first_only} 
 is non-zero then only the first match found is replaced.
 
@@ -3775,11 +3793,11 @@ In all cases in which the call to \tcode{regex_search} returns \tcode{true},
 \tcode{match.prefix().first} shall be equal to the previous value of
 \tcode{match[0].second}, and for each index \tcode{i} in the half-open range
 \tcode{[0, match.size())} for which \tcode{match[i].matched} is true,
-\tcode{match[i].position()}
+\tcode{match.position(i)}
 shall return \tcode{distance(begin, match[i].\brk{}first)}.
 
 \pnum
-\enternote This means that \tcode{match[i].position()} gives the
+\enternote This means that \tcode{match.position(i)} gives the
 offset from the beginning of the target sequence, which is often not
 the same as the offset from the sequence passed in the call
 to \tcode{regex_search}. \exitnote

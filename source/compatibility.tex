@@ -108,7 +108,7 @@ int i;
 is valid in C, invalid in \Cpp.
 This makes it impossible to define
 mutually referential file-local static objects, if initializers are
-restricted to the syntactic forms of C.
+restricted to the syntactic forms of C\@.
 For example,
 
 \begin{codeblock}
@@ -788,7 +788,7 @@ Seldom.
 \change Whether \mname{STDC} is defined and if so, what its value is, are
 implementation-defined
 \rationale
-\Cpp is not identical to ISO C.
+\Cpp is not identical to ISO C\@.
 Mandating that \mname{STDC}
 be defined would require that translators make an incorrect claim.
 Each implementation must choose the behavior that will be most
@@ -1123,10 +1123,11 @@ have different runtime behavior.
 \ref{logical.operations}, \ref{bitwise.operations}, \ref{negators}
 \change Standard function object types no longer derived from
 \tcode{std::unary_function} or \tcode{std::binary_function}
-\rationale Superseded by new feature.
+\rationale Superseded by new feature; \tcode{unary_function} and
+\tcode{binary_function} are no longer defined.
 \effect
 Valid \CppIII code that depends on function object types being derived from
-\tcode{unary_function} or \tcode{binary_function} will execute differently
+\tcode{unary_function} or \tcode{binary_function} may fail to compile
 in this International Standard.
 
 \rSec2[diff.cpp03.strings]{Clause \ref{strings}: strings library}
@@ -1373,6 +1374,48 @@ struct S {
 \effect
 Valid \CppXI code that uses the \tcode{gets} function may fail to compile
 in this International Standard.
+
+\rSec1[diff.cpp14]{\Cpp and ISO \CppXIV}
+
+\pnum
+\indextext{summary!compatibility~with ISO \CppXIV}%
+This subclause lists the differences between \Cpp and
+ISO \CppXIV (ISO/IEC 14882:2014, \doccite{Programming Languages --- \Cpp}),
+by the chapters of this document.
+
+\rSec2[diff.cpp14.lex]{Clause \ref{lex}: lexical conventions}
+
+\ref{lex.phases}
+\indextext{trigraph sequence}%
+\change Removal of trigraph support as a required feature.
+\rationale Prevents accidental uses of trigraphs in non-raw string literals and comments.
+\effect
+Valid \CppXIV code that uses trigraphs may not be valid or may have different
+semantics in this International Standard. Implementations may choose to
+translate trigraphs as specified in \CppXIV if they appear outside of a raw
+string literal, as part of the implementation-defined mapping from physical
+source file characters to the basic source character set.
+
+\rSec2[diff.cpp14.depr]{Annex D: compatibility features}
+
+\change
+The class templates
+\tcode{auto_ptr},
+\tcode{unary_function}, and
+\tcode{binary_function},
+the function templates
+\tcode{random_shuffle},
+and the function templates (and their return types)
+\tcode{ptr_fun},
+\tcode{mem_fun},
+\tcode{mem_fun_ref},
+\tcode{bind1st}, and
+\tcode{bind2nd}
+are not defined.
+\rationale Superseded by new features.
+\effect Valid \CppXIV code that uses these class templates
+and function templates may fail to compile in this International Standard.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \rSec1[diff.library]{C standard library}
