@@ -153,7 +153,7 @@ The following is a short summary that worked fine for me.
    Those files need to be placed in a location that can be found
    by your LaTeX to DVI compiler.
    You can use ``kpsewhich -show-path ls-R`` to print the paths searched
-    for your LaTeX installation.
+   for your LaTeX installation.
    Note that LXir also stores some XML files alongside the TeX files.
    Example:
    ``./configure --prefix=YOUR_BINARY_DESTINATION_PREFIX --with-texmf-prefix=YOUR_TEX_PREFIX``
@@ -181,7 +181,7 @@ contains an adjusted ``transformations.xml`` as well as additional XSL
 Transformations.
 Therefore, you'll need to replace the original file with a modified one.
 
-No additioanl requirements.
+No additional requirements.
 
 Instructions:
 
@@ -194,7 +194,7 @@ Instructions:
    to this repository's ``transformation.xml`` to simplify updates.
    For other versions of LXir, you might need to adjust this file.
 #. The additional transformations can also be found in this repository in
-   ``./xml/lxir_customizations``
+   ``./xml/lxir_customizations/``
    LXir will search those in
    ``YOUR_TEX_PREFIX/tex/lxir/xslt/cpp-trafos/``
    (note: the subdirectory is ``xslt``, not ``xml``).
