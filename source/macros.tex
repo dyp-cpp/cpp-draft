@@ -148,13 +148,9 @@
 %%--------------------------------------------------
 % Indexing
 
-% dyp: memoir indices and the multind packages use a slightly different syntax for indices
-%      so I need to reconsolidate them (adapt the multind syntax)
-%      (the 'dummy' probably has an actual default value in memoir, but we don't use it)
-\let\makeindexOrig=\makeindex
-\let\indexOrig=\index
-\renewcommand{\makeindex}[1][dummy]{\makeindexOrig{#1}}
-\renewcommand{\index}[2][dummy]{\indexOrig{#1}{#2}}
+% dyp: disabling indices for now
+\renewcommand{\makeindex}[1][dummy]{}
+\renewcommand{\index}[2][dummy]{}
 
 % locations
 \newcommand{\indextext}[1]{\index[generalindex]{#1}}
