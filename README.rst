@@ -95,67 +95,137 @@ Please send me encrypted and signed e-mails::
 Instructions
 ------------
 
-Installation of LXir
-====================
+These instructions have been tested on a vanilla Lubuntu 14.10
 
-These instructions have been tested on a vanilla Lubuntu 14.04
+Note: I recommend trying the tool chain in a virtual machine.
+Lubuntu 14.10 in a VirtualBox caused some graphics problems on my machine,
+which could be fixed by right-CTRL-F1 followed by right-CTRL-F7.
+
+
+Setup to build the C++ Standard Draft LaTeX Sources
+=========================================
 
 Required packages:
 
-#. ``subversion`` and a LaTeX distribution such as ``texlive``
-#. ``build-essential, libxml2, libxml2-dev, libxslt1.1, libxslt1-dev, pkg-config, libicu-dev, automake, libkpathsea-dev, gengetopt`` for building LXir
+#. A LaTeX distribution such as ``texlive`` to build the C++ draft,
+   plus any additional packages required to build the C++ draft sources
+   (such as ``texlive-latex-extra`` for ``isodate.sty``).
+#. git, to download this repository.
 
 Instructions:
 
-#. Get LXir; at least r235 (2014-06-20). ``svn checkout http://svn.edpsciences.org/svn/lxir``
-#. The installation instructions of LXir can be found on `its homepage <http://www.lxir-latex.org>`_,
-   but only in French.
-#. Configure LXir. ``./configure --prefix=binary/destination/path/prefix --with-texmf-prefix=tex/destination/path/prefix``
-   The prefix of the destination for LXir's TeX files
-   (which inject the data later recovered from the DVI)
-   should be set to a path searched by your LaTeX distribution.
-   LXir also stores some XSLT and XML files there.
-   You can use ``kpsewhich -show-path ls-R`` to print those paths.
-   For example, ``--with-texmf-prefix=/usr/local/share/texmf``
-#. Make LXir. An error will most likely occur building the test suite.
-   This seems not to seem to be fatal, though.
-#. Make install.
+This step is merely to ensure you can build the original PDF version.
+Check out the ``main`` branch of this repository,
+and run ``pdflatex std.tex`` inside the ``source`` directory.
+Run it twice to resolve additional dependencies, or use ``latexmk``,
+as described in the `original README file <README_orig.rst>`_.
+
+
+Installation of LXir
+====================
+
+Required packages:
+
+#. ``subversion`` to fetch a recent version of the LXir sources.
+#. ``automake build-essential gengetopt libicu-dev libkpathsea-dev libxml2 libxml2-dev libxslt1.1 libxslt1-dev pkg-config``
+   for building LXir.
+
+Instructions:
+
+The installation instructions of LXir can be found on `its homepage <http://www.lxir-latex.org>`_,
+but only in French.
+The following is a short summary that worked fine for me.
+
+#. Get the LXir sources; at least r235 (2014-06-20): ``svn checkout http://svn.edpsciences.org/svn/lxir``
+#. (Maybe) rebuild the ``configure`` and ``Makefile.in`` files:
+   LXir uses ``autotools`` to generate those files.
+   It does ship with a ``configure`` and ``Makefile.in`` file, though.
+   This caused problems for me since the versions used by the LXir developers
+   didn't match my version of ``autotools``.
+   To rebuild those files, run ``aclocal && autoconf && automake``.
+#. Configure LXir.
+   You might want to use two configuration options:
+   The prefix for the binaries output,
+   and the prefix for the TeX files (and related) output.
+   The latter refers to TeX style files etc.
+   that are used by your LaTeX to DVI compiler
+   to inject markers later recoved from the DVI file by the LXir tool.
+   Those files need to be placed in a location that can be found
+   by your LaTeX to DVI compiler.
+   You can use ``kpsewhich -show-path ls-R`` to print the paths searched
+    for your LaTeX installation.
+   Note that LXir also stores some XML files alongside the TeX files.
+   Example:
+   ``./configure --prefix=YOUR_BINARY_DESTINATION_PREFIX --with-texmf-prefix=YOUR_TEX_PREFIX``
+   where, for example the TeX prefix is set to:
+   ``--with-texmf-prefix=/usr/local/share/texmf``
+#. Make LXir and install ``make && make install``.
+   Depending on the paths chosen in the previous step,
+   you'll need to run ``make install`` as the superuser,
+   e.g. ``make && sudo make install``.
+
 
 Installation of the additional XSL Transformations
 ==================================================
 
-For r235 of LXir, simply replace the ``transformations.xml`` in
-``tex/destination/path/prefix/tex/lxir/xml/`` with the version
-provided in this repository ``./xml/lxir_customizations``
-You can also replace the original version with a symlink to
-simplify updates.
-For other versions of LXir, you might need to adjust this file.
-It contains the list and order of all transformations applied to
-the basic DVI -> XML transformation.
+Preface:
+LXir reads the DVI produced by your LaTeX to DVI compiler,
+and looks for certain markers injected by special TeX files.
+Then, it builds a rudimentary XML file based on this information.
+This first XML file is then cleaned up in several steps using XSL
+Transformations and C functions provided by LXir.
+An XML file called ``transformations.xml`` configures which transformations
+are called and their order.
+This toolchain to convert the C++ Standard Draft LaTeX sources
+contains an adjusted ``transformations.xml`` as well as additional XSL
+Transformations.
+Therefore, you'll need to replace the original file with a modified one.
 
-The additional transformations can also be found in this repository in
-``./xml/lxir_customizations``
-Inside the adjusted ``transformations.xml``, the transformations
-are referred to via a relative subdirectory called ``cpp-trafos``.
-This subdirectory is searched for from the location of
-``transformations.xml``.
-I recommend creating a symlink to ``./xml/lxir_customizations``, so that
-updating this repository also updates the transformations used.
+No additioanl requirements.
+
+Instructions:
+
+#. For <= r237 of LXir, simply replace the file
+   ``YOUR_TEX_PREFIX/tex/lxir/xml/transformations.xml``
+   (inside the path you set up when configuring LXir)
+   with the version provided in this repository:
+   ``./xml/lxir_customizations/transformations.xml``
+   You can also replace the original version with a symbolic link
+   to this repository's ``transformation.xml`` to simplify updates.
+   For other versions of LXir, you might need to adjust this file.
+#. The additional transformations can also be found in this repository in
+   ``./xml/lxir_customizations``
+   LXir will search those in
+   ``YOUR_TEX_PREFIX/tex/lxir/xslt/cpp-trafos/``
+   (note: the subdirectory is ``xslt``, not ``xml``).
+   I recommend creating a symbolic link
+   from ``YOUR_TEX_PREFIX/tex/lxir/xslt/cpp-trafos``
+   to your local copy of this repository ``./xml/lxir_customizations``,
+   so that updating this repository also updates the transformations used by LXir.
+
 
 Building the XML cleaner
 ========================
 
 Requirements:
 
-#. `pugixml 1.4 <http://pugixml.org/downloads/>`_ for the XML cleaner tool
+#. `pugixml <http://pugixml.org/downloads/>`_ for the XML cleaner tool
 
-For instructions, see ``./xml/xml_cleaner/README.txt`` in this repository.
+Originally, I used version 1.4 for development.
+The XML cleaner tool also compiles and works fine with pugixml 1.5
+
+For installation instructions,
+see ``./xml/xml_cleaner/README.txt`` in this repository.
+
 
 Running the toolchain
 =====================
 
-#. Build the DVI using the ``latex`` program at least twice to resolve
-   references. E.g. ``latex std.tex && latex std.tex``
+#. Check out the ``xml`` branch of this repository.
+#. Build the DVI using your LaTeX to DVI compiler (e.g. the ``latex`` program)
+   at least twice to resolve references:
+   Inside this repository's ``source`` directory, compile ``std.tex``.
+   E.g. (inside ``source``): ``latex std.tex && latex std.tex``
 #. Run ``lxir`` on the resulting DVI. It will print the XML document to the
    standard output. E.g. ``lxir std.dvi > std.xml``
 #. Run the XML cleaner on the resulting XML document. It will also print to
