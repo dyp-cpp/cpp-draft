@@ -142,7 +142,7 @@
 		<transformation name="clean_rowspan" />-->
 		
 		<!-- dyp: additional, cpp-draft transformations -->
-		<transformation name="dump_tree" param="before_custom_trafos.xml"/>
+		<!--<transformation name="dump_tree" param="before_custom_trafos.xml"/>--> <!-- debug only -->
 		<transformation name="xslt_proc" param="cpp-trafos/clean-codeblock.xsl"/>
 		<transformation name="xslt_proc" param="cpp-trafos/restructure-definition.xsl"/>
 		<transformation name="xslt_proc" param="cpp-trafos/restructure-ref.xsl"/>
