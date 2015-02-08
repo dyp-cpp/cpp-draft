@@ -27,7 +27,6 @@ like \term or \grammarterm, \defn etc. and those are transformed to specific XML
 	
 	<xsl:variable name="footnoteText"
 	              select="    ancestor::footnoteText
-	                      and (@font = '21' or @font = '18' or @font = '16' or @font = '23' or @font = '19')
 	                      and @lxir:series = 'm'"/>
 	
 	<xsl:variable name="sectionTitle"
