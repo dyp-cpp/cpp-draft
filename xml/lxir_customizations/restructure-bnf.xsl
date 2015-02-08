@@ -8,9 +8,15 @@ Restructures bnf and simplebnf environments.
 Transforms flat <grammar-rule/> markers to <grammar-rule>..</grammar-rule> nodes.
 -->
 
-<xsl:template match="bnf | simplebnf">
-	<xsl:element name="bnf">
-		<xsl:attribute name="type"><xsl:value-of select="name(.)"/></xsl:attribute>
+<xsl:template name="make-grammar-rule">
+	<xsl:param name="target" select="."/>
+	<grammar-rule>
+			<xsl:apply-templates select="$target" mode="collect-grammar-rule"/>
+	</grammar-rule>
+</xsl:template>
+
+<xsl:template match="bnf">
+	<bnf type="bnf">
 		<xsl:apply-templates select="@*"/>
 		
 		<defines>
@@ -19,9 +25,9 @@ Transforms flat <grammar-rule/> markers to <grammar-rule>..</grammar-rule> nodes
 					<xsl:apply-templates select="nontermdef"/>
 				</xsl:when>
 				<xsl:when test="name(.) = 'bnf' and nonterminal">
+					<error>bnf without nontermdef</error>
 					<xsl:apply-templates select="nonterminal[1]"/>
 				</xsl:when>
-				<xsl:when test="name(.) = 'simplebnf'"/>
 				<xsl:otherwise>
 					<error>bnf without definition</error>
 				</xsl:otherwise>
@@ -29,16 +35,31 @@ Transforms flat <grammar-rule/> markers to <grammar-rule>..</grammar-rule> nodes
 		</defines>
 		
 		<xsl:if test="not(grammar-rule)">
-			<grammar-rule>
-				<xsl:apply-templates select="*"/>
-			</grammar-rule>
+			<error>bnf without grammar-rule</error>
 		</xsl:if>
-		<xsl:for-each select="grammar-rule">
-			<grammar-rule>
-				<xsl:apply-templates select="following-sibling::*[1]" mode="collect-grammar-rule"/>
-			</grammar-rule>
+		<xsl:for-each select="grammar-rule/following-sibling::*[1]">
+			<xsl:call-template name="make-grammar-rule"/>
 		</xsl:for-each>
-	</xsl:element>
+	</bnf>
+</xsl:template>
+
+<xsl:template match="simplebnf">
+	<bnf type="simplebnf">
+		<xsl:apply-templates select="@*"/>
+		
+		<defines/>
+		<xsl:if test="nontermdef">
+			<error>simplebnf with definition</error>
+		</xsl:if>
+		
+		<xsl:call-template name="make-grammar-rule">
+			<xsl:with-param name="target" select="*[1]"/>
+		</xsl:call-template>
+		
+		<xsl:for-each select="grammar-rule/following-sibling::*[1]">
+			<xsl:call-template name="make-grammar-rule"/>
+		</xsl:for-each>
+	</bnf>
 </xsl:template>
 
 <xsl:template match="grammar-rule" mode="collect-grammar-rule"/><!-- end recursion -->
