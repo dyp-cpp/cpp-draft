@@ -61,8 +61,6 @@ Known restrictions and flaws
    pictures).
 #. There are too few space characters, e.g. after the <cpp/> tag,
    or after quotes.
-#. The toolchain is really slow. It might take several minutes
-   and might require several hundred MiB of RAM.
 #. The index is dropped entirely.
 #. The front matter is dropped entirely.
 
@@ -132,11 +130,15 @@ Required packages:
 
 Instructions:
 
-The installation instructions of LXir can be found on `its homepage <http://www.lxir-latex.org>`_,
+The installation instructions of LXir can be found on
+`its homepage <http://www.lxir-latex.org>`_,
 but only in French.
 The following is a short summary that worked fine for me.
 
-#. Get the LXir sources; at least r235 (2014-06-20): ``svn checkout http://svn.edpsciences.org/svn/lxir``
+#. Get the LXir sources; at least r235 (2014-06-20):
+   ``svn checkout http://svn.edpsciences.org/svn/lxir``
+#. The following procedures should be run from within the subdirectory
+   ``trunk/lxir`` of your local copy of the LXir repository.
 #. (Maybe) rebuild the ``configure`` and ``Makefile.in`` files:
    LXir uses ``autotools`` to generate those files.
    It does ship with a ``configure`` and ``Makefile.in`` file, though.
