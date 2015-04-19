@@ -134,8 +134,6 @@ traverse_codeblock(pugi::xml_node const node)
 	
 	auto codeblock = this->gState.current_node.last_child();
 	
-	merge_text(codeblock.first_child());
-	
 	if(str_cmp(codeblock.first_child().name(), "text"))
 	{
 		trim_l(codeblock.first_child());
