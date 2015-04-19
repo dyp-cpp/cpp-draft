@@ -58,6 +58,16 @@ This transformation changes the content of <codeblock>s.
 		<xsl:call-template name="verbatimLineBreak"/>
 	</xsl:template>
 	
+		<!--
+			Replace special asterisk character
+			The only known occurences are as multiline-comment markers,
+			i.e. /* and */
+			It is possible that this is unintended by the listings package.
+		-->
+	<xsl:template match="text()" mode="in-codeblock">
+		<xsl:value-of select="translate(., '∗', '*')"/>
+	</xsl:template>
+	
 	
 	<xsl:template match="*|@*" mode="in-codeblock">
 		<xsl:copy>
