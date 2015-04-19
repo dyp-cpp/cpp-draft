@@ -84,10 +84,11 @@ protected:
 		
 		void traverse_text_element(pugi::xml_node const node)
 		{
-			if(   str_cmp(this->gState.current_node.last_child().name(), "text")
-			   && attributes_mergeable(node, this->gState.current_node.last_child()))
+			auto const predecessor = this->gState.current_node.last_child();
+			if(   str_cmp(predecessor.name(), "text")
+			   && attributes_mergeable(node, predecessor))
 			{
-				this->push_and_do(this->gState.current_node.last_child(), [&]
+				this->push_and_do(predecessor, [&]
 				{
 					this->traverse_children(node);
 				});

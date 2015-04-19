@@ -4,7 +4,7 @@
 
 
 #include <functional>
-#include <map>
+#include <unordered_map>
 
 
 template<class OldTop, class Derived>
@@ -15,7 +15,7 @@ traverse_element(pugi::xml_node const node)
 	constexpr auto t_inline = &self_t::traverse_inline_element;
 	constexpr auto t_epsilon = &self_t::epsilon_traverser;
 	
-	static auto const traversers = std::map<std::string, func_t>
+	static auto const traversers = std::unordered_map<std::string, func_t>
 	{
 		 {"par"         , &self_t::traverse_par}
 		,{"number"      , t_epsilon}
