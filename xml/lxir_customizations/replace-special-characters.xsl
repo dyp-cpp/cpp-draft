@@ -11,14 +11,26 @@ others could be considered incorrect even in the PDF output
 (that is, their LaTeX source is problematic).
 -->
 
+
 <!--
 	Replace special asterisk character
 	The only known occurences are as multiline-comment markers,
 	i.e. /* and */
 	It is possible that this is unintended by the listings package.
+	
+	Replace special apostrophe character
+	Use the ASCII apostrophe character instead.
 -->
-<xsl:template match="text()" mode="in-codeblock">
-	<xsl:value-of select="translate(., '∗', '*')"/>
+<xsl:variable name="ascii-apos">'</xsl:variable>
+<xsl:template match="tcode/text() | terminal/text() | codeblock/text/text()">
+	<xsl:value-of select="translate(., '∗’', concat('*', $ascii-apos))"/>
+</xsl:template>
+
+
+<xsl:template match="* | @*">
+	<xsl:copy>
+		<xsl:apply-templates select="* | @* | text()"/>
+	</xsl:copy>
 </xsl:template>
 
 
