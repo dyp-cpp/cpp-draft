@@ -159,6 +159,7 @@
 		<transformation name="xslt_proc" param="cpp-trafos/restructure-table.xsl"/>
 		<transformation name="xslt_proc" param="cpp-trafos/clean-text-attributes.xsl"/>
 		<transformation name="xslt_proc" param="cpp-trafos/clean-attributes.xsl"/>
+		<transformation name="xslt_proc" param="cpp-trafos/replace-special-characters.xsl"/>
 		<transformation name="xslt_proc" param="cpp-trafos/finalize.xsl"/>
 		<transformation name="xslt_proc" param="cpp-trafos/remove-empty-par.xsl"/>
 		<!-- dyp: end of additional transformations -->
